@@ -1,0 +1,18 @@
+<mat-toolbar>
+    <mat-toolbar-row>
+      <!-- <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
+        <mat-icon>menu</mat-icon>
+      </button> -->
+      <button *ngIf="!isUserHasValidToken()" [routerLink]="['./']" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true}" class="mr-2" mat-button>Home</button>
+      <button *ngIf="isUserHasValidToken()" [routerLink]="['/match']" [routerLinkActive]="['active']" class="mr-2" mat-button>Match</button>
+      <button *ngIf="isUserHasValidToken()" [routerLink]="['/preferences']" [routerLinkActive]="['active']" class="mr-2" mat-button>Preferences</button>
+      <div class="flex-auto"></div>
+      <span class="text-sm" *ngIf="isUserHasValidToken()"> {{'Logged as ' + getUserEmail()}}</span>
+      <button mat-icon-button color="secondary" aria-label="Toggle theme button" (click)="toggleTheme()">
+        <mat-icon *ngIf="selectedTheme === 'dark'; else lightIconContainer">brightness_3</mat-icon>
+          <ng-template #lightIconContainer>
+              <mat-icon>wb_sunny</mat-icon>
+          </ng-template>
+      </button>
+    </mat-toolbar-row>
+  </mat-toolbar>

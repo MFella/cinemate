@@ -1,0 +1,27 @@
+<div class="flex justify-center items-center">
+    <mat-card class="example-card">
+      <mat-card-header>
+        <mat-card-subtitle>Dog Breed</mat-card-subtitle>
+        <mat-card-title>Shiba Inu</mat-card-title>
+      </mat-card-header>
+      <mat-card-content [formGroup]="preferencesFormGroup">
+        <p>This card has divider and indeterminate progress as footer</p>
+        <p>{{ 'dasdasd' }}</p>
+        <mat-form-field class="w-full">
+            <mat-label>Select genres</mat-label>
+            <mat-select formControlName="genre">
+                <mat-option *ngFor="let genreOption of genreOptions" [value]="genreOption.value" [disabled]="genreOption.disabled">{{genreOption.label}}</mat-option>
+              </mat-select>
+          </mat-form-field>
+      </mat-card-content>
+      <mat-card-actions>
+        <button [disabled]="
+            preferencesFormGroup.invalid ||
+            isFetchingData ||
+            preferencesFormGroup.get('genre')?.value === originGenreId" mat-button color="primary" class="w-full" (click)="savePreference()">Save</button>
+      </mat-card-actions>
+      <mat-card-footer>
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      </mat-card-footer>
+    </mat-card>
+  </div>

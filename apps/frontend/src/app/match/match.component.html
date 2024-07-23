@@ -1,0 +1,55 @@
+  <!-- <mat-card class="example-card">
+    <mat-card-header>
+      <mat-card-subtitle>Dog Breed</mat-card-subtitle>
+      <mat-card-title>Shiba Inu</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p>This card has divider and indeterminate progress as footer</p>
+      <p>{{ 'dasdasd' }}</p>
+      <mat-divider></mat-divider>
+    </mat-card-content>
+  </mat-card> -->
+
+<div class="flex justify-center items-center">
+  <mat-card class="match-card">
+    <mat-card-header>
+      <!-- <div mat-card-avatar class="example-header-image"></div> -->
+      <mat-card-title><h1 class="text-center">{{ currentMovie.title }}</h1></mat-card-title>
+      <mat-card-subtitle class="!flex !justify-between !pt-4">
+        <mat-chip-set>
+          <mat-chip class="year-container"> {{currentMovie.year}} </mat-chip>
+        </mat-chip-set>
+        <span class="genres-container">
+          <mat-chip-set class="justify-end">
+            <mat-chip *ngFor="let genre of currentMovie.gen"> {{ genre.genre }}</mat-chip>
+          </mat-chip-set>
+          <!-- <div *ngFor="let genre of currentMovie.gen" [matBadge]="genre.genre" matBadgeOverlap="false" class="demo-section"></div> -->
+        </span>
+      </mat-card-subtitle>
+    </mat-card-header>
+    <div class="current-movie-img-container">
+      <img mat-card-image [src]="currentMovie.image_url" alt="Photo of current movie" class="current-movie-img shadow-lg !rounded-xl">
+    </div>
+    <mat-card-content>
+      <!-- <mat-expansion-panel hideToggle>
+        <mat-expansion-panel-header>
+          <mat-panel-title> Description </mat-panel-title>
+        </mat-expansion-panel-header>
+        <p>{{ currentMovie.description }}</p>
+      </mat-expansion-panel> -->
+    </mat-card-content>
+    <mat-divider></mat-divider>
+    <mat-card-actions>
+      <button *ngFor="let item of markActions" class="w-full" color="warn" mat-button (click)="voteMovie(item)">{{item.label}}</button>
+    </mat-card-actions>
+    <mat-card-footer>
+      <!-- <mat-progress-bar mode="indeterminate"></mat-progress-bar> -->
+      <mat-expansion-panel hideToggle class="border-t-2">
+        <mat-expansion-panel-header>
+          <mat-panel-title> Description </mat-panel-title>
+        </mat-expansion-panel-header>
+        <p>{{ currentMovie.description }}</p>
+      </mat-expansion-panel>
+    </mat-card-footer>
+  </mat-card>
+</div>
