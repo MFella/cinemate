@@ -25,7 +25,8 @@ export class MoviesUtil {
     static convertMoviesToRateToMoviesListDto(moviesToRate: Array<MovieToRate>, genreIdToGenreFromDbMap: Map<number, Genre>,
         pageGenre: Genre): MoviesListDTO {
         const movies = moviesToRate.map((movie) => {
-            const gen: Array<GenEntity> = movie.genreIds.map(genreId => genreIdToGenreFromDbMap.get(genreId)).filter(Boolean);
+            const gen: Array<Genre> = movie.genreIds
+                .map(genreId => genreIdToGenreFromDbMap.get(genreId)).filter(Boolean);
             return {
                 imdb_id: movie.movieId,
                 gen,

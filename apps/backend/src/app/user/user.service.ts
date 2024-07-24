@@ -25,7 +25,7 @@ export class UserService {
         if (genreFromDbId === null || genreFromDbId === undefined) {
             const defaultGenreFromDb = await this.prismaService.genre.findFirst({
                 where: {
-                    genre: UserService.DEFAULT_GENRE
+                    name: UserService.DEFAULT_GENRE
                 }
             });
 
@@ -71,7 +71,7 @@ export class UserService {
         // try get default genre and save it
         const defaultGenreFromDb = await this.prismaService.genre.findFirst({
             where: {
-                genre: UserService.DEFAULT_GENRE
+                name: UserService.DEFAULT_GENRE
             }
         });
 
@@ -80,7 +80,7 @@ export class UserService {
             // return cached default genre with nullish id
             return {
                 preference: {
-                    genre: UserService.DEFAULT_GENRE,
+                    name: UserService.DEFAULT_GENRE,
                     id: UserService.DEFAULT_GENRE_ID
                 },
 
@@ -110,7 +110,7 @@ export class UserService {
             // return cached genres
             return genres.map((genre) => {
                 return {
-                    genre,
+                    name: genre,
                     id: genre === UserService.DEFAULT_GENRE ? UserService.DEFAULT_GENRE_ID : null
                 };
             });

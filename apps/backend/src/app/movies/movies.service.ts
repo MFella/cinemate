@@ -1,27 +1,43 @@
 import { Injectable } from "@nestjs/common";
 import { MoviesListDTO } from "../dtos/movies-list.dto";
-import { HttpService } from "@nestjs/axios";
-import { firstValueFrom } from "rxjs";
 import { MoviesUtil } from "./movies.util";
-import { MoodMovie } from "../dtos/mood-movie";
+import { GenEntity, MoodMovie } from "../dtos/mood-movie";
 import { Genres, genres } from "../typings/common";
 import { PrismaService } from "../database/prisma.service";
 import { Rate } from "../dtos/rate-of-movie";
 import { CompletedPageOfMovie, Genre, MovieToRate, PageOfMovie, Genre as PrismaGenre } from "@prisma/client";
 import { RateResultDto } from "../dtos/rate-result.dto";
 import { PrismaUtil } from "../util/prisma-util";
+import { BaseRestDataService } from "../common/base-rest-data.service";
 
 @Injectable()
 export class MoviesService {
-    private static readonly API_URL = 'https://mood2movie.com/api/movies/';
     private static readonly DEFAULT_PAGE_NUMBER = 1;
     private static readonly DEFAULT_GENRE: Genres = 'Adventure';
     private static readonly DEFAULT_GENRE_ID = 4;
 
     constructor(
-        private readonly httpService: HttpService,
+        private readonly baseRestDataService: BaseRestDataService,
         private readonly prismaService: PrismaService
     ){}
+
+    async fetchAndSaveGenres(): Promise<boolean> {
+        const genresFromDb = await this.prismaService.genre.findMany();
+        if (genresFromDb?.length) {
+            return true;
+        }
+
+        const fetchedGenres = await this.baseRestDataService.get<Record<'genres', Array<GenEntity>>>('genres');
+
+        await this.prismaService.genre.createMany({
+            data: fetchedGenres.data.genres.map((genreEntity) => {
+                return {
+                    id: genreEntity.id,
+                    name: genreEntity.name
+                }
+            })
+        });
+    }
 
     async getMoviesData(userId: string, shouldLoadNextPage: 0 | 1): Promise<MoviesListDTO> {
             if (shouldLoadNextPage === 0) {
@@ -42,13 +58,13 @@ export class MoviesService {
             });
 
 
-            let userGenreName = userGenreFromDb?.genre?.genre;
+            let userGenreName = userGenreFromDb?.genre?.name;
             let userGenreId = userGenreFromDb?.genre?.id;
     
             if (userGenreName === null || userGenreName === undefined) {
                 const defaultGenre = await this.prismaService.genre.findFirst({
                     where: {
-                        genre: MoviesService.DEFAULT_GENRE
+                        name: MoviesService.DEFAULT_GENRE
                     }
                 })
 
@@ -56,7 +72,7 @@ export class MoviesService {
                     userGenreName = MoviesService.DEFAULT_GENRE;
                     userGenreId = undefined;
                 } else {
-                    userGenreName = defaultGenre.genre;
+                    userGenreName = defaultGenre.name;
                     userGenreId = defaultGenre.id
                 }
             }
@@ -80,8 +96,13 @@ export class MoviesService {
             }
  
             currentPageNumber += shouldLoadNextPage;
-            console.log(userGenreName, currentPageNumber);
-            const response = await firstValueFrom(this.httpService.post<Array<MoodMovie>>(`${MoviesService.API_URL}${userGenreName}?page=${currentPageNumber}`, {}));
+            const response = await this.baseRestDataService.get<Array<MoodMovie>>('movies',
+                {
+                    genreId: userGenreId,
+                    pageNumber: currentPageNumber
+                }
+            );
+            console.log(response.data, userGenreId);
             if (response.data) {
                 const pageGenre = await this.extractPageGenreFromMoodMovieList(response.data, userGenreName);
                 const moviesListDto = MoviesUtil.convertMoodMoviesToMoviesListDto(response.data, pageGenre);
@@ -107,7 +128,7 @@ export class MoviesService {
             const randomGenreText = this.getRandomUserGenre().toString();
             const genreEntity = await this.prismaService.genre.findFirst({
                 where: {
-                    genre: randomGenreText
+                    name: randomGenreText
                 }
             });
 
@@ -176,10 +197,7 @@ export class MoviesService {
         });
 
         const c1 = await this.prismaService.movieToRate.findMany();
-        console.log('ffs', c1.filter(c => nonVotedMovieIds.includes(c.movieId)).map(a => a.movieId));
 
-
-        console.log('fdshghg', cachedMovies.length);
         const genreToReturn = await this.prismaService.genre.findFirst({
             where: {
                 id: userGenreId
@@ -223,7 +241,7 @@ export class MoviesService {
         const resultGenres = [...new Map<number, PrismaGenre>(groupedGenres.map(g => [g.id, g])).values()];
         let genreId = MoviesService.DEFAULT_GENRE_ID;
         if (userGenre?.genre) {
-            genreId = resultGenres.find((resultGenre) => resultGenre.genre === userGenre.genre.genre)?.id;
+            genreId = resultGenres.find((resultGenre) => resultGenre.name === userGenre.genre.name)?.id;
         }
         console.log('pageNumber', pageNumber); 
         await this.prismaService.pageOfMovie.create({
@@ -304,7 +322,7 @@ export class MoviesService {
             // fallback to default
             const defaultGenre = await this.prismaService.genre.findFirst({
                 where: {
-                    genre: MoviesService.DEFAULT_GENRE
+                    name: MoviesService.DEFAULT_GENRE
                 }
             });
 
@@ -425,7 +443,7 @@ export class MoviesService {
     private async extractPageGenreFromMoodMovieList(moodMovies: Array<MoodMovie>, userGenreName: string): Promise<Genre> {
         const genreFromMoodMovies = moodMovies.map((moodMovie) => moodMovie.gen)
             .reduce((acc, val) => acc.concat(val), []);
-        const map = new Map(genreFromMoodMovies.map(genre => [genre.genre, genre]));
-        return map.get(userGenreName);
+        const genreFromMoodMoviesMap = new Map(genreFromMoodMovies.map(genre => [genre.name, genre]));
+        return genreFromMoodMoviesMap.get(userGenreName);
     }
 }

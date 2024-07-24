@@ -12,19 +12,19 @@ const cachedMovies: Array<MovieToRate> = [
       "gen": [
           {
               "id": 4,
-              "genre": "Adventure"
+              "name": "Adventure"
           },
           {
               "id": 6,
-              "genre": "Fantasy"
+              "name": "Fantasy"
           },
           {
               "id": 8,
-              "genre": "Drama"
+              "name": "Drama"
           },
           {
               "id": 15,
-              "genre": "Mystery"
+              "name": "Mystery"
           }
       ],
       "image_url": "https://m.media-amazon.com/images/M/MV5BMGVmMWNiMDktYjQ0Mi00MWIxLTk0N2UtN2ZlYTdkN2IzNDNlXkEyXkFqcGdeQXVyODE5NzE3OTE@._V1_UX182_CR0,0,182,268_AL_.jpg",
@@ -39,27 +39,27 @@ const cachedMovies: Array<MovieToRate> = [
       "gen": [
           {
               "id": 4,
-              "genre": "Adventure"
+              "name": "Adventure"
           },
           {
               "id": 5,
-              "genre": "Family"
+              "name": "Family"
           },
           {
               "id": 6,
-              "genre": "Fantasy"
+              "name": "Fantasy"
           },
           {
               "id": 9,
-              "genre": "Comedy"
+              "name": "Comedy"
           },
           {
               "id": 10,
-              "genre": "Animation"
+              "name": "Animation"
           },
           {
               "id": 13,
-              "genre": "Action"
+              "name": "Action"
           }
       ],
       "image_url": "https://m.media-amazon.com/images/M/MV5BZWNiOTc4NGItNGY4YS00ZGNkLThkOWEtMDE2ODcxODEwNjkwXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_UX182_CR0,0,182,268_AL_.jpg",
@@ -74,15 +74,15 @@ const cachedMovies: Array<MovieToRate> = [
       "gen": [
           {
               "id": 4,
-              "genre": "Adventure"
+              "name": "Adventure"
           },
           {
               "id": 11,
-              "genre": "Sci-Fi"
+              "name": "Sci-Fi"
           },
           {
               "id": 13,
-              "genre": "Action"
+              "name": "Action"
           }
       ],
       "image_url": "https://m.media-amazon.com/images/M/MV5BMjMxNjY2MDU1OV5BMl5BanBnXkFtZTgwNzY1MTUwNTM@._V1_UX182_CR0,0,182,268_AL_.jpg",
@@ -97,19 +97,19 @@ const cachedMovies: Array<MovieToRate> = [
       "gen": [
           {
               "id": 4,
-              "genre": "Adventure"
+              "name": "Adventure"
           },
           {
               "id": 8,
-              "genre": "Drama"
+              "name": "Drama"
           },
           {
               "id": 13,
-              "genre": "Action"
+              "name": "Action"
           },
           {
               "id": 25,
-              "genre": "Western"
+              "name": "Western"
           }
       ],
       "image_url": "https://m.media-amazon.com/images/M/MV5BMDNlNmVlNDItMjE3Yi00ZTA3LWIyOTktNDhhMGFlZjk5ZDQ0XkEyXkFqcGdeQXVyMDM2NDM2MQ@@._V1_UX182_CR0,0,182,268_AL_.jpg",
@@ -124,23 +124,23 @@ const cachedMovies: Array<MovieToRate> = [
       "gen": [
           {
               "id": 4,
-              "genre": "Adventure"
+              "name": "Adventure"
           },
           {
               "id": 6,
-              "genre": "Fantasy"
+              "name": "Fantasy"
           },
           {
               "id": 11,
-              "genre": "Sci-Fi"
+              "name": "Sci-Fi"
           },
           {
               "id": 13,
-              "genre": "Action"
+              "name": "Action"
           },
           {
               "id": 14,
-              "genre": "Thriller"
+              "name": "Thriller"
           }
       ],
       "image_url": "https://m.media-amazon.com/images/M/MV5BY2ZlNWIxODMtN2YwZi00ZjNmLWIyN2UtZTFkYmZkNDQyNTAyXkEyXkFqcGdeQXVyODkzNTgxMDg@._V1_UX182_CR0,0,182,268_AL_.jpg",
@@ -155,15 +155,15 @@ const cachedMovies: Array<MovieToRate> = [
       "gen": [
           {
               "id": 4,
-              "genre": "Adventure"
+              "name": "Adventure"
           },
           {
               "id": 11,
-              "genre": "Sci-Fi"
+              "name": "Sci-Fi"
           },
           {
               "id": 13,
-              "genre": "Action"
+              "name": "Action"
           }
       ],
       "image_url": "https://m.media-amazon.com/images/M/MV5BMTYzOTc2NzU3N15BMl5BanBnXkFtZTcwNjY3MDE3NQ@@._V1_UX182_CR0,0,182,268_AL_.jpg",
@@ -178,19 +178,19 @@ const cachedMovies: Array<MovieToRate> = [
       "gen": [
           {
               "id": 4,
-              "genre": "Adventure"
+              "name": "Adventure"
           },
           {
               "id": 8,
-              "genre": "Drama"
+              "name": "Drama"
           },
           {
               "id": 11,
-              "genre": "Sci-Fi"
+              "name": "Sci-Fi"
           },
           {
               "id": 13,
-              "genre": "Action"
+              "name": "Action"
           }
       ],
       "image_url": "https://m.media-amazon.com/images/M/MV5BMTc5MDE2ODcwNV5BMl5BanBnXkFtZTgwMzI2NzQ2NzM@._V1_UX182_CR0,0,182,268_AL_.jpg",
@@ -205,19 +205,19 @@ const cachedMovies: Array<MovieToRate> = [
       "gen": [
           {
               "id": 4,
-              "genre": "Adventure"
+              "name": "Adventure"
           },
           {
               "id": 6,
-              "genre": "Fantasy"
+              "name": "Fantasy"
           },
           {
               "id": 11,
-              "genre": "Sci-Fi"
+              "name": "Sci-Fi"
           },
           {
               "id": 13,
-              "genre": "Action"
+              "name": "Action"
           }
       ],
       "image_url": "https://m.media-amazon.com/images/M/MV5BYjI3NDg0ZTEtMDEwYS00YWMyLThjYjktMTNlM2NmYjc1OGRiXkEyXkFqcGdeQXVyMTEyMjM2NDc2._V1_UX182_CR0,0,182,268_AL_.jpg",
@@ -232,15 +232,15 @@ const cachedMovies: Array<MovieToRate> = [
       "gen": [
           {
               "id": 4,
-              "genre": "Adventure"
+              "name": "Adventure"
           },
           {
               "id": 8,
-              "genre": "Drama"
+              "name": "Drama"
           },
           {
               "id": 11,
-              "genre": "Sci-Fi"
+              "name": "Sci-Fi"
           }
       ],
       "image_url": "https://m.media-amazon.com/images/M/MV5BZjdkOTU3MDktN2IxOS00OGEyLWFmMjktY2FiMmZkNWIyODZiXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_UX182_CR0,0,182,268_AL_.jpg",
@@ -255,19 +255,19 @@ const cachedMovies: Array<MovieToRate> = [
       "gen": [
           {
               "id": 4,
-              "genre": "Adventure"
+              "name": "Adventure"
           },
           {
               "id": 6,
-              "genre": "Fantasy"
+              "name": "Fantasy"
           },
           {
               "id": 8,
-              "genre": "Drama"
+              "name": "Drama"
           },
           {
               "id": 13,
-              "genre": "Action"
+              "name": "Action"
           }
       ],
       "image_url": "https://m.media-amazon.com/images/M/MV5BN2EyZjM3NzUtNWUzMi00MTgxLWI0NTctMzY4M2VlOTdjZWRiXkEyXkFqcGdeQXVyNDUzOTQ5MjY@._V1_UX182_CR0,0,182,268_AL_.jpg",
@@ -282,27 +282,27 @@ const cachedMovies: Array<MovieToRate> = [
       "gen": [
           {
               "id": 4,
-              "genre": "Adventure"
+              "name": "Adventure"
           },
           {
               "id": 5,
-              "genre": "Family"
+              "name": "Family"
           },
           {
               "id": 7,
-              "genre": "Crime"
+              "name": "Crime"
           },
           {
               "id": 9,
-              "genre": "Comedy"
+              "name": "Comedy"
           },
           {
               "id": 10,
-              "genre": "Animation"
+              "name": "Animation"
           },
           {
               "id": 30,
-              "genre": "Musical"
+              "name": "Musical"
           }
       ],
       "image_url": "https://m.media-amazon.com/images/M/MV5BMTU2MDY3MzAzMl5BMl5BanBnXkFtZTcwMTg0NjM5NA@@._V1_UX182_CR0,0,182,268_AL_.jpg",
@@ -317,19 +317,19 @@ const cachedMovies: Array<MovieToRate> = [
       "gen": [
           {
               "id": 4,
-              "genre": "Adventure"
+              "name": "Adventure"
           },
           {
               "id": 11,
-              "genre": "Sci-Fi"
+              "name": "Sci-Fi"
           },
           {
               "id": 13,
-              "genre": "Action"
+              "name": "Action"
           },
           {
               "id": 14,
-              "genre": "Thriller"
+              "name": "Thriller"
           }
       ],
       "image_url": "https://m.media-amazon.com/images/M/MV5BMzA2NDkwODAwM15BMl5BanBnXkFtZTgwODk5MTgzMTE@._V1_UX182_CR0,0,182,268_AL_.jpg",
@@ -344,23 +344,23 @@ const cachedMovies: Array<MovieToRate> = [
       "gen": [
           {
               "id": 4,
-              "genre": "Adventure"
+              "name": "Adventure"
           },
           {
               "id": 6,
-              "genre": "Fantasy"
+              "name": "Fantasy"
           },
           {
               "id": 9,
-              "genre": "Comedy"
+              "name": "Comedy"
           },
           {
               "id": 11,
-              "genre": "Sci-Fi"
+              "name": "Sci-Fi"
           },
           {
               "id": 13,
-              "genre": "Action"
+              "name": "Action"
           }
       ],
       "image_url": "https://m.media-amazon.com/images/M/MV5BYWVkMWEyMDUtZTVmOC00MTYxLWE1ZTUtNjk4M2IzMjY2OTIxXkEyXkFqcGdeQXVyMDk5Mzc5MQ@@._V1_UX182_CR0,0,182,268_AL_.jpg",
@@ -375,23 +375,23 @@ const cachedMovies: Array<MovieToRate> = [
       "gen": [
           {
               "id": 4,
-              "genre": "Adventure"
+              "name": "Adventure"
           },
           {
               "id": 6,
-              "genre": "Fantasy"
+              "name": "Fantasy"
           },
           {
               "id": 9,
-              "genre": "Comedy"
+              "name": "Comedy"
           },
           {
               "id": 11,
-              "genre": "Sci-Fi"
+              "name": "Sci-Fi"
           },
           {
               "id": 13,
-              "genre": "Action"
+              "name": "Action"
           }
       ],
       "image_url": "https://m.media-amazon.com/images/M/MV5BMjMyNDkzMzI1OF5BMl5BanBnXkFtZTgwODcxODg5MjI@._V1_UX182_CR0,0,182,268_AL_.jpg",
@@ -406,11 +406,11 @@ const cachedMovies: Array<MovieToRate> = [
       "gen": [
           {
               "id": 4,
-              "genre": "Adventure"
+              "name": "Adventure"
           },
           {
               "id": 13,
-              "genre": "Action"
+              "name": "Action"
           }
       ],
       "image_url": "https://m.media-amazon.com/images/M/MV5BMTk4ODQzNDY3Ml5BMl5BanBnXkFtZTcwODA0NTM4Nw@@._V1_UX182_CR0,0,182,268_AL_.jpg",
@@ -425,15 +425,15 @@ const cachedMovies: Array<MovieToRate> = [
       "gen": [
           {
               "id": 4,
-              "genre": "Adventure"
+              "name": "Adventure"
           },
           {
               "id": 11,
-              "genre": "Sci-Fi"
+              "name": "Sci-Fi"
           },
           {
               "id": 13,
-              "genre": "Action"
+              "name": "Action"
           }
       ],
       "image_url": "https://m.media-amazon.com/images/M/MV5BMTE0YWFmOTMtYTU2ZS00ZTIxLWE3OTEtYTNiYzBkZjViZThiXkEyXkFqcGdeQXVyODMzMzQ4OTI@._V1_UX182_CR0,0,182,268_AL_.jpg",

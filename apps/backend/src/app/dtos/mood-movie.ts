@@ -24,7 +24,7 @@ export interface MoodMovie {
 
   export interface GenEntity {
     id: number;
-    genre: string;
+    name: string;
 }
   
   export interface KeywordsEntity {

@@ -53,7 +53,7 @@ export class PreferencesComponent implements OnInit {
         this.genreOptions = preferencesData[1].map((genre) => {
           return {
             value: genre.id,
-            label: genre.genre,
+            label: genre.name,
             disabled: genre.id === null
           }
         });

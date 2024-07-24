@@ -3,22 +3,29 @@
  * This is only a minimal backend to get started.
  */
 
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app/app.module';
+import { ConfigService } from '@nestjs/config';
+import { MoviesService } from './app/movies/movies.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get<ConfigService>(ConfigService);
+
+  const appPort = configService.get<number>('port');
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
-  const port = process.env.PORT || 3000;
+  app.useGlobalPipes(new ValidationPipe());
   app.enableCors({
     origin: ['http://localhost:4200']
   });
-  await app.listen(port);
+  await app.listen(appPort);
+  const moviesService = app.get<MoviesService>(MoviesService);
+  await moviesService.fetchAndSaveGenres();
   Logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
+    `🚀 Application is running on: http://localhost:${appPort}/${globalPrefix}`
   );
 }
 

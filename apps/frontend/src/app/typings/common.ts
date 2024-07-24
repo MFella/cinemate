@@ -58,7 +58,7 @@ export interface MovieToRate {
 
 export interface GenEntity {
     id: number;
-    genre: Genres;
+    name: Genres;
 }
 
 export type RateResultDto = {
