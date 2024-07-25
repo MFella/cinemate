@@ -5,25 +5,22 @@ import { AxiosRequestConfig, AxiosResponse } from "axios";
 import { firstValueFrom } from "rxjs";
 
 const originPaths = ['genres', 'movies'] as const;
-type PathParams = {
+type PathParams<T extends OriginPaths = 'genres'> = T extends 'genres' ? {} : {
     genreId: number;
     pageNumber: number;
 };
+
 type OriginPaths = typeof originPaths[number];
-const baseRestDataPaths: Map<OriginPaths, (pathParams: Partial<PathParams>) => string> =
-    new Map<OriginPaths, (pathParams: Partial<PathParams>) => string>(
+const baseRestDataPaths: Map<OriginPaths, (pathParams: PathParams<OriginPaths>) => string> =
+    new Map<OriginPaths, (pathParams: PathParams<OriginPaths>) => string>(
         [
-            ['genres', (_pathParams: Partial<PathParams>) => 'genre/movie/list?language=en'],
-            ['movies', (pathParams: Partial<PathParams>) =>
-                `discover/movie?language=en-US&${pathParams.pageNumber !== undefined ? 'page=' + pathParams.pageNumber : ''}` + 
-                `${pathParams.genreId !== undefined && pathParams.genreId !== null ? '&with_genres=' + pathParams.genreId : ''}`
+            ['genres', (_pathParams: PathParams<OriginPaths>) => 'genre/movie/list?language=en'],
+            ['movies', (pathParams: PathParams<OriginPaths>) =>
+                `discover/movie?language=en-US&${pathParams['pageNumber'] !== undefined ? 'page=' + pathParams['pageNumber'] : ''}` + 
+                `${pathParams['genreId'] !== undefined && pathParams['genreId'] !== null ? '&with_genres=' + pathParams['genreId'] : ''}`
             ]
         ]
     )
-// {
-//     getGenresPath: () => 'genre/movie/list?language=en',
-//     getMoviesPath: 
-// } as const;
 
 @Injectable()
 export class BaseRestDataService {
@@ -45,7 +42,7 @@ export class BaseRestDataService {
         };
     }
 
-    get<T>(originPath: OriginPaths, pathParams: Partial<PathParams> = {}): Promise<AxiosResponse<T>> {
+    get<T>(originPath: OriginPaths, pathParams: PathParams<typeof originPath>): Promise<AxiosResponse<T>> {
         const restDataPathResolveFn = baseRestDataPaths.get(originPath);
         return firstValueFrom(this.httpService.get<T>(BaseRestDataService.API_URL + restDataPathResolveFn(pathParams),
         BaseRestDataService.REQUEST_CONFIG));

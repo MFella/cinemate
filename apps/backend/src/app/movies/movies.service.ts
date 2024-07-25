@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { MoviesListDTO } from "../dtos/movies-list.dto";
 import { MoviesUtil } from "./movies.util";
-import { GenEntity, MoodMovie } from "../dtos/mood-movie";
+import { GenEntity, TmdbDiscoverResult, TmdbMovie } from "../dtos/tmdb-movie";
 import { Genres, genres } from "../typings/common";
 import { PrismaService } from "../database/prisma.service";
 import { Rate } from "../dtos/rate-of-movie";
@@ -27,7 +27,7 @@ export class MoviesService {
             return true;
         }
 
-        const fetchedGenres = await this.baseRestDataService.get<Record<'genres', Array<GenEntity>>>('genres');
+        const fetchedGenres = await this.baseRestDataService.get<Record<'genres', Array<GenEntity>>>('genres', {});
 
         await this.prismaService.genre.createMany({
             data: fetchedGenres.data.genres.map((genreEntity) => {
@@ -96,16 +96,15 @@ export class MoviesService {
             }
  
             currentPageNumber += shouldLoadNextPage;
-            const response = await this.baseRestDataService.get<Array<MoodMovie>>('movies',
+            const response = await this.baseRestDataService.get<TmdbDiscoverResult>('movies',
                 {
                     genreId: userGenreId,
                     pageNumber: currentPageNumber
                 }
             );
-            console.log(response.data, userGenreId);
             if (response.data) {
-                const pageGenre = await this.extractPageGenreFromMoodMovieList(response.data, userGenreName);
-                const moviesListDto = MoviesUtil.convertMoodMoviesToMoviesListDto(response.data, pageGenre);
+                const pageGenre = await this.extractPageGenreFromMoodMovieList(response.data.results, userGenreId);
+                const moviesListDto = MoviesUtil.convertTmdbMoviesToMoviesListDto(response.data.results, pageGenre);
                 await this.saveMovieListDto(moviesListDto, userId, Boolean(shouldLoadNextPage));
                 return moviesListDto;
             } else {
@@ -123,7 +122,6 @@ export class MoviesService {
 
         let userGenreId = userGenreFromDb?.genreId;
 
-        console.log('userGenreId', userGenreId);
         if (userGenreId === undefined) {
             const randomGenreText = this.getRandomUserGenre().toString();
             const genreEntity = await this.prismaService.genre.findFirst({
@@ -236,9 +234,16 @@ export class MoviesService {
             },
         })
 
-        const groupedGenres = moviesListDto.movies.map(movie => movie.gen).filter(Boolean).reduce((acc, gen) => acc.concat(gen)
+        const groupedGenreIds = moviesListDto.movies.map(movie => movie.genre_ids).filter(Boolean).reduce((acc, gen) => acc.concat(gen)
         , []);
-        const resultGenres = [...new Map<number, PrismaGenre>(groupedGenres.map(g => [g.id, g])).values()];
+        const genresFromDb = await this.prismaService.genre.findMany({
+            where: {
+                id: {
+                    in: groupedGenreIds
+                }
+            }
+        });
+        const resultGenres = [...new Map<number, PrismaGenre>(genresFromDb.map(g => [g.id, g])).values()];
         let genreId = MoviesService.DEFAULT_GENRE_ID;
         if (userGenre?.genre) {
             genreId = resultGenres.find((resultGenre) => resultGenre.name === userGenre.genre.name)?.id;
@@ -248,20 +253,21 @@ export class MoviesService {
             data: {
             pageNumber,
             genreId,
-            movieIds: moviesListDto.movies.map((movieInListDto) => movieInListDto.imdb_id)
+            movieIds: moviesListDto.movies.map((movieInListDto) => movieInListDto.id.toString())
             }
         });
 
+        // change schema.prisma
         await this.prismaService.movieToRate.createMany({
             skipDuplicates: true,
             data: moviesListDto.movies.map((movieInListDto) => {
                 return {
-                    movieId: movieInListDto.imdb_id,
-                    imageUrl: movieInListDto.image_url,
-                    year: movieInListDto.year,
+                    movieId: movieInListDto.id.toString(),
+                    imageUrl: movieInListDto.poster_path,
+                    releaseDate: movieInListDto.release_date,
                     title: movieInListDto.title,
-                    description: movieInListDto.description,
-                    rating: movieInListDto.rating
+                    description: movieInListDto.overview,
+                    rating: movieInListDto.vote_average
                 }
             })
         });
@@ -373,7 +379,6 @@ export class MoviesService {
     }
 
     private async extractCachedMovies(userId: string, genreId: number): Promise<MoviesListDTO> {
-        console.log('buu', userId, genreId);
         const genreFromDb = await this.prismaService.genre.findFirst({
             where: {
                 id: genreId
@@ -440,10 +445,11 @@ export class MoviesService {
         return genres[genreRandomIndex];
     }
 
-    private async extractPageGenreFromMoodMovieList(moodMovies: Array<MoodMovie>, userGenreName: string): Promise<Genre> {
-        const genreFromMoodMovies = moodMovies.map((moodMovie) => moodMovie.gen)
-            .reduce((acc, val) => acc.concat(val), []);
-        const genreFromMoodMoviesMap = new Map(genreFromMoodMovies.map(genre => [genre.name, genre]));
-        return genreFromMoodMoviesMap.get(userGenreName);
+    private async extractPageGenreFromMoodMovieList(moodMovies: Array<TmdbMovie>, userGenreId: number): Promise<Genre> {
+        return await this.prismaService.genre.findFirst({
+            where: {
+                id: userGenreId
+            }
+        });
     }
 }

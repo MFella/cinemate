@@ -46,14 +46,13 @@ export type MovieInitData = {
 };
 
 export interface MovieToRate {
-    imdb_id: string;
-    gen?: (GenEntity)[] | null;
-    image_url: string;
-    year: number;
+    id: number;
+    genre_ids?: (number)[] | null;
+    poster_path: string;
+    release_date: string;
     title: string;
-    description: string;
-    rating: number;
-    pageNumber: number;
+    overview: string;
+    vote_average: number;
 }
 
 export interface GenEntity {

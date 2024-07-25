@@ -1,18 +1,18 @@
 import { Genre, MovieToRate } from "@prisma/client";
-import { GenEntity, MoodMovie } from "../dtos/mood-movie";
 import { MoviesListDTO } from "../dtos/movies-list.dto";
+import { TmdbMovie } from "../dtos/tmdb-movie";
 
 export class MoviesUtil {
-    static convertMoodMoviesToMoviesListDto(moodMovies: Array<MoodMovie>, pageGenre: Genre): MoviesListDTO {
-        const movies = moodMovies.map((moodMovie: MoodMovie) => {
+    static convertTmdbMoviesToMoviesListDto(tmdbMovies: Array<TmdbMovie>, pageGenre: Genre): MoviesListDTO {
+        const movies = tmdbMovies.map((tmdbMovie: TmdbMovie) => {
             return {
-                imdb_id: moodMovie.imdb_id,
-                gen: moodMovie.gen,
-                image_url: moodMovie.image_url,
-                year: moodMovie.year,
-                title: moodMovie.title,
-                description: moodMovie.description,
-                rating: moodMovie.rating
+                id: tmdbMovie.id,
+                genre_ids: tmdbMovie.genre_ids,
+                poster_path: tmdbMovie.poster_path,
+                release_date: tmdbMovie.release_date,
+                title: tmdbMovie.title,
+                overview: tmdbMovie.overview,
+                vote_average: tmdbMovie.vote_average
             }
         });
 
@@ -28,13 +28,13 @@ export class MoviesUtil {
             const gen: Array<Genre> = movie.genreIds
                 .map(genreId => genreIdToGenreFromDbMap.get(genreId)).filter(Boolean);
             return {
-                imdb_id: movie.movieId,
-                gen,
-                image_url: movie.imageUrl,
-                year: movie.year,
+                id: parseInt(movie.movieId),
+                genre_ids: movie.genreIds,
+                poster_path: movie.imageUrl,
+                release_date: movie.releaseDate,
                 title: movie.title,
-                description: movie.description,
-                rating: movie.rating
+                overview: movie.description,
+                vote_average: movie.rating
             }
         });
 
