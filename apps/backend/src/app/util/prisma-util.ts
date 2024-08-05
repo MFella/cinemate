@@ -3,7 +3,6 @@ import { Rate } from "../dtos/rate-of-movie";
 
 export class PrismaUtil {
     static convertRateToRateValue(rate: Rate): RateValue {
-        console.log(rate);
         switch (rate) {
             case Rate.YES:
                 return RateValue.YES;

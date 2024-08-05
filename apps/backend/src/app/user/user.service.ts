@@ -14,7 +14,6 @@ export class UserService {
     ) {}
 
     async saveUserPreference(userId: string, genreId: number): Promise<boolean> {
-        console.log(userId, genreId);
         const genreFromDb = await this.prismaService.genre.findFirst({
             where: {
                 id: genreId

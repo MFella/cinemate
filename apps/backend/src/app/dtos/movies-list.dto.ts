@@ -1,8 +1,17 @@
-import { Genre } from "@prisma/client";
-import { TmdbMovie } from "./tmdb-movie";
+import { GenEntity, TmdbMovie } from "./tmdb-movie";
 
-type MovieDTO = Array<Pick<TmdbMovie, 'id' | 'genre_ids' | 'poster_path' | 'release_date' | 'title' | 'overview' | 'vote_average'>>;
+type CamelCased<T extends string> = T extends `${infer First}_${infer Rest}`
+    ? `${Lowercase<First>}${Capitalize<Rest>}` : T;
+
+type TmdbMovieKeysToPick = 'id' | 'genre_ids' | 'poster_path' | 'release_date' | 'title' | 'overview' | 'vote_average';
+type FilteredTmdbMovie = Pick<TmdbMovie, TmdbMovieKeysToPick>;
+type TransformedTmdbMovie = {
+    [K in keyof FilteredTmdbMovie as CamelCased<K>]: FilteredTmdbMovie[K]
+};
+
 export type MoviesListDTO = {
-    movies: MovieDTO;
-    genre: Genre
+    movies: Array<TransformedTmdbMovie>;
+    pageGenres: Array<GenEntity>;
+    selectedGenreId: number;
+    pageNumber: number;
 };

@@ -1,14 +1,14 @@
 import { inject } from '@angular/core';
 import { ResolveFn } from '@angular/router';
 import { RestDataService } from '../_services/rest-data.service';
-import { MovieInitData, MovieToRate } from '../typings/common';
-import { catchError, of, throwError, timeout, timer } from 'rxjs';
+import { MovieInitData } from '../typings/common';
+import { catchError, throwError, timeout } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AlertInteractionService } from '../_services/alert-interaction.service';
 
-const cachedMovies: Array<MovieToRate> = [
+const cachedMovies: Array<any> = [
   {
-      "imdb_id": "tt1201607",
+      "id": "tt1201607",
       "gen": [
           {
               "id": 4,
@@ -35,7 +35,7 @@ const cachedMovies: Array<MovieToRate> = [
       "pageNumber": 1
   },
   {
-      "imdb_id": "tt5109280",
+      "id": "tt5109280",
       "gen": [
           {
               "id": 4,
@@ -70,7 +70,7 @@ const cachedMovies: Array<MovieToRate> = [
       "pageNumber": 1
   },
   {
-      "imdb_id": "tt4154756",
+      "id": "tt4154756",
       "gen": [
           {
               "id": 4,
@@ -93,7 +93,7 @@ const cachedMovies: Array<MovieToRate> = [
       "pageNumber": 1
   },
   {
-      "imdb_id": "tt6878306",
+      "id": "tt6878306",
       "gen": [
           {
               "id": 4,
@@ -120,7 +120,7 @@ const cachedMovies: Array<MovieToRate> = [
       "pageNumber": 1
   },
   {
-      "imdb_id": "tt0293429",
+      "id": "tt0293429",
       "gen": [
           {
               "id": 4,
@@ -151,7 +151,7 @@ const cachedMovies: Array<MovieToRate> = [
       "pageNumber": 1
   },
   {
-      "imdb_id": "tt0458339",
+      "id": "tt0458339",
       "gen": [
           {
               "id": 4,
@@ -174,7 +174,7 @@ const cachedMovies: Array<MovieToRate> = [
       "pageNumber": 1
   },
   {
-      "imdb_id": "tt4154796",
+      "id": "tt4154796",
       "gen": [
           {
               "id": 4,
@@ -201,7 +201,7 @@ const cachedMovies: Array<MovieToRate> = [
       "pageNumber": 1
   },
   {
-      "imdb_id": "tt12361974",
+      "id": "tt12361974",
       "gen": [
           {
               "id": 4,
@@ -228,7 +228,7 @@ const cachedMovies: Array<MovieToRate> = [
       "pageNumber": 1
   },
   {
-      "imdb_id": "tt0816692",
+      "id": "tt0816692",
       "gen": [
           {
               "id": 4,
@@ -251,7 +251,7 @@ const cachedMovies: Array<MovieToRate> = [
       "pageNumber": 1
   },
   {
-      "imdb_id": "tt0120737",
+      "id": "tt0120737",
       "gen": [
           {
               "id": 4,
@@ -278,7 +278,7 @@ const cachedMovies: Array<MovieToRate> = [
       "pageNumber": 1
   },
   {
-      "imdb_id": "tt1436562",
+      "id": "tt1436562",
       "gen": [
           {
               "id": 4,
@@ -313,7 +313,7 @@ const cachedMovies: Array<MovieToRate> = [
       "pageNumber": 1
   },
   {
-      "imdb_id": "tt1843866",
+      "id": "tt1843866",
       "gen": [
           {
               "id": 4,
@@ -340,7 +340,7 @@ const cachedMovies: Array<MovieToRate> = [
       "pageNumber": 1
   },
   {
-      "imdb_id": "tt2222042",
+      "id": "tt2222042",
       "gen": [
           {
               "id": 4,
@@ -371,7 +371,7 @@ const cachedMovies: Array<MovieToRate> = [
       "pageNumber": 1
   },
   {
-      "imdb_id": "tt3501632",
+      "id": "tt3501632",
       "gen": [
           {
               "id": 4,
@@ -402,7 +402,7 @@ const cachedMovies: Array<MovieToRate> = [
       "pageNumber": 1
   },
   {
-      "imdb_id": "tt1345836",
+      "id": "tt1345836",
       "gen": [
           {
               "id": 4,
@@ -421,7 +421,7 @@ const cachedMovies: Array<MovieToRate> = [
       "pageNumber": 1
   },
   {
-      "imdb_id": "tt4154664",
+      "id": "tt4154664",
       "gen": [
           {
               "id": 4,
@@ -450,10 +450,10 @@ export const movieInitDataResolver: ResolveFn<MovieInitData> = (_route, _state) 
   const alertInteractionService = inject(AlertInteractionService);
   alertInteractionService.isLoadingSpinnerActive$.next(true);
 
-  const mockedMovieInitData: MovieInitData = {
-    movies: cachedMovies,
-    genre: 'Adventure'
-  };
+//   const mockedMovieInitData: MovieInitData = {
+//     movies: cachedMovies,
+//     genre: 'Adventure'
+//   };
 
   // of(mockedMovieInitData)
   return inject(RestDataService).fetchMoviesData().pipe(

@@ -4,7 +4,7 @@ import {MatCardModule} from '@angular/material/card';
 import { MatDividerModule} from '@angular/material/divider';
 import { MatProgressBarModule} from '@angular/material/progress-bar';
 import { MatButtonModule } from '@angular/material/button';
-import type { Genres, MarkAction, MovieInitData, MovieToRate, RateResultDto } from '../typings/common';
+import type { GenEntity, Genres, MarkAction, MovieInitData, MovieToRate, RateResultDto } from '../typings/common';
 import { ActivatedRoute } from '@angular/router';
 import { map, take } from 'rxjs';
 import { RestDataService } from '../_services/rest-data.service';
@@ -29,6 +29,9 @@ type MarkButtonData = {
 })
 export class MatchComponent implements OnInit {
   private static readonly MOVIES_REMAINS_FETCH_THRESHOLD = 4;
+  private static readonly POSTER_URL_PREFIX = 'https://image.tmdb.org/t/p/original';
+  private static readonly POSTER_URL_PLACEHOLDER = './assets/no-image.svg';
+
   markActions: Array<MarkButtonData> = [
     { label: 'Nah 🤨', value: 'NO' },
     { label: '?! 👀', value: 'IDK' },
@@ -36,8 +39,10 @@ export class MatchComponent implements OnInit {
   ];
   fetchedMovies: Array<MovieToRate> = [];
   currentMovie!: MovieToRate;
-  originGenre!: Genres;
   isLoadingMovies: boolean = false;
+  genresOnPage!: Map<number, GenEntity>;
+  pageNumber: number = 1;
+  lastRateResult!: RateResultDto;
 
   constructor(
     private readonly activatedRoute: ActivatedRoute,
@@ -50,11 +55,12 @@ export class MatchComponent implements OnInit {
     map((data) => data['movieInitData']))
     .subscribe((movieInitData: MovieInitData) => {
       this.alertInteractionService.isLoadingSpinnerActive$.next(false);
+      this.genresOnPage = new Map<number, GenEntity>(movieInitData.pageGenres.map(pageGenre => [pageGenre.id, pageGenre]));
+      this.pageNumber = movieInitData.pageNumber;
 
       if (movieInitData?.movies?.length) {
         this.currentMovie = movieInitData?.movies?.shift()!;
         this.fetchedMovies = movieInitData?.movies;
-        this.originGenre = movieInitData.genre;
         console.log(movieInitData?.movies);
       } else {
         console.log('Display load data again screen');
@@ -63,7 +69,7 @@ export class MatchComponent implements OnInit {
   }
 
   voteMovie(vote: MarkButtonData): void {
-    this.restDataService.voteMovie(vote.value, this.currentMovie.imdb_id)
+    this.restDataService.voteMovie(vote.value, this.currentMovie.id, this.resolvePageNumber())
       .pipe(take(1))
       .subscribe((rateResult: RateResultDto) => {
         if (this.fetchedMovies.length === 0) {
@@ -75,6 +81,7 @@ export class MatchComponent implements OnInit {
           return;
         }
 
+        this.lastRateResult = rateResult;
         this.currentMovie = this.fetchedMovies.shift()!;
 
 
@@ -84,15 +91,29 @@ export class MatchComponent implements OnInit {
         }
     
 
-        console.log(rateResult, this.fetchedMovies.length);
         if (this.fetchedMovies?.length <= MatchComponent.MOVIES_REMAINS_FETCH_THRESHOLD) {
           this.restDataService.fetchMoviesData(true)
           .pipe(take(1))
           .subscribe((fetchedMovies: MovieInitData) => {
             this.fetchedMovies = this.fetchedMovies.concat(fetchedMovies?.movies);
             this.isLoadingMovies = true;
+            this.pageNumber = fetchedMovies.pageNumber;
           })
         }
       });
+  }
+
+  getMoviePosterSrc(posterPath: string): string {
+    return  posterPath ? MatchComponent.POSTER_URL_PREFIX + posterPath : MatchComponent.POSTER_URL_PLACEHOLDER; 
+  }
+
+  resolvePageNumber(): number {
+    if (this.lastRateResult?.moviesCountLeftOnPage !== null && this.lastRateResult?.moviesCountLeftOnPage !== undefined) {
+      return this.lastRateResult.moviesCountLeftOnPage <= MatchComponent.MOVIES_REMAINS_FETCH_THRESHOLD
+        ? this.pageNumber - 1
+        : this.pageNumber;
+    }
+
+    return this.pageNumber;
   }
 }

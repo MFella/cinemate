@@ -14,7 +14,6 @@ export class UserController {
 
     @Post('preference')
     async saveUserPreference(@UserId() userId: string, @Body() preferenceBody: UserPreferenceBody): Promise<boolean> {
-        console.log(preferenceBody);
         return await this.userService.saveUserPreference(userId, preferenceBody.genreId);
     }
 

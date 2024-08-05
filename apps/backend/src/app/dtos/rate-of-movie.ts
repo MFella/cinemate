@@ -1,5 +1,5 @@
 export type RateOfMovie = {
-    imdbId: string;
+    movieId: number;
     rate: Rate;
     pageNumber: number;
 };

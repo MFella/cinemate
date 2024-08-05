@@ -18,6 +18,6 @@ export class MoviesController {
 
     @Post('rate')
     async rateMovie(@UserId() userId: string, @Body() rateOfMovie: RateOfMovie): Promise<RateResultDto> {
-        return this.moviesService.rateMovie(rateOfMovie.imdbId, rateOfMovie.rate, rateOfMovie?.pageNumber, userId);
+        return this.moviesService.rateMovie(rateOfMovie.movieId, rateOfMovie.rate, userId);
     }
 }

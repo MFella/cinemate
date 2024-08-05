@@ -41,18 +41,20 @@ export const genres = ["Adventure", "Action", "Animation", "Biography", "Comedy"
 export type Genres = typeof genres[number];
 
 export type MovieInitData = {
-    genre: Genres;
+    pageGenres: Array<GenEntity>;
+    selectedGenreId: number;
     movies: Array<MovieToRate>;
+    pageNumber: number;
 };
 
 export interface MovieToRate {
     id: number;
-    genre_ids?: (number)[] | null;
-    poster_path: string;
-    release_date: string;
+    genreIds?: (number)[] | null;
+    posterPath: string;
+    releaseDate: string;
     title: string;
     overview: string;
-    vote_average: number;
+    voteAverage: number;
 }
 
 export interface GenEntity {

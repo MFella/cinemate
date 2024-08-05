@@ -7,8 +7,8 @@ import { BasicRestDataService } from './basic-rest-data.service';
   providedIn: 'root'
 })
 export class RestDataService extends BasicRestDataService {
-  voteMovie(vote: MarkAction, imdbId: string): Observable<RateResultDto> {
-    return this.post<RateResultDto>(`movies/rate`, { imdbId, rate: vote });
+  voteMovie(vote: MarkAction, movieId: number, pageNumber: number): Observable<RateResultDto> {
+    return this.post<RateResultDto>(`movies/rate`, { movieId, rate: vote, pageNumber });
   }
 
   fetchMoviesData(shouldLoadNextPage: boolean = false): Observable<MovieInitData> {
