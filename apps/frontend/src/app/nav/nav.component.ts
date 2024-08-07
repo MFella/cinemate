@@ -7,11 +7,12 @@ import {MatToolbarModule} from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../_services/auth.service';
 import { Subject } from 'rxjs';
+import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
   selector: 'app-nav',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, NgIf, MatToolbarModule, RouterModule],
+  imports: [CommonModule, MatButtonModule, MatIconModule, NgIf, MatToolbarModule, RouterModule, MatDividerModule],
   templateUrl: './nav.component.html',
   styleUrl: './nav.component.scss',
 })
@@ -32,6 +33,11 @@ export class NavComponent {
   getUserEmail(): string {
     const identityClaim = this.#authService.getUserIdentityClaim();
     return identityClaim.email;
+  }
+
+  getUserAvatarUrl(): string {
+    const identityClaim = this.#authService.getUserIdentityClaim();
+    return identityClaim.picture;
   }
 
   isUserHasValidToken(): boolean {
