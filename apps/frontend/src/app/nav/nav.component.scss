@@ -5,18 +5,14 @@
 .active {
     // border: 1px solid rgba(0,0,0, .1);
     // filter: invert(25%);
-    background-color: #005cbb1a;
-}
-
-.dark > .active {
-    background-color: #435;
+    background-color: var(--mat-icon-button-state-layer-color);
 }
 
 .user-app-preferences-container {
     display: flex;
     align-items: center;
-    padding-right: 1rem;
-    border-right: 1px solid rgba(0, 0, 0, .2);
+    border-color: var(--mat-toolbar-container-text-color);
+    // padding-right: 1rem;
     // &::after {
     //     content: '|';
     //     font-weight: 200;

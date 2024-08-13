@@ -1,6 +1,5 @@
 import { Component, DestroyRef, Inject, PLATFORM_ID, inject } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { NxWelcomeComponent } from './nx-welcome.component';
+import { Router, RouterModule } from '@angular/router';
 import { NavComponent } from './nav/nav.component';
 import { AppLang, AppTheme } from './typings/common';
 import { LocalStorageService } from './_services/local-storage.service';
@@ -13,10 +12,13 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { ProgressSpinnerComponent } from './progress-spinner/progress-spinner.component';
+import { switchMap, throwError } from 'rxjs';
+import { RestDataService } from './_services/rest-data.service';
+import { TypeUtil } from './typings/util';
 
 @Component({
   standalone: true,
-  imports: [NxWelcomeComponent, RouterModule, NavComponent],
+  imports: [NavComponent, RouterModule],
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
@@ -28,7 +30,9 @@ export class AppComponent {
   #destroyRef = inject(DestroyRef);
   #authService = inject(AuthService);
   #intercationService = inject(AlertInteractionService);
+  #restDataService = inject(RestDataService);
   #matDialog = inject(MatDialog);
+  #router = inject(Router);
   #matDialogRef: MatDialogRef<any> | null = null;
 
   title = 'frontend';
@@ -52,7 +56,7 @@ export class AppComponent {
       this.document.body.classList.add(selectedTheme);
     }
 
-    this.observeTokenReceived();
+    this.observeUserRegistered();
     this.observeLoadingSpinnerChanged();
   }
 
@@ -63,10 +67,23 @@ export class AppComponent {
     this.document.body.classList.add(theme);
   }
 
-  private observeTokenReceived(): void {
+  private observeUserRegistered(): void {
     this.#authService.selectOauthEvent('token_received')
-      .pipe(takeUntilDestroyed(this.#destroyRef))
-      .subscribe((event) => {
+      .pipe(
+        switchMap(() => {
+          const [userId, userEmail] = this.#authService.getIdentityClaimValues('sub', 'email');
+          if (TypeUtil.isStringedNumber(userId) && TypeUtil.isString(userEmail)) {
+            return this.#restDataService.tryRegisterUser(userId, userEmail);
+          } else {
+            return throwError(() => new Error('Cannot retrieve user id and email'));
+          }
+        }),
+        takeUntilDestroyed(this.#destroyRef)
+      )
+      .subscribe((isUserRegistered: boolean) => {
+        if (isUserRegistered) {
+          this.#router.navigate(['/match'])
+        }
         console.log(event);
       });
   }

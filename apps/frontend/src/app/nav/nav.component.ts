@@ -8,17 +8,23 @@ import { RouterModule } from '@angular/router';
 import { AuthService } from '../_services/auth.service';
 import { Subject } from 'rxjs';
 import { MatDividerModule } from '@angular/material/divider';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import { CustomTooltipDirective } from '../_directives/custom-tooltip.directive';
+import {MatMenuModule} from '@angular/material/menu';
 
 @Component({
   selector: 'app-nav',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, NgIf, MatToolbarModule, RouterModule, MatDividerModule],
+  imports: [CommonModule, MatButtonModule, MatIconModule, NgIf, MatToolbarModule, RouterModule, MatDividerModule, MatTooltipModule,
+      CustomTooltipDirective, MatMenuModule
+  ],
   templateUrl: './nav.component.html',
   styleUrl: './nav.component.scss',
 })
 export class NavComponent {
   #authService = inject(AuthService);
   isTokenValid: boolean = false;
+  customTooltipContent: string = `<strong>Hello</strong>`;
 
   @Input()
   selectedTheme!: AppTheme;
@@ -42,5 +48,9 @@ export class NavComponent {
 
   isUserHasValidToken(): boolean {
     return this.#authService.hasUserHaveValidToken();
+  }
+
+  logoutUser(): void {
+    this.#authService.logout();
   }
 }

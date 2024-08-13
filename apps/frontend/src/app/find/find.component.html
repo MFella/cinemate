@@ -1,0 +1,62 @@
+<form *ngIf="isInSearchMode && !findMatchResult?.movies; else matchTable" class="search-user-form" [formGroup]="searchUserForm">
+    <mat-card class="min-w-96" appearance="outlined">
+        <mat-card-header class="mb-4">
+          <mat-card-title>Search user</mat-card-title>
+        </mat-card-header>
+        <mat-divider></mat-divider>
+        <mat-card-content class="!flex !flex-col m-4">
+            <mat-form-field>
+                <mat-label>Put mails</mat-label>
+                <mat-chip-grid #chipGrid aria-label="User selection" formControlName="mailOfUsers">
+                  @for (user of selectedEmails(); track $index) {
+                    <mat-chip-row (removed)="removeUser(user)">
+                      {{user}}
+                      <button matChipRemove [attr.aria-label]="'remove ' + user">
+                        <mat-icon>cancel</mat-icon>
+                      </button>
+                    </mat-chip-row>
+                  }
+                </mat-chip-grid>
+                <input
+                  name="currentUser"
+                  placeholder="Mail to compare..."
+                  #userInput
+                  [(ngModel)]="currentUser"
+                  [ngModelOptions]="{ standalone: true }"
+                  [matChipInputFor]="chipGrid"
+                  [matAutocomplete]="auto"
+                  (matChipInputTokenEnd)="addUser($event)"
+                />
+                <mat-autocomplete #auto="matAutocomplete" (optionSelected)="handleUserSelection($event)">
+                  @for (user of filteredUsers(); track user) {
+                    <mat-option [value]="user">{{user}}</mat-option>
+                  }
+                  @if (filteredUsers().length === 0) {
+                    <mat-option [disabled]="true">No email found 😶</mat-option>
+                  }
+                </mat-autocomplete>
+              </mat-form-field>
+              <mat-form-field class="w-full">
+                <mat-label>Select genre</mat-label>
+                <mat-select formControlName="genre">
+                    <mat-option *ngFor="let genreOption of genreOptions" [value]="genreOption.value" [disabled]="genreOption.disabled">{{genreOption.label}}</mat-option>
+                  </mat-select>
+              </mat-form-field>
+        </mat-card-content>
+        <mat-divider></mat-divider>
+        <mat-card-footer class="example-card-footer">
+            <button [disabled]="!searchUserForm.valid" color="warn" class="w-full" mat-flat-button
+              (click)="getUserMatch()">
+                <mat-icon>search</mat-icon>
+                <span>Find</span>
+            </button>
+            <!-- <button class="w-full" mat-raised-button>Basic</button> -->
+        </mat-card-footer>
+      </mat-card>
+  </form>
+
+  <ng-template #matchTable>
+    <table mat-table [dataSource]="findMatchResult?.movies ?? []">
+      ...
+    </table>
+  </ng-template>

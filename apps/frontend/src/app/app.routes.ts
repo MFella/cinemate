@@ -4,16 +4,22 @@ import { authGuard } from './_guards/auth.guard';
 import { inject } from '@angular/core';
 import { AuthService } from './_services/auth.service';
 import { preferencesResolver } from './_resolvers/preferences.resolver';
+import { findResolver } from './_resolvers/find.resolver';
+
+const componentNames = ['match', 'home', 'preferences'] as const;
+const importedComponentFiles = componentNames
+    .map((componentName) => `./${componentName}/${componentName}.component` as const);
 
 type ImportedMatchFile = typeof import('./match/match.component');
-type ImportedHomeFile = typeof import('./home/home.component');
+type ImportedAuthFile = typeof import('./auth/auth.component');
 type ImportedPreferencesFile = typeof import('./preferences/preferences.component');
+type ImportedFindFile = typeof import('./find/find.component');
 
 export const appRoutes: Route[] = [
     {
         path: '',
-        loadComponent: () => import('./home/home.component').then((importedFile: ImportedHomeFile) => importedFile.HomeComponent),
-        canMatch: [ () => !inject(AuthService).hasUserHaveValidToken()]
+        loadComponent: () => import('./auth/auth.component').then((importedFile: ImportedAuthFile) => importedFile.AuthComponent),
+        canMatch: [ () => !inject(AuthService).hasUserHaveValidToken()],
     },
     {
         path: 'match',
@@ -29,6 +35,14 @@ export const appRoutes: Route[] = [
         canActivate: [authGuard],
         resolve: {
             preferencesData: preferencesResolver
+        }
+    },
+    {
+        path: 'find',
+        loadComponent: () => import('./find/find.component').then((importedFile: ImportedFindFile) => importedFile.FindComponent),
+        canActivate: [authGuard],
+        resolve: {
+            findData: findResolver
         }
     }
 ];

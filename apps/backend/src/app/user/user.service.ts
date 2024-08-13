@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../database/prisma.service";
 import { genres, Genres } from "../typings/common";
 import { UserPreferenceDto } from "../dtos/user-preference.dto";
@@ -115,5 +115,42 @@ export class UserService {
             });
         }
         return genresFromDb;
+    }
+
+    async tryRegisterUser(userId: number, userEmail: string): Promise<boolean> {
+        const result = await this.prismaService.user.findFirst({ where: { id: userId }});
+        console.log(result);
+        if (result) {
+            Logger.log('User already registered');
+            return true;
+        }
+
+        const userCreationResult = await this.prismaService.user.create({
+            data: {
+                id: userId,
+                email: userEmail
+            }
+        });
+
+        if (userCreationResult) {
+            Logger.log('User registered');
+            return true;
+        } else {
+            Logger.error('Cannot register user');
+            return false;
+        }
+    }
+
+    async getUsersEmails(startsWith: string): Promise<Array<string>> {
+        return (await this.prismaService.user.findMany({
+            where: {
+                email: {
+                    startsWith
+                }
+            },
+            select: {
+                email: true
+            }
+        })).map((emailFromDb) => emailFromDb.email);
     }
 }

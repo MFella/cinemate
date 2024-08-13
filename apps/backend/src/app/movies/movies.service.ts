@@ -411,7 +411,7 @@ export class MoviesService {
             genreId
         }});
 
-        if (pageOfMovies || pageOfMovies?.movieIds?.length) {
+        if (!pageOfMovies || !pageOfMovies?.movieIds?.length) {
             return { movies: [], selectedGenreId: genreFromDb.id, pageGenres: [], pageNumber: -1 };
         }
 

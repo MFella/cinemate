@@ -3,7 +3,8 @@
       <!-- <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
         <mat-icon>menu</mat-icon>
       </button> -->
-      <img class="max-h-16 mr-4" alt="Cinemate logo" src="../../assets/cinemate-logo.png" />
+      <img class="max-h-14 mr-4 absolute left-0 rounded-r-full shadow-md" alt="Cinemate logo" src="../../assets/cinemate-logo.png" />
+      <div class="flex-auto"></div>
       <button *ngIf="!isUserHasValidToken(); else validTokenTemplateRef" [routerLink]="['./']"
         [routerLinkActive]="['active']"
         [routerLinkActiveOptions]="{ exact: true }"
@@ -22,13 +23,16 @@
           <mat-icon>settings</mat-icon>
           <span>Preferences</span>
         </button>
-        <button [routerLink]="['/']" [routerLinkActive]="['active']" class="!rounded-3xl" mat-button>
+        <button [routerLink]="['/find']" [routerLinkActive]="['active']" class="!rounded-3xl" mat-button>
           <mat-icon>search</mat-icon>
           <span>Find</span>
         </button>
       </ng-template>
       <div class="flex-auto"></div>
-      <div class="user-app-preferences-container">
+      <div class="user-app-preferences-container"
+        [ngClass]="{
+          'border-r-[1px] pr-4': isUserHasValidToken()
+        }">
         <button mat-icon-button color="secondary" aria-label="Toggle theme button" (click)="toggleTheme()">
           <mat-icon *ngIf="selectedTheme === 'dark'; else lightIconContainer">brightness_3</mat-icon>
             <ng-template #lightIconContainer>
@@ -39,7 +43,13 @@
       <mat-divider [vertical]="false"></mat-divider>
       <div class="flex items-center ml-4" *ngIf="isUserHasValidToken()">
         <span class="text-sm mr-4">Logged as</span>
-        <img class="rounded-full w-8" [src]="getUserAvatarUrl()" alt="User logo"/>
+          <img mat-icon-button [matMenuTriggerFor]="menu" class="rounded-full w-8 hover:cursor-pointer" [src]="getUserAvatarUrl()" alt="User logo"/>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="logoutUser()">
+            <mat-icon>logout</mat-icon>
+            <span>Logout</span>
+          </button>
+        </mat-menu>
       </div>
     </mat-toolbar-row>
   </mat-toolbar>

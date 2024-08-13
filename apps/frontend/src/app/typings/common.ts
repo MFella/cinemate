@@ -1,7 +1,7 @@
 export type AppTheme = 'dark' | 'default';
 export type AppLang = 'pl-PL' | 'en-US';
 
-export type MarkAction = 'YES' | 'NO' | 'IDK';
+export type MovieRate = 'YES' | 'NO' | 'IDK';
 
 export type IdentityClaim = {
     iss: string;
@@ -67,4 +67,18 @@ export type RateResultDto = {
     isRateSaved: boolean;
     reason?: string
 };
+
+export type FindMatchResult = {
+    email: string;
+    id: string;
+    searchedRate: MovieRate;
+    movies: Array<MovieToRate>;
+  };
+  
+  type FindMatchMovie = {
+    id: string;
+    name: string;
+    description: string;
+    isViewed: string;
+  };
   

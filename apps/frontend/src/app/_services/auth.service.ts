@@ -3,7 +3,8 @@ import { EventType, OAuthEvent, OAuthService } from 'angular-oauth2-oidc';
 import { IdentityClaim } from '../typings/common';
 import { getAuthConfig } from '../auth/oauth.config';
 import { isPlatformBrowser } from '@angular/common';
-import { Observable, filter } from 'rxjs';
+import { Observable, filter, from, of, take } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -11,13 +12,14 @@ import { Observable, filter } from 'rxjs';
 export class AuthService {
   #oauthService = inject(OAuthService);
   #platformId = inject(PLATFORM_ID);
+  #router = inject(Router);
 
   constructor() {
     const authConfig = getAuthConfig('google', isPlatformBrowser(this.#platformId));
     if (authConfig) {
       this.#oauthService.configure(authConfig);
-      this.#oauthService.loadDiscoveryDocumentAndTryLogin();
       this.#oauthService.setupAutomaticSilentRefresh();
+      this.#oauthService.loadDiscoveryDocumentAndTryLogin()
     }
   }
 
@@ -26,8 +28,15 @@ export class AuthService {
   }
 
   logout(): void {
-    this.#oauthService.revokeTokenAndLogout();
-    this.#oauthService.logOut();
+    from(Promise.all(
+      [
+        this.#oauthService.revokeTokenAndLogout(false, true),
+        of(this.#oauthService.logOut())
+      ]))
+      .pipe(take(1))
+      .subscribe(() => {
+        this.#router.navigate(['']);
+      });
   }
 
   hasUserHaveValidToken(): boolean {
@@ -40,6 +49,11 @@ export class AuthService {
 
   getUserId(): string {
     return this.getUserIdentityClaim().sub;
+  }
+
+  getIdentityClaimValues<T extends keyof IdentityClaim>(...identityClaimKeys: Array<T>): Array<keyof T> {
+    const identityClaim = this.getUserIdentityClaim();
+    return Object.create(identityClaimKeys.map((key) => identityClaim[key]));
   }
 
   getAccessToken(): string {

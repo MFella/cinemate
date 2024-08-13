@@ -4,7 +4,7 @@ import {MatCardModule} from '@angular/material/card';
 import { MatDividerModule} from '@angular/material/divider';
 import { MatProgressBarModule} from '@angular/material/progress-bar';
 import { MatButtonModule } from '@angular/material/button';
-import type { GenEntity, Genres, MarkAction, MovieInitData, MovieToRate, RateResultDto } from '../typings/common';
+import type { GenEntity, Genres, MovieRate, MovieInitData, MovieToRate, RateResultDto } from '../typings/common';
 import { ActivatedRoute } from '@angular/router';
 import { map, take } from 'rxjs';
 import { RestDataService } from '../_services/rest-data.service';
@@ -16,7 +16,7 @@ import {MatChipsModule} from '@angular/material/chips';
 
 type MarkButtonData = {
   label: string;
-  value: MarkAction
+  value: MovieRate
 };
 
 @Component({

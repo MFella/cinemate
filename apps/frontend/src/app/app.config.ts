@@ -10,6 +10,7 @@ import { userIdInterceptor } from './_interceptors/user-id.interceptor';
 import { NgToastModule } from 'ng-angular-popup';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideHttpClient(withInterceptors([corsInterceptor, userIdInterceptor])), provideClientHydration(),
+  providers: [provideHttpClient(),
+    provideHttpClient(withInterceptors([corsInterceptor, userIdInterceptor])), provideClientHydration(),
   provideRouter(appRoutes), provideAnimationsAsync(), provideOAuthClient(),importProvidersFrom(NgToastModule)],
 };
