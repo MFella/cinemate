@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, computed, DestroyRef, inject, model, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatChipInputEvent, MatChipsModule } from '@angular/material/chips';
 import {MatAutocompleteModule, MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
@@ -10,19 +10,32 @@ import { of, take } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
-import { FindMatchResult, GenEntity, Genres, MovieRate, SelectOption } from '../typings/common';
+import { FindMatchResult, GenEntity, Genres, MovieRate, MovieToRate, SelectOption } from '../typings/common';
 import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../_services/auth.service';
 import {MatTableModule} from '@angular/material/table';
 import { RestDataService } from '../_services/rest-data.service';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import { MatDialog } from '@angular/material/dialog';
+import { MovieDetailComponent } from '../components/movie-detail/movie-detail.component';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-find',
   standalone: true,
   imports: [CommonModule, FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatDividerModule, MatSelectModule,
-    ReactiveFormsModule, MatChipsModule, MatAutocompleteModule, MatIconModule, MatCardModule, MatTableModule],
+    ReactiveFormsModule, MatChipsModule, MatAutocompleteModule, MatIconModule, MatCardModule, MatTableModule,
+    MatSlideToggleModule, MatTooltipModule],
+    providers: [
+      {
+        provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+        useValue: {
+          subscriptSizing: 'dynamic'
+        }
+      }
+    ],
   templateUrl: './find.component.html',
   styleUrl: './find.component.scss',
 })
@@ -31,6 +44,7 @@ export class FindComponent implements OnInit {
   readonly #destroyRef = inject(DestroyRef);
   readonly #authService = inject(AuthService);
   readonly #restDataService = inject(RestDataService);
+  readonly #matDialog = inject(MatDialog);
 
   readonly fetchedGenres = signal<Array<GenEntity>>([]);
   readonly selectedEmails = signal<Array<string>>([]);
@@ -48,6 +62,10 @@ export class FindComponent implements OnInit {
   isInSearchMode: boolean = true;
   allUsers: Array<string> = [];
   genreOptions: Array<SelectOption<Genres>> = [];
+  displayMatchTableColumns: string[] = ['view-details', 'movie', 'email', 'is-watched'];
+
+  toppings = new FormControl('');
+  toppingList: string[] = ['Extra cheese', 'Mushroom', 'Onion', 'Pepperoni', 'Sausage', 'Tomato'];
 
   ngOnInit(): void {
     this.setSearchUserFormValidators();
@@ -111,11 +129,42 @@ export class FindComponent implements OnInit {
   getUserMatch(): void {
     this.#restDataService.fetchUserMatch(this.searchUserForm.value.genre, this.searchUserForm.value.mailOfUsers)
       .pipe(take(1), takeUntilDestroyed(this.#destroyRef))
-      .subscribe(() => {
+      .subscribe((findMatchResult: FindMatchResult) => {
         //
+        this.findMatchResult = findMatchResult;
+        this.isInSearchMode = false;
+        debugger;
       });
   }
 
+  async openMovieInfoDialog(movieId: number): Promise<void> {
+    this.#restDataService.fetchMovieData(movieId)
+      .pipe(take(1))
+      .subscribe((movieToRate: MovieToRate) => {
+        this.#matDialog.open(MovieDetailComponent, {
+          data: {
+            movie: movieToRate,
+            movieDetailConfig: {
+              shouldDisplayConfig: true,
+              dialogActionButtons: ['Close']
+            }
+          }
+        });
+      });
+  }
+
+  returnToSearchMode(): void {
+    this.isInSearchMode = true;
+
+    // clear state of fetched rate results
+    this.findMatchResult.matchedRates ??= [];
+  }
+
+  updateIsMovieWatched(movieId: string, isMovieWatched: boolean): void {
+    // this.#restDataService.saveIsMovieWatched()
+    debugger;
+  }
+  
   private setSearchUserFormValidators(): void {
     this.searchUserForm.controls['genre'].addValidators([Validators.required]);
     this.searchUserForm.controls['mailOfUsers'].addValidators([Validators.required]);

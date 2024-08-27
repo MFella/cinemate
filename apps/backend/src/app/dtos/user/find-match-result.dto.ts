@@ -1,30 +1,33 @@
-import { IsArray, IsEnum, IsString, Validate, ValidateNested, ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from "class-validator";
+import { IsArray, IsDefined, IsEnum, IsString, Validate, ValidateNested, ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from "class-validator";
 import { Rate } from "../rate-of-movie";
-import { MovieToRate } from "@prisma/client";
-import { Type } from 'class-transformer';
+import { MovieToRate, RateValue } from "@prisma/client";
 import { TypeUtil } from "../../typings/type-util";
+import { MatchedRate } from "../../typings/common";
 
 @ValidatorConstraint()
-export class IsMovieToRate implements ValidatorConstraintInterface {
-    validate(moviesToRate: Array<any>): Promise<boolean> | boolean {
-        return Array.isArray(moviesToRate) && moviesToRate.every(movieToRate => TypeUtil.isMovieToRate(movieToRate)) 
+class IsRateValue implements ValidatorConstraintInterface {
+    validate(value: any): Promise<boolean> | boolean {
+        return value === RateValue.YES || value === RateValue.IDK || value === RateValue.NO;
+    }
+}
+
+@ValidatorConstraint()
+class IsMatchedRate implements ValidatorConstraintInterface {
+    validate(matchedRates: Array<any>): Promise<boolean> | boolean {
+        return matchedRates.every(matchedRate => TypeUtil.isMatchedRate(matchedRate));
     }
 }
 
 export class FindMatchResultDto {
-    @IsString()
-    email: string;
-
-    @IsString()
-    id: string;
-
-    @IsEnum(Rate, { each: true })
-    searchedRate: Rate
+    @Validate(IsRateValue, {
+        message: 'Provided match rate value is not in appropriate shape'
+    })
+    @IsDefined()
+    matchedRateValue: Rate;
 
     @IsArray()
-    @ValidateNested({ each: true })
-    @Validate(IsMovieToRate, {
-        message: 'Provided collection is not in appropriate shape'
+    @Validate(IsMatchedRate, {
+        message: 'Provided matched rate is not in appropriate shape'
     })
-    movies: Array<MovieToRate>;
+    matchedRates: Array<MatchedRate>;
 }

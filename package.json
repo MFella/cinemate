@@ -4,7 +4,6 @@
   "license": "MIT",
   "scripts": {
     "dev:front": "npx nx run frontend:serve",
-    "gen-front:resolver": "nx g @nx/angular:resolver ",
     "dev:back": "npx nx run backend:serve"
   },
   "private": true,

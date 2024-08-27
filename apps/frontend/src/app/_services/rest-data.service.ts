@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
-import { GenEntity, Genres, MovieRate, MovieInitData, RateResultDto, FindMatchResult } from '../typings/common';
+import { GenEntity, Genres, MovieRate, MovieInitData, RateResultDto, FindMatchResult, MovieToRate } from '../typings/common';
 import { Observable } from 'rxjs';
 import { BasicRestDataService } from './basic-rest-data.service';
+import { HttpParams } from '@angular/common/http';
+import { Memoize } from '../_decorators/memoize.decorator';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RestDataService extends BasicRestDataService {
-  voteMovie(vote: MovieRate, movieId: number, pageNumber: number): Observable<RateResultDto> {
+  voteMovie(vote: MovieRate, movieId: string, pageNumber: number): Observable<RateResultDto> {
     return this.post<RateResultDto>(`movies/rate`, { movieId, rate: vote, pageNumber });
   }
 
@@ -15,10 +17,15 @@ export class RestDataService extends BasicRestDataService {
     return this.get<MovieInitData>(`movies?shouldLoadNextPage=${+shouldLoadNextPage}`)
   }
 
+  fetchMovieData(movieId: number): Observable<MovieToRate> {
+    return this.get<MovieToRate>(`movies/${movieId}`);
+  }
+
   fetchUserGenrePreference(): Observable<GenEntity> {
     return this.get<GenEntity>('user/preference');
   }
 
+  @Memoize()
   fetchAllGenres(): Observable<Array<GenEntity>> {
     return this.get<Array<GenEntity>>('user/preferences');
   }
@@ -28,11 +35,20 @@ export class RestDataService extends BasicRestDataService {
   }
 
   fetchUserMatch(genreId: number, userEmails: Array<string>): Observable<FindMatchResult> {
-    return this.get<FindMatchResult>(`user/match?genreId=${genreId}&userEmails=${userEmails}`)
+    let httpParams = new HttpParams();
+    httpParams = httpParams.append('genreId', genreId);
+    httpParams = httpParams.appendAll({mailOfUsers: ['dupa',...userEmails]});
+    return this.get<FindMatchResult>('user/match', {
+      params: httpParams
+    })
   }
 
   saveUserPreference(preference: Genres): Observable<boolean> {
     return this.post<boolean>('user/preference', { genreId: preference });
+  }
+
+  saveIsMovieWatched(movieId: number, isMovieWatched: boolean) {
+    return this.put<boolean>('movies/mark-watch', { movieId, isWatched: isMovieWatched });
   }
 
   tryRegisterUser(userId: string, email: string): Observable<boolean> {

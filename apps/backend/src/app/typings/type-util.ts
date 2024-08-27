@@ -1,4 +1,5 @@
 import { MovieToRate } from "@prisma/client";
+import { MatchedRate } from "./common";
 
 export class TypeUtil {
     static isMovieToRate(movie: any): movie is MovieToRate {
@@ -9,6 +10,11 @@ export class TypeUtil {
             'title',
             'description',
             'rating',
-            'genreIds'].every(movieToRateKey => movieToRateKey in movie)
+            'genreIds'
+        ].every(movieToRateKey => movieToRateKey in movie)
+    }
+
+    static isMatchedRate(matchedRate: any): matchedRate is MatchedRate {
+        return 'id' in matchedRate && 'user' in matchedRate && 'movie' in matchedRate;
     }
 }

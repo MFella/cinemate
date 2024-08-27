@@ -6,5 +6,5 @@ export const UserId = createParamDecorator((_data: unknown, context: ExecutionCo
         throw new UnauthorizedException('Access cannot be granted - wrong credentials');
     }
 
-    return request?.headers?.['userid'];
+    return parseInt(request?.headers?.['userid']);
 });

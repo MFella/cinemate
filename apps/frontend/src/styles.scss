@@ -11,7 +11,7 @@ $default-typography: mat.define-typography-config($font-family: '"Montserrat", s
 
 $default-primary: mat.define-palette(mat.$indigo-palette, 100);
 $default-accent: mat.define-palette(mat.$indigo-palette, A200, A100, A400);
-$default-warn: mat.define-palette(mat.$indigo-palette, A200, A100, A400);
+$default-warn: mat.define-palette(mat.$indigo-palette, 300, 600, A400);
 
 $default-theme: mat.define-light-theme((
  color: (
@@ -68,15 +68,20 @@ body {
 //   --mat-icon-button-state-layer-color: map-get($theme, backg);
 // }
 
-
 .default {
   @include mat.all-component-themes($default-theme);
   // @include nav-style($default-theme);
   --mat-icon-button-state-layer-color: rgba(25, 54, 101, .1);
+  .cinemate-logo {
+    filter: drop-shadow(1px 1px 1px rgba(255, 255, 255, .2)) brightness(0);
+  }
 }
 
 .dark {
   @include mat.all-component-themes($dark-theme);
   // @include nav-style($dark-theme);
   --mat-icon-button-state-layer-color: rgba(255, 255, 255, .1);
+  .cinemate-logo {
+    filter: drop-shadow(1px 1px 1px rgba(255, 255, 255, .2)) invert(0);
+  }
 }

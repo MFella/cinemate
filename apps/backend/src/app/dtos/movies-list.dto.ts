@@ -5,7 +5,7 @@ type CamelCased<T extends string> = T extends `${infer First}_${infer Rest}`
 
 type TmdbMovieKeysToPick = 'id' | 'genre_ids' | 'poster_path' | 'release_date' | 'title' | 'overview' | 'vote_average';
 type FilteredTmdbMovie = Pick<TmdbMovie, TmdbMovieKeysToPick>;
-type TransformedTmdbMovie = {
+export type TransformedTmdbMovie = {
     [K in keyof FilteredTmdbMovie as CamelCased<K>]: FilteredTmdbMovie[K]
 };
 

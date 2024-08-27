@@ -17,12 +17,12 @@ export class UserController {
     constructor (private readonly userService: UserService) {}
 
     @Post('preference')
-    async saveUserPreference(@UserId() userId: string, @Body() preferenceBody: UserPreferenceBody): Promise<boolean> {
+    async saveUserPreference(@UserId() userId: number, @Body() preferenceBody: UserPreferenceBody): Promise<boolean> {
         return await this.userService.saveUserPreference(userId, preferenceBody.genreId);
     }
 
     @Get('preference')
-    async getUserPreference(@UserId() userId: string): Promise<UserPreferenceDto> {
+    async getUserPreference(@UserId() userId: number): Promise<UserPreferenceDto> {
         return this.userService.getUserPreference(userId);
     }
 
@@ -43,7 +43,7 @@ export class UserController {
     }
 
     @Get('match')
-    async getUserMatch(@Query() userMatchQuery: UserMatchQuery): Promise<FindMatchResultDto> {
-        return this.userService.getUserMatch(userMatchQuery.genreId, userMatchQuery.mailOfUsers);
+    async getUserMatch(@UserId() userId: number, @Query() userMatchQuery: UserMatchQuery): Promise<FindMatchResultDto> {
+        return this.userService.getUserMatch(userId, parseInt(userMatchQuery.genreId), userMatchQuery.mailOfUsers);
     }
 }

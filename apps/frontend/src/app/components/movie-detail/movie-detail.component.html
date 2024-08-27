@@ -1,0 +1,58 @@
+<div class="flex justify-center items-center">
+    <mat-card class="match-card">
+      <mat-card-header>
+        <mat-card-title class="!flex justify-between">
+          <h1 class="text-center">{{ movie.title }}</h1>
+          <button mat-mini-fab (click)="closeDialog()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-card-title>
+        <mat-card-subtitle class="!flex !justify-between">
+          <mat-chip-set>
+            <mat-chip class="year-container"> {{movie.releaseDate?.split('-')?.at(0)}} </mat-chip>
+          </mat-chip-set>
+          <span class="genres-container" *ngIf="genresOnPage?.size">
+            <mat-chip-set class="justify-end">
+              <mat-chip *ngFor="let genreId of movie.genreIds"> {{ genresOnPage!.get(genreId)?.name }}</mat-chip>
+            </mat-chip-set>
+          </span>
+        </mat-card-subtitle>
+      </mat-card-header>
+      <div class="movie-detail-poster__container">
+        <img mat-card-image [src]="getMoviePosterSrc(movie.posterPath)" alt="Photo of movie from detail" class="movie-detail-poster__img shadow-lg !rounded-xl">
+      </div>
+      <mat-card-content *ngIf="movieDetailConfig.shouldDisplayContent; else descriptionExpansionPanel">
+        <p>{{ movie.overview }}</p>
+      </mat-card-content>
+      <mat-divider></mat-divider>
+      <mat-card-actions *ngIf="movieDetailConfig.shouldDisplayActionButtons && markActions?.length">
+        <button *ngFor="let item of markActions" class="w-full" color="warn" mat-button (click)="markActionButtonClicked$.next(item)">{{item.label}}</button>
+      </mat-card-actions>
+      <mat-card-footer>
+        <ng-template #descriptionExpansionPanel>
+            <mat-expansion-panel hideToggle class="border-t-2 mat-elevation-z2">
+                <mat-expansion-panel-header>
+                  <mat-panel-title> <h3 class="!m-0">Description</h3> </mat-panel-title>
+                </mat-expansion-panel-header>
+                <p>{{ movie.overview }}</p>
+              </mat-expansion-panel>
+        </ng-template>
+      </mat-card-footer>
+    </mat-card>
+  </div>
+
+<!-- <mat-dialog-actions *ngIf="movieDetailConfig.dialogActionButtons?.length">
+  @for (dialogAction of movieDetailConfig.dialogActionButtons; track $index) {
+    <button mat-fab extended [attr.mat-dialog-close]="dialogAction === 'Close'">
+      @switch (dialogAction) {
+        @case('Close') {
+          <mat-icon>close</mat-icon>
+        }
+      }
+      <ng-template [ngSwitch]="dialogAction">
+        <mat-icon *ngSwitchCase="'Close'">close</mat-icon>
+      </ng-template>
+      {{dialogAction}}
+    </button>
+  }
+</mat-dialog-actions> -->

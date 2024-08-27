@@ -2,7 +2,11 @@ import { Injectable, InternalServerErrorException, Logger, NotFoundException } f
 import { PrismaService } from "../database/prisma.service";
 import { genres, Genres } from "../typings/common";
 import { UserPreferenceDto } from "../dtos/user-preference.dto";
-import { Genre } from "@prisma/client";
+import { Genre, MovieToRate, RateValue, User } from "@prisma/client";
+import { FindMatchResultDto } from "../dtos/user/find-match-result.dto";
+import { Rate } from "../dtos/rate-of-movie";
+import { MoviesUtil } from "../movies/movies.util";
+import { TransformedTmdbMovie } from "../dtos/movies-list.dto";
 
 @Injectable()
 export class UserService {
@@ -13,7 +17,7 @@ export class UserService {
         private readonly prismaService: PrismaService
     ) {}
 
-    async saveUserPreference(userId: string, genreId: number): Promise<boolean> {
+    async saveUserPreference(userId: number, genreId: number): Promise<boolean> {
         const genreFromDb = await this.prismaService.genre.findFirst({
             where: {
                 id: genreId
@@ -35,26 +39,22 @@ export class UserService {
             genreFromDbId = defaultGenreFromDb.id
         }
 
-        const genreUpsertResult = await this.prismaService.userGenre.upsert({
+        const genreUpdateResult = await this.prismaService.user.update({
             where: {
-                userId
+                id: userId
             },
-            update: {
+            data: {
                 genreId: genreFromDbId
             },
-            create: {
-                genreId: genreFromDbId,
-                userId
-            }
         });
 
-        return !!genreUpsertResult;
+        return !!genreUpdateResult;
     }
 
-    async getUserPreference(userId: string): Promise<UserPreferenceDto> {
-        const userGenreFromDb = await this.prismaService.userGenre.findFirst({
+    async getUserPreference(userId: number): Promise<UserPreferenceDto> {
+        const userGenreFromDb = await this.prismaService.user.findFirst({
             where: {
-                userId
+                id: userId
             },
             include: {
                 genre: true
@@ -87,9 +87,11 @@ export class UserService {
         }
 
         // save user default genre
-        const userGenreCreateResult = await this.prismaService.userGenre.create({
+        const userGenreCreateResult = await this.prismaService.user.update({
+            where: {
+                id: userId
+            },
             data: {
-                userId,
                 genreId: defaultGenreFromDb.id
             }
         });
@@ -125,10 +127,12 @@ export class UserService {
             return true;
         }
 
+        const genreId = await this.getRandomGenreId();
         const userCreationResult = await this.prismaService.user.create({
             data: {
                 id: userId,
-                email: userEmail
+                email: userEmail,
+                genreId
             }
         });
 
@@ -152,5 +156,92 @@ export class UserService {
                 email: true
             }
         })).map((emailFromDb) => emailFromDb.email);
+    }
+
+    async getUserMatch(userId: number, genreId: number, mailOfUsers: Array<string>): Promise<FindMatchResultDto> {
+        const usersFromDb = new Map<any, User>((await this.prismaService.user.findMany({
+            where: {
+                email: {
+                    in: mailOfUsers
+                }
+            },
+        })).map((userFromDb) => [userFromDb.id.toString(), userFromDb]));
+
+        console.log('users', usersFromDb)
+        const moviesFromDb = new Map<number, TransformedTmdbMovie>((await this.prismaService.movieToRate.findMany({
+            where: {
+                genreIds: {
+                    has: genreId
+                },
+            },
+        })).map((movieToRate) => [movieToRate.movieId, MoviesUtil.convertMovieToRateToTransformedTmdbMovie(movieToRate)]));
+
+        const ratesFromDb = await this.prismaService.rate.findMany(({
+            where: {
+                userId: {
+                    in: Array.from(usersFromDb.keys())
+                },
+                movieId: {
+                    in: Array.from(moviesFromDb.keys())
+                },
+                value: RateValue.YES,
+            },
+        }));
+
+        const watchedUserMovies = (await this.prismaService.watchedMovie.findMany({
+            where: {
+                userId
+            },
+            select: {
+                movieId: true
+            }
+        })).map(watchedUserMovie => watchedUserMovie.movieId);
+
+        const populatedRates = ratesFromDb.map((rate) => {
+            console.log(usersFromDb.get(rate.userId));
+            const movieFromDb = moviesFromDb.get(rate.movieId);
+            return {
+                id: rate.id,
+                movie: movieFromDb,
+                user: usersFromDb.get(rate.userId.toString()),
+                isWatched: watchedUserMovies.includes(movieFromDb.id)
+            }
+        });
+
+        return {
+            matchedRateValue: Rate.YES,
+            matchedRates: populatedRates
+        }
+    }
+
+    private async getRandomGenreId(): Promise<number> {
+        const randomGenre = this.getRandomGenre();
+
+        const randomGenreFromDb = await this.prismaService.genre.findFirst({
+            where: {
+                name: randomGenre
+            }
+        });
+
+        if (!randomGenre) {
+            const defaultGenreFromDb = await this.prismaService.genre.findFirst({
+                where: {
+                    id: UserService.DEFAULT_GENRE_ID
+                }
+            });
+
+            if (!defaultGenreFromDb) {
+                throw new InternalServerErrorException(`Cannot find genre with id ${UserService.DEFAULT_GENRE_ID}`);
+            }
+
+            return UserService.DEFAULT_GENRE_ID;
+        }
+
+        return randomGenreFromDb.id;
+    }
+
+    private getRandomGenre(): Genres {
+        const genreRandomIndex = Math.floor(Math.random() * genres.length);
+        return genres[genreRandomIndex];
     }
 }

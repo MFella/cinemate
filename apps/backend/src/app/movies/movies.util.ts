@@ -1,5 +1,5 @@
 import { Genre, MovieToRate } from "@prisma/client";
-import { MoviesListDTO } from "../dtos/movies-list.dto";
+import { MoviesListDTO, TransformedTmdbMovie } from "../dtos/movies-list.dto";
 import { TmdbMovie } from "../dtos/tmdb-movie";
 
 export class MoviesUtil {
@@ -27,23 +27,24 @@ export class MoviesUtil {
 
     static convertMoviesToRateToMoviesListDto(moviesToRate: Array<MovieToRate>, pageGenres: Array<Genre>, selectedGenreId: number,
         pageNumber: number): MoviesListDTO {
-        const movies = moviesToRate.map((movie) => {
-            return {
-                id: movie.movieId,
-                genreIds: movie.genreIds,
-                posterPath: movie.imageUrl,
-                releaseDate: movie.releaseDate,
-                title: movie.title,
-                overview: movie.description,
-                voteAverage: movie.rating
-            }
-        });
-
+        const movies = moviesToRate.map(movieToRate => MoviesUtil.convertMovieToRateToTransformedTmdbMovie(movieToRate));
         return {
             movies,
             selectedGenreId,
             pageGenres,
             pageNumber
         }
+    }
+
+    static convertMovieToRateToTransformedTmdbMovie(movieToRate: MovieToRate): TransformedTmdbMovie {
+        return {
+            id: movieToRate.movieId,
+            genreIds: movieToRate.genreIds,
+            overview: movieToRate.description,
+            posterPath: movieToRate.imageUrl,
+            releaseDate: movieToRate.releaseDate,
+            title: movieToRate.title,
+            voteAverage: movieToRate.rating
+        };
     }
 }
