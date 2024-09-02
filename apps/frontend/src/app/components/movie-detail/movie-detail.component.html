@@ -19,7 +19,11 @@
         </mat-card-subtitle>
       </mat-card-header>
       <div class="movie-detail-poster__container">
-        <img mat-card-image [src]="getMoviePosterSrc(movie.posterPath)" alt="Photo of movie from detail" class="movie-detail-poster__img shadow-lg !rounded-xl">
+        <img mat-card-image
+          [ngSrc]="getMoviePosterSrc(movie.posterPath)"
+          [width]="200"
+          [height]="300"
+        alt="Photo of movie from detail" class="movie-detail-poster__img shadow-lg !rounded-xl">
       </div>
       <mat-card-content *ngIf="movieDetailConfig.shouldDisplayContent; else descriptionExpansionPanel">
         <p>{{ movie.overview }}</p>

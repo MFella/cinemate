@@ -33,7 +33,6 @@ export class UserController {
 
     @Post('register')
     async registerUser(@Body() registerUserDto: RegisterUserDto): Promise<boolean> {
-        console.log('hello', registerUserDto);
         return this.userService.tryRegisterUser(registerUserDto.id, registerUserDto.email);
     }
 
@@ -44,6 +43,7 @@ export class UserController {
 
     @Get('match')
     async getUserMatch(@UserId() userId: number, @Query() userMatchQuery: UserMatchQuery): Promise<FindMatchResultDto> {
-        return this.userService.getUserMatch(userId, parseInt(userMatchQuery.genreId), userMatchQuery.mailOfUsers);
+        return this.userService.getUserMatch(userId, parseInt(userMatchQuery.genreId), userMatchQuery.mailOfUsers,
+            userMatchQuery.onlyUnwatched, userMatchQuery.onlyWatched, userMatchQuery.searchedMovieTitle);
     }
 }

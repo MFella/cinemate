@@ -1,9 +1,17 @@
-import { ArrayMinSize, IsArray, IsString, Validate, ValidatorConstraintInterface } from "class-validator";
+import { ArrayMinSize, IsArray, IsBoolean, IsOptional, IsString, MaxLength, Validate,
+    ValidatorConstraintInterface } from "class-validator";
+import { Transform } from 'class-transformer';
 
 class IsStringifiedNumber implements ValidatorConstraintInterface {
     validate(value: any): Promise<boolean> | boolean {
         return !isNaN(parseInt(value)) && typeof parseInt(value) === 'number';
     }
+}
+
+const transformStringToBoolean = ({value}) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+        return value;
 }
 
 export class UserMatchQuery {
@@ -16,4 +24,19 @@ export class UserMatchQuery {
         message: 'Invalid id of genre'
     })
     genreId: string;
+
+    @Transform(transformStringToBoolean)
+    @IsBoolean()
+    @IsOptional()
+    onlyWatched?: boolean;
+
+    @Transform(transformStringToBoolean)
+    @IsBoolean()
+    @IsOptional()
+    onlyUnwatched?: boolean;
+
+    @IsOptional()
+    @IsString()
+    @MaxLength(256)
+    searchedMovieTitle?: string
 }

@@ -9,7 +9,7 @@
 $default-typography: mat.define-typography-config($font-family: '"Montserrat", sans-serif');
 @include mat.typography-hierarchy($default-typography);
 
-$default-primary: mat.define-palette(mat.$indigo-palette, 100);
+$default-primary: mat.define-palette(mat.$indigo-palette, 200);
 $default-accent: mat.define-palette(mat.$indigo-palette, A200, A100, A400);
 $default-warn: mat.define-palette(mat.$indigo-palette, 300, 600, A400);
 
@@ -23,9 +23,9 @@ $default-theme: mat.define-light-theme((
  density: 0,
 ));
 
-$dark-primary: mat.define-palette(mat.$blue-gray-palette, 500);
-$dark-accent: mat.define-palette(mat.$blue-gray-palette, A400, A200, A200);
-$dark-warn: mat.define-palette(mat.$blue-gray-palette, A200, A100, A400);
+$dark-primary: mat.define-palette(mat.$grey-palette, 700);
+$dark-accent: mat.define-palette(mat.$grey-palette, A400, A200, A200);
+$dark-warn: mat.define-palette(mat.$grey-palette, A200, A100, A400);
 
 $dark-theme: mat.define-dark-theme((
  color: (
@@ -61,7 +61,8 @@ body {
 body {
   margin: 0;
   font-family: Roboto, 'Helvetica Neue', sans-serif;
-  color: var(--mat-app-text-color)
+  color: var(--mat-app-text-color);
+  background-color: var(--mat-app-background-color);
 }
 
 // @mixin nav-style($theme) {
@@ -75,6 +76,9 @@ body {
   .cinemate-logo {
     filter: drop-shadow(1px 1px 1px rgba(255, 255, 255, .2)) brightness(0);
   }
+
+  --mat-app-background-color: rgba(240, 248, 255, .7);
+  // --mdc-elevated-card-container-color: ;
 }
 
 .dark {
@@ -84,4 +88,6 @@ body {
   .cinemate-logo {
     filter: drop-shadow(1px 1px 1px rgba(255, 255, 255, .2)) invert(0);
   }
+
+  --mat-app-background-color: rgba(0, 0, 0, .7);
 }

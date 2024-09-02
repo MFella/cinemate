@@ -1,5 +1,5 @@
-import { Component, inject, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit, Output, ViewEncapsulation } from '@angular/core';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -33,7 +33,7 @@ type MovieDetailDialogData = {
   selector: 'app-movie-detail',
   standalone: true,
   imports: [CommonModule, MatCardModule, MatDividerModule, MatExpansionModule, MatChipsModule, MatDialogActions,
-      MatButtonModule, MatIconModule
+      MatButtonModule, MatIconModule, NgOptimizedImage
   ],
   templateUrl: './movie-detail.component.html',
   styleUrl: './movie-detail.component.scss',
@@ -70,8 +70,6 @@ export class MovieDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log(this.#matDialogData);
-      debugger;
   }
 
   closeDialog(): void {

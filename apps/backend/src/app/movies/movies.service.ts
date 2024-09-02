@@ -138,7 +138,6 @@ export class MoviesService {
     }
 
     async getSingleMovieData(movieId: number): Promise<TransformedTmdbMovie> {
-        console.log(movieId);
         const movieToRateFromDb = await this.prismaService.movieToRate.findFirst({
             where: {
                 movieId
@@ -185,7 +184,6 @@ export class MoviesService {
             }
         });
 
-        console.log('hehe', pageOfMovie)
         if (!pageOfMovie) {
             return {
                 movies: [],
@@ -257,7 +255,6 @@ export class MoviesService {
 
         // change schema.prisma
         const movieToRateCreateData = moviesListDto.movies.map((movieInListDto, index) => {
-            index === 1 && console.log('yafud', movieInListDto);
             return {
                 movieId: movieInListDto.id,
                 imageUrl: movieInListDto?.posterPath ?? '',
@@ -390,11 +387,11 @@ export class MoviesService {
             }
         });
 
+        console.log(isMovieWatchedFromDb, isWatched )
         if (isMovieWatchedFromDb && !isWatched) {
             await this.prismaService.watchedMovie.delete({
                 where: {
-                    movieId,
-                    userId
+                    id: isMovieWatchedFromDb.id
                 }
             });
             return true;

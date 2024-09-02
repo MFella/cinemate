@@ -28,11 +28,17 @@ export type GenreOption = {
     label: string;
 };
 
-export type SelectOption<T> = {
-    value: number;
-    label: T;
+export type SelectOption = {
+    value: number | boolean | string;
+    label: string;
     disabled: boolean;
 }
+
+export type UserMatchFilterOptions = {
+    onlyWatched?: true,
+    onlyUnwatched?: true,
+    searchedMovieTitle?: string
+};
 
 export const genres = ["Adventure", "Action", "Animation", "Biography", "Comedy", "Crime", "Documentary", "Drama", "Family",
 "Fantasy", "Film-Noir", "History", "Horror", "Music",

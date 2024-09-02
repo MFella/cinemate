@@ -121,7 +121,6 @@ export class UserService {
 
     async tryRegisterUser(userId: number, userEmail: string): Promise<boolean> {
         const result = await this.prismaService.user.findFirst({ where: { id: userId }});
-        console.log(result);
         if (result) {
             Logger.log('User already registered');
             return true;
@@ -158,7 +157,9 @@ export class UserService {
         })).map((emailFromDb) => emailFromDb.email);
     }
 
-    async getUserMatch(userId: number, genreId: number, mailOfUsers: Array<string>): Promise<FindMatchResultDto> {
+    async getUserMatch(userId: number, genreId: number, mailOfUsers: Array<string>,
+            onlyUnwatched?: boolean, onlyWatched?: boolean, searchedMovieTitle?: string
+    ): Promise<FindMatchResultDto> {
         const usersFromDb = new Map<any, User>((await this.prismaService.user.findMany({
             where: {
                 email: {
@@ -167,12 +168,39 @@ export class UserService {
             },
         })).map((userFromDb) => [userFromDb.id.toString(), userFromDb]));
 
-        console.log('users', usersFromDb)
+        const watchedUserMovies = (await this.prismaService.watchedMovie.findMany({
+            where: {
+                userId,
+            },
+            select: {
+                movieId: true
+            }
+        })).map(watchedUserMovie => watchedUserMovie.movieId);
+
+        let movieFilterQuery = {
+        };
+
+        if (onlyWatched === true) {
+            movieFilterQuery['in'] = watchedUserMovies 
+        }
+
+        if (onlyUnwatched === true) {
+            movieFilterQuery['notIn'] = watchedUserMovies;
+        }
+
+        if (onlyUnwatched === onlyWatched && onlyUnwatched !== undefined) {
+            movieFilterQuery = null;
+        }
+
         const moviesFromDb = new Map<number, TransformedTmdbMovie>((await this.prismaService.movieToRate.findMany({
             where: {
                 genreIds: {
                     has: genreId
                 },
+                movieId: movieFilterQuery ?? { },
+                title: {
+                    contains: searchedMovieTitle ?? ''
+                }
             },
         })).map((movieToRate) => [movieToRate.movieId, MoviesUtil.convertMovieToRateToTransformedTmdbMovie(movieToRate)]));
 
@@ -188,17 +216,7 @@ export class UserService {
             },
         }));
 
-        const watchedUserMovies = (await this.prismaService.watchedMovie.findMany({
-            where: {
-                userId
-            },
-            select: {
-                movieId: true
-            }
-        })).map(watchedUserMovie => watchedUserMovie.movieId);
-
         const populatedRates = ratesFromDb.map((rate) => {
-            console.log(usersFromDb.get(rate.userId));
             const movieFromDb = moviesFromDb.get(rate.movieId);
             return {
                 id: rate.id,

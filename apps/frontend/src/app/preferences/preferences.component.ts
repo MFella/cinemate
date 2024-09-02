@@ -33,7 +33,7 @@ export class PreferencesComponent implements OnInit {
   
   isFetchingData: boolean = false;
   originGenreId!: number;
-  genreOptions: Array<SelectOption<Genres>> = genres.map((genre) => {
+  genreOptions: Array<SelectOption> = genres.map((genre) => {
     return {
       value: Math.random() * 10,
       label: genre,
@@ -73,6 +73,7 @@ export class PreferencesComponent implements OnInit {
         next: (isSaved: boolean) => {
           if (isSaved) {
             this.originGenreId = selectedPreference;
+            this.#alertService.success('Preference has been saved');
           }
         },
         error:(error: HttpErrorResponse) => {

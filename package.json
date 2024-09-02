@@ -4,7 +4,8 @@
   "license": "MIT",
   "scripts": {
     "dev:front": "npx nx run frontend:serve",
-    "dev:back": "npx nx run backend:serve"
+    "dev:back": "npx nx run backend:serve",
+    "test:front-e2e": "npx nx e2e frontend-e2e"
   },
   "private": true,
   "dependencies": {

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, computed, DestroyRef, inject, model, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, model, OnInit, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldModule } from '@angular/material/form-field';
@@ -10,8 +10,8 @@ import { of, take } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
-import { FindMatchResult, GenEntity, Genres, MovieRate, MovieToRate, SelectOption } from '../typings/common';
-import { MatSelectModule } from '@angular/material/select';
+import { FindMatchResult, GenEntity, MovieToRate, SelectOption } from '../typings/common';
+import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../_services/auth.service';
@@ -40,6 +40,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   styleUrl: './find.component.scss',
 })
 export class FindComponent implements OnInit {
+
+  @ViewChild('filterSelect')
+  filterSelect!: MatSelect;
+
+  private static readonly FETCH_MATCH_RESULT_SCROLL_THRESHOLD_PX = 200;
   private readonly activatedRoute = inject(ActivatedRoute);
   readonly #destroyRef = inject(DestroyRef);
   readonly #authService = inject(AuthService);
@@ -58,14 +63,29 @@ export class FindComponent implements OnInit {
     genre: new FormControl()
   });
 
+  readonly filterMatchResultForm = new FormGroup({
+    moreFilters: new FormControl(),
+    movieTitle: new FormControl('')
+  })
+
+  readonly filterOptions: Array<SelectOption> = [
+    {
+      disabled: false,
+      label: 'Only watched',
+      value: 'onlyWatched'
+    },
+    {
+      disabled: false,
+      label: 'Only unwatched',
+      value: 'onlyUnwatched'
+    }
+  ]
+
   findMatchResult!: FindMatchResult;
   isInSearchMode: boolean = true;
   allUsers: Array<string> = [];
-  genreOptions: Array<SelectOption<Genres>> = [];
+  genreOptions: Array<SelectOption> = [];
   displayMatchTableColumns: string[] = ['view-details', 'movie', 'email', 'is-watched'];
-
-  toppings = new FormControl('');
-  toppingList: string[] = ['Extra cheese', 'Mushroom', 'Onion', 'Pepperoni', 'Sausage', 'Tomato'];
 
   ngOnInit(): void {
     this.setSearchUserFormValidators();
@@ -96,13 +116,10 @@ export class FindComponent implements OnInit {
 
   addUser($event: MatChipInputEvent): void {
     const value = ($event.value || '').trim();
-
-    // Add our fruit
     if (value) {
       this.selectedEmails.update(fruits => [...fruits, value]);
     }
 
-    // Clear the input value
     this.currentUser.set('');
   }
 
@@ -133,7 +150,6 @@ export class FindComponent implements OnInit {
         //
         this.findMatchResult = findMatchResult;
         this.isInSearchMode = false;
-        debugger;
       });
   }
 
@@ -141,6 +157,7 @@ export class FindComponent implements OnInit {
     this.#restDataService.fetchMovieData(movieId)
       .pipe(take(1))
       .subscribe((movieToRate: MovieToRate) => {
+        debugger;
         this.#matDialog.open(MovieDetailComponent, {
           data: {
             movie: movieToRate,
@@ -160,9 +177,47 @@ export class FindComponent implements OnInit {
     this.findMatchResult.matchedRates ??= [];
   }
 
-  updateIsMovieWatched(movieId: string, isMovieWatched: boolean): void {
-    // this.#restDataService.saveIsMovieWatched()
-    debugger;
+  updateIsMovieWatched(movieId: number, isMovieWatched: boolean, $event: MouseEvent): void {
+    $event.stopPropagation();
+    this.#restDataService.saveIsMovieWatched(movieId, !isMovieWatched)
+      .pipe(take(1))
+      .subscribe((isResultSaved: boolean) => {
+        debugger;
+      });
+  }
+
+  openFilterSettingsSelect(): void {
+    this.filterSelect.open();
+  }
+
+  filterMatchResultList(): void {
+    const { moreFilters, movieTitle } = this.filterMatchResultForm.value;
+    const moreFiltersObject = moreFilters?.reduce((acc: Record<'onlyWatched' | 'onlyUnwatched', boolean>, value: string) =>
+      Object.defineProperty(acc, value, { value: true }), {}) ?? {};
+
+    this.#restDataService.fetchUserMatch(this.searchUserForm.value.genre, this.searchUserForm.value.mailOfUsers,
+      {
+        onlyWatched: moreFiltersObject['onlyWatched'],
+        onlyUnwatched: moreFiltersObject['onlyUnwatched'],
+        searchedMovieTitle: movieTitle ?? ''
+      }
+    )
+      .pipe(take(1), takeUntilDestroyed(this.#destroyRef))
+      .subscribe((findMatchResult: FindMatchResult) => {
+        this.findMatchResult = findMatchResult;
+      })
+  }
+
+  handleMatchTableScroll($event: Event): void {
+    const tableViewHeight = ($event.target as HTMLElement).offsetHeight // viewport: ~500px
+    const tableScrollHeight = ($event.target as HTMLElement).scrollHeight // length of all table
+    const scrollLocation = ($event.target as HTMLElement).scrollTop; // how far user scrolled
+
+
+    const viewportTreshold = tableScrollHeight - tableViewHeight - FindComponent.FETCH_MATCH_RESULT_SCROLL_THRESHOLD_PX;    
+    if (scrollLocation > viewportTreshold) {
+      // fetch next match entities
+    }
   }
   
   private setSearchUserFormValidators(): void {

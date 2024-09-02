@@ -14,6 +14,10 @@ export class AlertInteractionService {
     return this.isLoadingSpinnerActive$.asObservable();
   }
 
+  success(message: string): void {
+    this.ngToastService.success(message, 'Saved');
+  }
+
   error(message: string): void {
     this.ngToastService.danger(message);
   }

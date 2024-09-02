@@ -17,7 +17,7 @@ async function bootstrap() {
   const appPort = configService.get<number>('port');
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.enableCors({
     origin: ['http://localhost:4200']
   });

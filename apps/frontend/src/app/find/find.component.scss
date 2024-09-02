@@ -12,9 +12,27 @@
         }
     }
 
+    table.mat-mdc-table {
+        display: block;
+        max-height: 26rem;
+        overflow-y: scroll;
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+    }
+
     th.mdc-data-table__header-cell,
     td.mdc-data-table__cell {
         padding-top: 1rem;
         padding-bottom: 1rem;
+    }
+
+    .open-filter-settings-select {
+        .mdc-button__label {
+            z-index: -1 !important;
+        }
     }
 }

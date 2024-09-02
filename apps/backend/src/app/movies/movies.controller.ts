@@ -5,7 +5,7 @@ import { RateOfMovie } from "../dtos/rate-of-movie";
 import { PrismaClientErrorFilter } from "../error-handlers/prisma-client.error-filter";
 import { RateResultDto } from "../dtos/rate-result.dto";
 import { UserId } from "../decorators/user-id.decorator";
-import { MarkMovieToWatchQuery } from "../dtos/movie/mark-movie-to-watch.query";
+import { markMovieToWatchBody } from "../dtos/movie/mark-movie-to-watch.body";
 
 @Controller('movies')
 @UseFilters(new PrismaClientErrorFilter())
@@ -28,7 +28,7 @@ export class MoviesController {
     }
 
     @Put('mark-watch')
-    async markMovieToWatch(@UserId() userId: number, @Query() markMovieToWatchQuery: MarkMovieToWatchQuery): Promise<boolean> {
-        return this.moviesService.markMovieToWatch(userId, markMovieToWatchQuery.movieId, markMovieToWatchQuery.isWatched);
+    async markMovieToWatch(@UserId() userId: number, @Body() markMovieToWatchBody: markMovieToWatchBody): Promise<boolean> {
+        return this.moviesService.markMovieToWatch(userId, markMovieToWatchBody.movieId, markMovieToWatchBody.isWatched);
     }
 }

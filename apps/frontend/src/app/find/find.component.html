@@ -65,21 +65,39 @@
         (click)="returnToSearchMode()">
           <mat-icon>arrow_back</mat-icon>
         </button>
-        <mat-form-field class="w-full">
-          <mat-label>Search by movie name</mat-label>
-          <input matInput placeholder="No country for old man" value="">
-        </mat-form-field>
-        <button mat-fab aria-label="Search for rated movie" color="warn" class="ml-4 mr-2" matTooltip="More filters">
-          <mat-icon>settings</mat-icon>
-        </button>
+        <div class="w-full flex" [formGroup]="filterMatchResultForm">
+          <mat-form-field class="w-full">
+            <mat-label>Search by movie title</mat-label>
+            <input matInput placeholder="No country for old man" value="" formControlName="movieTitle">
+          </mat-form-field>
+          <button (click)="openFilterSettingsSelect()" mat-fab aria-label="Select to filter list of rates" color="warn"
+            class="ml-4 mr-2 overflow-hidden open-filter-settings-select" matTooltip="More filters">
+            <mat-icon class="absolute">settings</mat-icon>
+            <mat-form-field class="w-full mt-4 invisible -z-1">
+              <mat-select #filterSelect formControlName="filter" multiple formControlName="moreFilters">
+                @for (filterOption of filterOptions; track $index) {
+                  <mat-option [value]="filterOption.value">
+                    {{filterOption.label}}
+                  </mat-option>
+                }
+                </mat-select>
+            </mat-form-field>
+          </button>
+        </div>
       </div>
-      <button mat-fab aria-label="Search for rated movie" color="primary" class="ml-2" matTooltip="Filter table">
+      <button mat-fab aria-label="Search for rated movie" color="primary" class="ml-2" matTooltip="Filter table"
+        (click)="filterMatchResultList()">
         <mat-icon>search</mat-icon>
       </button>
     </div>
   
-    <table *ngIf="findMatchResult?.matchedRates?.length; else noResultFoundRef" mat-table [dataSource]="findMatchResult?.matchedRates ?? []" class="mat-elevation-z8 rounded-lg overflow-hidden">
-      
+    <!-- Implement dataSource as stream -->
+    <table *ngIf="findMatchResult?.matchedRates?.length; else noResultFoundRef"
+      mat-table
+      [dataSource]="findMatchResult?.matchedRates ?? []"
+      class="mat-elevation-z8 rounded-lg overflow-hidden"
+      (scroll)="handleMatchTableScroll($event)"
+      >
       <ng-container matColumnDef="view-details">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let matchedRate">
@@ -107,7 +125,7 @@
         <td mat-cell *matCellDef="let matchedRate" class="!text-center">
           <mat-slide-toggle
           [checked]="matchedRate.isWatched"
-          (click)="updateIsMovieWatched(matchedRate.movie.id, matchedRate.isWatched)">
+          (click)="updateIsMovieWatched(matchedRate.movie.id, matchedRate.isWatched, $event)">
       </mat-slide-toggle>
         </td>
       </ng-container>

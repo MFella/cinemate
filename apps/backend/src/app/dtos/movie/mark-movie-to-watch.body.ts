@@ -1,6 +1,6 @@
 import { IsBoolean, IsDefined, IsNumber } from "class-validator";
 
-export class MarkMovieToWatchQuery {
+export class markMovieToWatchBody {
     @IsNumber()
     @IsDefined()
     movieId: number;

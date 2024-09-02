@@ -15,10 +15,11 @@ import { ProgressSpinnerComponent } from './progress-spinner/progress-spinner.co
 import { switchMap, throwError } from 'rxjs';
 import { RestDataService } from './_services/rest-data.service';
 import { TypeUtil } from './typings/util';
+import { NgToastModule } from 'ng-angular-popup';
 
 @Component({
   standalone: true,
-  imports: [NavComponent, RouterModule],
+  imports: [NavComponent, RouterModule, NgToastModule],
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
@@ -84,7 +85,6 @@ export class AppComponent {
         if (isUserRegistered) {
           this.#router.navigate(['/match'])
         }
-        console.log(event);
       });
   }
 

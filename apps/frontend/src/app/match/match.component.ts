@@ -56,7 +56,6 @@ export class MatchComponent implements OnInit {
       if (movieInitData?.movies?.length) {
         this.currentMovie = movieInitData?.movies?.shift()!;
         this.fetchedMovies = movieInitData?.movies;
-        console.log(movieInitData?.movies);
       } else {
         console.log('Display load data again screen');
       }

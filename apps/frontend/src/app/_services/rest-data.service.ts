@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { GenEntity, Genres, MovieRate, MovieInitData, RateResultDto, FindMatchResult, MovieToRate } from '../typings/common';
+import { GenEntity, Genres, MovieRate, MovieInitData, RateResultDto, FindMatchResult, MovieToRate, UserMatchFilterOptions } from '../typings/common';
 import { Observable } from 'rxjs';
 import { BasicRestDataService } from './basic-rest-data.service';
 import { HttpParams } from '@angular/common/http';
@@ -34,10 +34,19 @@ export class RestDataService extends BasicRestDataService {
     return this.get<Array<string>>(`user/emails?startsWith=${startsWith}`);
   }
 
-  fetchUserMatch(genreId: number, userEmails: Array<string>): Observable<FindMatchResult> {
+  fetchUserMatch(genreId: number, userEmails: Array<string>, userMatchFilterOptions: Partial<UserMatchFilterOptions> = {}):
+    Observable<FindMatchResult> {
     let httpParams = new HttpParams();
     httpParams = httpParams.append('genreId', genreId);
-    httpParams = httpParams.appendAll({mailOfUsers: ['dupa',...userEmails]});
+    httpParams = httpParams.appendAll({mailOfUsers: ['', ...userEmails]});
+
+    for (let key in userMatchFilterOptions) {
+      debugger;
+      if ((userMatchFilterOptions as Record<string, string>)[key] !== undefined) {
+        httpParams = httpParams.append(key, userMatchFilterOptions[key as keyof UserMatchFilterOptions] as true | string);
+      }
+    }
+
     return this.get<FindMatchResult>('user/match', {
       params: httpParams
     })
