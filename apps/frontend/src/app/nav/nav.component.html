@@ -1,8 +1,5 @@
 <mat-toolbar color="primary">
     <mat-toolbar-row>
-      <!-- <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
-        <mat-icon>menu</mat-icon>
-      </button> -->
       <img class="cinemate-logo max-h-14 mr-4 absolute left-0 rounded-r-full shadow-md" alt="Cinemate logo" src="../../assets/cinemate-logo.png" />
       <div class="flex-auto"></div>
       <button *ngIf="!isUserHasValidToken(); else validTokenTemplateRef" [routerLink]="['./']"

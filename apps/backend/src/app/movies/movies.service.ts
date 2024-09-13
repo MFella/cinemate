@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { MoviesListDTO, TransformedTmdbMovie } from "../dtos/movies-list.dto";
 import { MoviesUtil } from "./movies.util";
-import { GenEntity, TmdbDiscoverResult, TmdbMovie } from "../dtos/tmdb-movie";
+import { GenEntity, TmdbDiscoverResult, TmdbMovie, TmdbMovieGetListRequestOptions } from "../dtos/tmdb-movie";
 import { Genres, genres } from "../typings/common";
 import { PrismaService } from "../database/prisma.service";
 import { Rate } from "../dtos/rate-of-movie";
@@ -50,75 +50,49 @@ export class MoviesService {
                 }
             }
 
-            const userGenreFromDb = await this.prismaService.user.findFirst({
-                where: {
-                    id: userId
-                },
-                include: {
-                    genre: true
-                }
-            });
+            let { pageNumber, genreId } = await this.getTmdbMovieRequestOptions(userId, shouldLoadNextPage);
 
-
-            let userGenreName = userGenreFromDb?.genre?.name;
-            let userGenreId = userGenreFromDb?.genre?.id;
-
-            // if (userGenreName === null || userGenreName === undefined) {
-            //     const defaultGenre = await this.prismaService.genre.findFirst({
-            //         where: {
-            //             name: MoviesService.DEFAULT_GENRE
-            //         }
-            //     })
-
-            //     if (!defaultGenre) {
-            //         throw new Error('Default genre cannot be found');
-            //     } else {
-            //         userGenreName = defaultGenre.name;
-            //         userGenreId = defaultGenre.id
-            //     }
-            // }
-
-            const userCompletedPages = await this.prismaService.completedPageOfMovie.findMany({
-                where: {
-                    userId,
-                    pageOfMovie: {
-                        genreId: userGenreId
-                    }
-                },
-                include: {
-                    pageOfMovie: true
-                }
-            });
-
-            let currentPageNumber = MoviesService.DEFAULT_PAGE_NUMBER;
-            if (userGenreId !== undefined && userCompletedPages?.length > 0) {
-                currentPageNumber = Math.max(...userCompletedPages
-                    .map((userCompletedPage) => userCompletedPage.pageOfMovie.pageNumber)) + 1;    
-            }
- 
-            currentPageNumber += shouldLoadNextPage;
-            
             const pageOfMovie = await this.prismaService.pageOfMovie.findFirst({
                 where: {
-                    genreId: userGenreId,
-                    pageNumber: currentPageNumber
+                    genreId,
+                    pageNumber
                 }
             });
+
+            if (pageOfMovie && Object.keys(pageOfMovie).length) {
+                const moviesListDtoFromCache = await this.retrieveMovieListDtoFromDb(userId, pageOfMovie);
+
+                if (moviesListDtoFromCache?.movies?.length && moviesListDtoFromCache?.selectedGenreId !== null
+                    && moviesListDtoFromCache?.selectedGenreId !== undefined
+                ) {
+                    return moviesListDtoFromCache;
+                } else {
+                    // mark page as completed
+                    await this.prismaService.completedPageOfMovie.create({
+                        data: {
+                            userId,
+                            pageOfMovieId: pageOfMovie.id
+                        }
+                    });
+
+                    pageNumber++;
+                }
+            }
 
             const response = await this.baseRestDataService.get<TmdbDiscoverResult>('movies',
                 {
-                    genreId: userGenreId,
-                    pageNumber: currentPageNumber
+                    genreId,
+                    pageNumber
                 }
             );
 
             if (response.data && !pageOfMovie) {
-                const pageGenre = await this.extractGenreById(userGenreId);
+                const pageGenre = await this.extractGenreById(genreId);
                 const genresOnPage = await this.extractGenresOnPageFromMovies(response.data.results);
                 const moviesListDto = MoviesUtil.convertTmdbMoviesToMoviesListDto(response.data.results, genresOnPage, pageGenre.id,
-                    currentPageNumber
+                    pageNumber
                 );
-                await this.saveMovieListDto(moviesListDto, userId, currentPageNumber);
+                await this.saveMovieListDto(moviesListDto, userId, pageNumber);
                 return moviesListDto;
             } else if (pageOfMovie) {
                 const moviesOnPage = await this.prismaService.movieToRate.findMany({
@@ -129,7 +103,7 @@ export class MoviesService {
                     }
                 });
                 const genresOnPage = await this.extractGenresOnPageFromMovies(moviesOnPage);
-                return MoviesUtil.convertMoviesToRateToMoviesListDto(moviesOnPage, genresOnPage, userGenreId, currentPageNumber);
+                return MoviesUtil.convertMoviesToRateToMoviesListDto(moviesOnPage, genresOnPage, genreId, pageNumber);
             }
             else {
                 console.error('Received data is undefined');
@@ -151,7 +125,7 @@ export class MoviesService {
         return MoviesUtil.convertMovieToRateToTransformedTmdbMovie(movieToRateFromDb);
     }
 
-    async retrieveMovieListDtoFromDb(userId: number): Promise<MoviesListDTO> {
+    async retrieveMovieListDtoFromDb(userId: number, pageOfMovie?: PageOfMovie): Promise<MoviesListDTO> {
         const userFromDb = await this.prismaService.user.findFirst({
             where: {
                 id: userId
@@ -177,12 +151,14 @@ export class MoviesService {
             Math.max(...completedPageOfMovies.map(c => c.pageOfMovie.pageNumber)) : 0;        
         const currentPageNumber = maxCompletedPageNumber + 1;
 
-        const pageOfMovie = await this.prismaService.pageOfMovie.findFirst({
-            where: {
-                genreId: userFromDb.genreId,
-                pageNumber: currentPageNumber
-            }
-        });
+        if (!pageOfMovie) {
+            pageOfMovie = await this.prismaService.pageOfMovie.findFirst({
+                where: {
+                    genreId: userFromDb.genreId,
+                    pageNumber: currentPageNumber
+                }
+            });
+        }
 
         if (!pageOfMovie) {
             return {
@@ -254,7 +230,7 @@ export class MoviesService {
         });
 
         // change schema.prisma
-        const movieToRateCreateData = moviesListDto.movies.map((movieInListDto, index) => {
+        const movieToRateCreateData = moviesListDto.movies.map((movieInListDto) => {
             return {
                 movieId: movieInListDto.id,
                 imageUrl: movieInListDto?.posterPath ?? '',
@@ -389,6 +365,7 @@ export class MoviesService {
 
         console.log(isMovieWatchedFromDb, isWatched )
         if (isMovieWatchedFromDb && !isWatched) {
+            console.log('delete');
             await this.prismaService.watchedMovie.delete({
                 where: {
                     id: isMovieWatchedFromDb.id
@@ -397,6 +374,7 @@ export class MoviesService {
             return true;
 
         } else if (!isMovieWatchedFromDb && isWatched) {
+            console.log('create');
             await this.prismaService.watchedMovie.create({
                 data: {
                     movieId,
@@ -493,5 +471,44 @@ export class MoviesService {
     private static isMovieToRate(obj: any): obj is MovieToRate {
         return 'id' in obj && 'movieId' in obj && 'imageUrl' in obj && 'releaseDate' in obj
             && 'title' in obj && 'description' in obj && 'rating' in obj && 'genreIds' in obj;
+    }
+
+    private async getTmdbMovieRequestOptions(userId: number, shouldLoadNextPage?: 0 | 1)
+    : Promise<TmdbMovieGetListRequestOptions> {
+        const userGenreFromDb = await this.prismaService.user.findFirst({
+            where: {
+                id: userId
+            },
+            include: {
+                genre: true
+            }
+        });
+
+        let userGenreId = userGenreFromDb?.genre?.id;
+
+        const userCompletedPages = await this.prismaService.completedPageOfMovie.findMany({
+            where: {
+                userId,
+                pageOfMovie: {
+                    genreId: userGenreId
+                }
+            },
+            include: {
+                pageOfMovie: true
+            }
+        });
+
+        let currentPageNumber = MoviesService.DEFAULT_PAGE_NUMBER;
+        if (userGenreId !== undefined && userCompletedPages?.length > 0) {
+            currentPageNumber = Math.max(...userCompletedPages
+                .map((userCompletedPage) => userCompletedPage.pageOfMovie.pageNumber)) + 1;    
+        }
+
+        currentPageNumber += shouldLoadNextPage;
+
+        return {
+            pageNumber: currentPageNumber,
+            genreId: userGenreId
+        }
     }
 }

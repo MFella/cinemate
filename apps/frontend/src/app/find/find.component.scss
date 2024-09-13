@@ -13,7 +13,7 @@
     }
 
     table.mat-mdc-table {
-        display: block;
+        // display: block;
         max-height: 26rem;
         overflow-y: scroll;
 
@@ -34,5 +34,15 @@
         .mdc-button__label {
             z-index: -1 !important;
         }
+    }
+
+    tr {
+        th.mat-column-is-watched {
+            text-align: center;
+        }
+    }
+
+    .mat-column-movie {
+        width: 40%;
     }
 }

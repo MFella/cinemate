@@ -80,10 +80,10 @@ export type FindMatchResult = {
     matchedRates: Array<MatchedMovie>;
   };
   
-  type MatchedMovie = {
+export type MatchedMovie = {
     id: string;
     movie: MovieToRate;
     user: Record<'id' | 'email', string>;
     isWatched: boolean;
-  };
+};
   

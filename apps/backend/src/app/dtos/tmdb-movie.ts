@@ -1,4 +1,4 @@
-  export interface TmdbMovie {
+export interface TmdbMovie {
     adult: boolean;
     backdrop_path: string;
     genre_ids?: (number)[] | null;
@@ -25,4 +25,10 @@ export type TmdbDiscoverResult = {
   total_pages: number;
   total_results: number;
   results: Array<TmdbMovie>;
+}
+
+
+export interface TmdbMovieGetListRequestOptions {
+    pageNumber: number;
+    genreId: number;
 }

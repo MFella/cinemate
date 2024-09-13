@@ -124,8 +124,9 @@
         <th mat-header-cell *matHeaderCellDef> <strong>Did you watch?</strong> </th>
         <td mat-cell *matCellDef="let matchedRate" class="!text-center">
           <mat-slide-toggle
+          #slideToggleRef
           [checked]="matchedRate.isWatched"
-          (click)="updateIsMovieWatched(matchedRate.movie.id, matchedRate.isWatched, $event)">
+          (click)="updateIsMovieWatched(matchedRate, $event, slideToggleRef)">
       </mat-slide-toggle>
         </td>
       </ng-container>

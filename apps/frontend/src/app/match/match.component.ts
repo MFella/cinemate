@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import {MatCardModule} from '@angular/material/card';
 import { MatDividerModule} from '@angular/material/divider';
 import { MatProgressBarModule} from '@angular/material/progress-bar';
@@ -13,12 +13,14 @@ import {MatBadgeModule} from '@angular/material/badge';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatChipsModule} from '@angular/material/chips';
 import { MarkButtonData } from '../components/movie-detail/movie-detail.component';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-match',
   standalone: true,
   imports: [CommonModule, MatCardModule, MatDividerModule,
-    MatProgressBarModule, MatButtonModule, MatBadgeModule, MatExpansionModule, MatChipsModule],
+    MatProgressBarModule, MatButtonModule, MatBadgeModule, MatExpansionModule, MatChipsModule, NgOptimizedImage,
+  MatIconModule],
   templateUrl: './match.component.html',
   styleUrl: './match.component.scss',
 })
@@ -28,9 +30,9 @@ export class MatchComponent implements OnInit {
   private static readonly POSTER_URL_PLACEHOLDER = './assets/no-image.svg';
 
   markActions: Array<MarkButtonData> = [
-    { label: 'Nah 🤨', value: 'NO' },
-    { label: '?! 👀', value: 'IDK' },
-    { label: 'Ok 🍕', value: 'YES' },
+    { label: 'Nah 🤨', value: 'NO', buttonColor: 'danger' },
+    { label: '?! 👀', value: 'IDK', buttonColor: 'info' },
+    { label: 'Ok 🍕', value: 'YES', buttonColor: 'success' },
   ];
   fetchedMovies: Array<MovieToRate> = [];
   currentMovie!: MovieToRate;
@@ -97,8 +99,16 @@ export class MatchComponent implements OnInit {
       });
   }
 
-  getMoviePosterSrc(posterPath: string): string {
-    return  posterPath ? MatchComponent.POSTER_URL_PREFIX + posterPath : MatchComponent.POSTER_URL_PLACEHOLDER; 
+  getMoviePosterStyles(posterPath: string): Record<string, string> {
+    const posterUrl = posterPath ? MatchComponent.POSTER_URL_PREFIX + posterPath : MatchComponent.POSTER_URL_PLACEHOLDER; 
+    
+    return {
+      'background': `no-repeat center/100% url(${posterUrl})`
+    }
+  }
+
+  getMovieUrl(posterPath: string): string {
+    return posterPath ? MatchComponent.POSTER_URL_PREFIX + posterPath : MatchComponent.POSTER_URL_PLACEHOLDER;
   }
 
   resolvePageNumber(): number {

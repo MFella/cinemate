@@ -3,14 +3,17 @@
 }
 
 .match-card {
-    max-width: 400px;
-}
-  
-.example-header-image {
-    // background-image: url('https://material.angular.io/assets/img/examples/shiba1.jpg');
-    background-size: cover;
+    max-width: 360px;
+    max-height: 540px;
 }
 
+@media only screen and (max-width: 640px) {
+    .match-card {
+        max-width: 320px;
+        max-height: 480px;
+    }
+}
+  
 ::ng-deep {
     .mat-mdc-card-header-text {
         width: 100%;
@@ -23,11 +26,21 @@
     .mat-mdc-card-content {
         padding-top: 1rem !important;
         padding-bottom: 1rem !important;
-    }
 
-    // .mat-expansion-panel.mat-expanded {
-    //     height: 400px;
-    // }
+          &::-webkit-scrollbar {
+            width: 1em;
+          }
+           
+          &::-webkit-scrollbar-track {
+            box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+          }
+           
+          &::-webkit-scrollbar-thumb {
+            @apply rounded-full;
+            background-color: darkgrey;
+            outline: 1px solid slategrey;
+          }
+    }
 
     .genres-container {
         .mdc-evolution-chip-set__chips {
@@ -56,5 +69,25 @@
     img {
         height: 100%;
         border-radius: .5rem;
+    }
+}
+
+.current-movie-img {
+    filter: opacity(.9) blur(1px);
+}
+
+.mat-mdc-card-content,
+.mat-mdc-card-title > h1 {
+    @apply rounded-xl mx-4 mb-2;
+    background-color: rgba(255, 255, 255, .8);
+    color: black;
+}
+
+.mat-mdc-card-actions {
+    button {
+        @apply opacity-90 rounded-lg transition-all;
+        &:not(:last-child) {
+            @apply mr-2;
+        }
     }
 }

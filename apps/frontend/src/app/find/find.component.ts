@@ -10,17 +10,18 @@ import { of, take } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
-import { FindMatchResult, GenEntity, MovieToRate, SelectOption } from '../typings/common';
+import { FindMatchResult, GenEntity, MatchedMovie, MovieToRate, SelectOption } from '../typings/common';
 import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../_services/auth.service';
 import {MatTableModule} from '@angular/material/table';
 import { RestDataService } from '../_services/rest-data.service';
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatSlideToggle, MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { MatDialog } from '@angular/material/dialog';
 import { MovieDetailComponent } from '../components/movie-detail/movie-detail.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { AlertInteractionService } from '../_services/alert-interaction.service';
 
 @Component({
   selector: 'app-find',
@@ -50,6 +51,7 @@ export class FindComponent implements OnInit {
   readonly #authService = inject(AuthService);
   readonly #restDataService = inject(RestDataService);
   readonly #matDialog = inject(MatDialog);
+  readonly #alertInteractionService = inject(AlertInteractionService);
 
   readonly fetchedGenres = signal<Array<GenEntity>>([]);
   readonly selectedEmails = signal<Array<string>>([]);
@@ -177,13 +179,22 @@ export class FindComponent implements OnInit {
     this.findMatchResult.matchedRates ??= [];
   }
 
-  updateIsMovieWatched(movieId: number, isMovieWatched: boolean, $event: MouseEvent): void {
+  updateIsMovieWatched(matchedRate: MatchedMovie, $event: MouseEvent, slideToggleRef: MatSlideToggle): void {
     $event.stopPropagation();
-    this.#restDataService.saveIsMovieWatched(movieId, !isMovieWatched)
+    // slideToggleRef.setDisabledState(true);
+    debugger;
+    this.#restDataService.saveIsMovieWatched(matchedRate.movie.id as any, !matchedRate.isWatched)
       .pipe(take(1))
       .subscribe((isResultSaved: boolean) => {
-        debugger;
-      });
+        if (!isResultSaved) {
+          slideToggleRef.writeValue(matchedRate.isWatched);
+          this.#alertInteractionService.error('Movie "is-watched" cannot be saved');
+        } else {
+          matchedRate.isWatched = !matchedRate.isWatched;
+          slideToggleRef.setDisabledState(false);
+        }
+
+      })
   }
 
   openFilterSettingsSelect(): void {

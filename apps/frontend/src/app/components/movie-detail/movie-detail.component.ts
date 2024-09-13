@@ -11,6 +11,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 export type MatDialogAction = 'Close';
+export type CustomThemePalette = 'primary' | 'accent' | 'danger' | 'success' | 'info';
+
 export type MovieDetailConfig = {
   shouldDisplayContent?: boolean;
   shouldDisplayActionButtons?: boolean;
@@ -20,6 +22,7 @@ export type MovieDetailConfig = {
 export type MarkButtonData = {
   label: string;
   value: MovieRate;
+  buttonColor: CustomThemePalette
 };
 
 type MovieDetailDialogData = {
