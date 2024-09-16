@@ -34,15 +34,16 @@ export class RestDataService extends BasicRestDataService {
     return this.get<Array<string>>(`user/emails?startsWith=${startsWith}`);
   }
 
-  fetchUserMatch(genreId: number, userEmails: Array<string>, userMatchFilterOptions: Partial<UserMatchFilterOptions> = {}):
+  fetchUserMatch(genreId: number, userEmails: Array<string>, userMatchFilterOptions: UserMatchFilterOptions = {
+    pageNumber: 0
+  }):
     Observable<FindMatchResult> {
     let httpParams = new HttpParams();
     httpParams = httpParams.append('genreId', genreId);
     httpParams = httpParams.appendAll({mailOfUsers: ['', ...userEmails]});
 
     for (let key in userMatchFilterOptions) {
-      debugger;
-      if ((userMatchFilterOptions as Record<string, string>)[key] !== undefined) {
+      if ((userMatchFilterOptions as unknown as  Record<string, string | number>)[key] !== undefined) {
         httpParams = httpParams.append(key, userMatchFilterOptions[key as keyof UserMatchFilterOptions] as true | string);
       }
     }

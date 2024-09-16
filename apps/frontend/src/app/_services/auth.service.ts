@@ -5,6 +5,7 @@ import { getAuthConfig } from '../auth/oauth.config';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable, filter, from, of, take } from 'rxjs';
 import { Router } from '@angular/router';
+import { AlertInteractionService } from './alert-interaction.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +14,7 @@ export class AuthService {
   #oauthService = inject(OAuthService);
   #platformId = inject(PLATFORM_ID);
   #router = inject(Router);
+  #alertService = inject(AlertInteractionService);
 
   constructor() {
     const authConfig = getAuthConfig('google', isPlatformBrowser(this.#platformId));
@@ -36,6 +38,7 @@ export class AuthService {
       .pipe(take(1))
       .subscribe(() => {
         this.#router.navigate(['']);
+        this.#alertService.success('You have been logged out successfully');
       });
   }
 

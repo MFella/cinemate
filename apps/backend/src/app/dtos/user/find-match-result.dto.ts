@@ -1,4 +1,4 @@
-import { IsArray, IsDefined, IsEnum, IsString, Validate, ValidateNested, ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from "class-validator";
+import { IsArray, IsBoolean, IsDefined, IsEnum, IsString, Validate, ValidateNested, ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from "class-validator";
 import { Rate } from "../rate-of-movie";
 import { MovieToRate, RateValue } from "@prisma/client";
 import { TypeUtil } from "../../typings/type-util";
@@ -30,4 +30,7 @@ export class FindMatchResultDto {
         message: 'Provided matched rate is not in appropriate shape'
     })
     matchedRates: Array<MatchedRate>;
+
+    @IsBoolean()
+    isLastPage: boolean;
 }

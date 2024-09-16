@@ -6,7 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatChipInputEvent, MatChipsModule } from '@angular/material/chips';
 import {MatAutocompleteModule, MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
 import { MatIconModule } from '@angular/material/icon';
-import { of, take } from 'rxjs';
+import { BehaviorSubject, of, scan, Subject, take } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
@@ -81,9 +81,12 @@ export class FindComponent implements OnInit {
       label: 'Only unwatched',
       value: 'onlyUnwatched'
     }
-  ]
+  ];
 
-  findMatchResult!: FindMatchResult;
+  readonly matchedMovies$: BehaviorSubject<Array<MatchedMovie>> = new BehaviorSubject<Array<MatchedMovie>>([]);
+
+  pageNumber: number = 0;
+  findMatchResult: FindMatchResult | null = null;
   isInSearchMode: boolean = true;
   allUsers: Array<string> = [];
   genreOptions: Array<SelectOption> = [];
@@ -149,8 +152,8 @@ export class FindComponent implements OnInit {
     this.#restDataService.fetchUserMatch(this.searchUserForm.value.genre, this.searchUserForm.value.mailOfUsers)
       .pipe(take(1), takeUntilDestroyed(this.#destroyRef))
       .subscribe((findMatchResult: FindMatchResult) => {
-        //
         this.findMatchResult = findMatchResult;
+        this.matchedMovies$.next(findMatchResult.matchedRates);
         this.isInSearchMode = false;
       });
   }
@@ -176,7 +179,7 @@ export class FindComponent implements OnInit {
     this.isInSearchMode = true;
 
     // clear state of fetched rate results
-    this.findMatchResult.matchedRates ??= [];
+    this.findMatchResult = null;
   }
 
   updateIsMovieWatched(matchedRate: MatchedMovie, $event: MouseEvent, slideToggleRef: MatSlideToggle): void {
@@ -208,6 +211,7 @@ export class FindComponent implements OnInit {
 
     this.#restDataService.fetchUserMatch(this.searchUserForm.value.genre, this.searchUserForm.value.mailOfUsers,
       {
+        pageNumber: 0,
         onlyWatched: moreFiltersObject['onlyWatched'],
         onlyUnwatched: moreFiltersObject['onlyUnwatched'],
         searchedMovieTitle: movieTitle ?? ''
@@ -216,6 +220,7 @@ export class FindComponent implements OnInit {
       .pipe(take(1), takeUntilDestroyed(this.#destroyRef))
       .subscribe((findMatchResult: FindMatchResult) => {
         this.findMatchResult = findMatchResult;
+        this.matchedMovies$.next(findMatchResult.matchedRates);
       })
   }
 
@@ -226,8 +231,20 @@ export class FindComponent implements OnInit {
 
 
     const viewportTreshold = tableScrollHeight - tableViewHeight - FindComponent.FETCH_MATCH_RESULT_SCROLL_THRESHOLD_PX;    
-    if (scrollLocation > viewportTreshold) {
+    if (scrollLocation > viewportTreshold && !this.findMatchResult?.isLastPage) {
       // fetch next match entities
+      this.#restDataService.fetchUserMatch(this.searchUserForm.value.genre, this.searchUserForm.value.mailOfUsers, {
+        pageNumber: this.pageNumber + 1
+      })
+      .subscribe({
+        next: (findMatchResult: FindMatchResult) => {
+          this.matchedMovies$.next(this.matchedMovies$.getValue().concat(findMatchResult.matchedRates));
+          this.pageNumber += 1;
+        },
+        error: (err: unknown) => {
+          this.#alertInteractionService.error('Error occured during fetching next orders...');
+        }
+      })
     }
   }
   

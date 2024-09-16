@@ -1,4 +1,4 @@
-import { ArrayMinSize, IsArray, IsBoolean, IsOptional, IsString, MaxLength, Validate,
+import { ArrayMinSize, IsArray, IsBoolean, IsNumber, IsOptional, IsString, MaxLength, Validate,
     ValidatorConstraintInterface } from "class-validator";
 import { Transform } from 'class-transformer';
 
@@ -25,6 +25,11 @@ export class UserMatchQuery {
     })
     genreId: string;
 
+    @Validate(IsStringifiedNumber, {
+        message: 'Invalid id of genre'
+    })
+    pageNumber: string;
+
     @Transform(transformStringToBoolean)
     @IsBoolean()
     @IsOptional()
@@ -38,5 +43,5 @@ export class UserMatchQuery {
     @IsOptional()
     @IsString()
     @MaxLength(256)
-    searchedMovieTitle?: string
+    searchedMovieTitle?: string;
 }

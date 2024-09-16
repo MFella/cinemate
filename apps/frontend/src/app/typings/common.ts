@@ -35,6 +35,7 @@ export type SelectOption = {
 }
 
 export type UserMatchFilterOptions = {
+    pageNumber: number,
     onlyWatched?: true,
     onlyUnwatched?: true,
     searchedMovieTitle?: string
@@ -78,6 +79,7 @@ export type RateResultDto = {
 export type FindMatchResult = {
     matchedRateValue: MovieRate,
     matchedRates: Array<MatchedMovie>;
+    isLastPage: boolean;
   };
   
 export type MatchedMovie = {

@@ -94,7 +94,7 @@
     <!-- Implement dataSource as stream -->
     <table *ngIf="findMatchResult?.matchedRates?.length; else noResultFoundRef"
       mat-table
-      [dataSource]="findMatchResult?.matchedRates ?? []"
+      [dataSource]="matchedMovies$.asObservable()"
       class="mat-elevation-z8 rounded-lg overflow-hidden"
       (scroll)="handleMatchTableScroll($event)"
       >

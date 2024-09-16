@@ -44,6 +44,7 @@ export class UserController {
     @Get('match')
     async getUserMatch(@UserId() userId: number, @Query() userMatchQuery: UserMatchQuery): Promise<FindMatchResultDto> {
         return this.userService.getUserMatch(userId, parseInt(userMatchQuery.genreId), userMatchQuery.mailOfUsers,
-            userMatchQuery.onlyUnwatched, userMatchQuery.onlyWatched, userMatchQuery.searchedMovieTitle);
+            parseInt(userMatchQuery.pageNumber), userMatchQuery.onlyUnwatched, userMatchQuery.onlyWatched,
+            userMatchQuery.searchedMovieTitle);
     }
 }

@@ -12,6 +12,7 @@ import { TransformedTmdbMovie } from "../dtos/movies-list.dto";
 export class UserService {
     private static readonly DEFAULT_GENRE: Genres = 'Adventure';
     private static readonly DEFAULT_GENRE_ID = 4;
+    private static readonly MOVIE_SEARCH_RESULT_PER_PAGE = 15;
 
     constructor(
         private readonly prismaService: PrismaService
@@ -158,7 +159,7 @@ export class UserService {
     }
 
     async getUserMatch(userId: number, genreId: number, mailOfUsers: Array<string>,
-            onlyUnwatched?: boolean, onlyWatched?: boolean, searchedMovieTitle?: string
+            pageNumber: number = 0, onlyUnwatched?: boolean, onlyWatched?: boolean, searchedMovieTitle?: string
     ): Promise<FindMatchResultDto> {
         const usersFromDb = new Map<any, User>((await this.prismaService.user.findMany({
             where: {
@@ -214,6 +215,8 @@ export class UserService {
                 },
                 value: RateValue.YES,
             },
+            skip: pageNumber * UserService.MOVIE_SEARCH_RESULT_PER_PAGE,
+            take: UserService.MOVIE_SEARCH_RESULT_PER_PAGE
         }));
 
         const populatedRates = ratesFromDb.map((rate) => {
@@ -228,7 +231,8 @@ export class UserService {
 
         return {
             matchedRateValue: Rate.YES,
-            matchedRates: populatedRates
+            matchedRates: populatedRates,
+            isLastPage: ratesFromDb?.length < UserService.MOVIE_SEARCH_RESULT_PER_PAGE
         }
     }
 
