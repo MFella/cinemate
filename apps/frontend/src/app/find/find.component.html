@@ -1,141 +1,181 @@
-<form *ngIf="isInSearchMode; else matchTable" class="search-user-form" [formGroup]="searchUserForm">
-    <mat-card class="min-w-96" appearance="outlined">
-        <mat-card-header class="mb-4">
-          <mat-card-title>Search user</mat-card-title>
-        </mat-card-header>
-        <mat-divider></mat-divider>
-        <mat-card-content class="!flex !flex-col m-4">
-            <mat-form-field>
-                <mat-label>Put mails</mat-label>
-                <mat-chip-grid #chipGrid aria-label="User selection" formControlName="mailOfUsers">
-                  @for (user of selectedEmails(); track $index) {
-                    <mat-chip-row (removed)="removeUser(user)">
-                      {{user}}
-                      <button matChipRemove [attr.aria-label]="'remove ' + user">
-                        <mat-icon>cancel</mat-icon>
-                      </button>
-                    </mat-chip-row>
-                  }
-                </mat-chip-grid>
-                <input
-                  name="currentUser"
-                  placeholder="Mail to compare..."
-                  #userInput
-                  [(ngModel)]="currentUser"
-                  [ngModelOptions]="{ standalone: true }"
-                  [matChipInputFor]="chipGrid"
-                  [matAutocomplete]="auto"
-                  (matChipInputTokenEnd)="addUser($event)"
-                />
-                <mat-autocomplete #auto="matAutocomplete" (optionSelected)="handleUserSelection($event)">
-                  @for (user of filteredUsers(); track user) {
-                    <mat-option [value]="user">{{user}}</mat-option>
-                  }
-                  @if (filteredUsers().length === 0) {
-                    <mat-option [disabled]="true">No email found 😶</mat-option>
-                  }
-                </mat-autocomplete>
-              </mat-form-field>
-              <mat-form-field class="w-full mt-4">
-                <mat-label>Select genre</mat-label>
-                <mat-select formControlName="genre">
-                    <mat-option *ngFor="let genreOption of genreOptions" [value]="genreOption.value" [disabled]="genreOption.disabled">{{genreOption.label}}</mat-option>
-                  </mat-select>
-              </mat-form-field>
-        </mat-card-content>
-        <mat-divider></mat-divider>
-        <mat-card-footer class="example-card-footer">
-            <button [disabled]="!searchUserForm.valid" color="warn" class="w-full" mat-flat-button
-              (click)="getUserMatch()">
-                <mat-icon>search</mat-icon>
-                <span>Find</span>
+<form
+  *ngIf="isInSearchMode; else matchTable"
+  class="search-user-form flex justify-center"
+  [formGroup]="searchUserForm">
+  <mat-card class="w-full" appearance="outlined">
+    <mat-card-header class="mb-4">
+      <mat-card-title>Search user</mat-card-title>
+    </mat-card-header>
+    <mat-divider></mat-divider>
+    <mat-card-content class="!flex !flex-col m-4">
+      <mat-form-field>
+        <mat-label>Put mails</mat-label>
+        <mat-chip-grid
+          #chipGrid
+          aria-label="User selection"
+          formControlName="mailOfUsers">
+          @for (user of selectedEmails(); track $index) {
+          <mat-chip-row (removed)="removeUser(user)">
+            {{ user }}
+            <button matChipRemove [attr.aria-label]="'remove ' + user">
+              <mat-icon>cancel</mat-icon>
             </button>
-            <!-- <button class="w-full" mat-raised-button>Basic</button> -->
-        </mat-card-footer>
-      </mat-card>
-  </form>
+          </mat-chip-row>
+          }
+        </mat-chip-grid>
+        <input
+          name="currentUser"
+          placeholder="Mail to compare..."
+          #userInput
+          [(ngModel)]="currentUser"
+          [ngModelOptions]="{ standalone: true }"
+          [matChipInputFor]="chipGrid"
+          [matAutocomplete]="auto"
+          (matChipInputTokenEnd)="addUser($event)" />
+        <mat-autocomplete
+          #auto="matAutocomplete"
+          (optionSelected)="handleUserSelection($event)">
+          @for (user of filteredUsers(); track user) {
+          <mat-option [value]="user">{{ user }}</mat-option>
+          } @if (filteredUsers().length === 0) {
+          <mat-option [disabled]="true">No email found 😶</mat-option>
+          }
+        </mat-autocomplete>
+      </mat-form-field>
+      <mat-form-field class="w-full mt-4">
+        <mat-label>Select genre</mat-label>
+        <mat-select formControlName="genre">
+          <mat-option
+            *ngFor="let genreOption of genreOptions"
+            [value]="genreOption.value"
+            [disabled]="genreOption.disabled"
+            >{{ genreOption.label }}</mat-option
+          >
+        </mat-select>
+      </mat-form-field>
+    </mat-card-content>
+    <mat-divider></mat-divider>
+    <mat-card-footer class="example-card-footer">
+      <button
+        [disabled]="!searchUserForm.valid"
+        color="warn"
+        class="w-full"
+        mat-flat-button
+        (click)="getUserMatch()">
+        <mat-icon>search</mat-icon>
+        <span>Find</span>
+      </button>
+      <!-- <button class="w-full" mat-raised-button>Basic</button> -->
+    </mat-card-footer>
+  </mat-card>
+</form>
 
-  <ng-template #matchTable>
-    <div class="flex justify-between items-center mb-4 min-w-96">
-      <div class="flex justify-between items-center border-r-2 w-full">
-        <button mat-fab aria-label="Return to search form"
+<ng-template #matchTable>
+  <div class="flex justify-between items-center mb-4 min-w-96">
+    <div class="flex justify-between items-center border-r-2 w-full">
+      <button
+        mat-fab
+        aria-label="Return to search form"
         color="accent"
         class="mr-4"
         matTooltip="Go back"
         (click)="returnToSearchMode()">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
-        <div class="w-full flex" [formGroup]="filterMatchResultForm">
-          <mat-form-field class="w-full">
-            <mat-label>Search by movie title</mat-label>
-            <input matInput placeholder="No country for old man" value="" formControlName="movieTitle">
-          </mat-form-field>
-          <button (click)="openFilterSettingsSelect()" mat-fab aria-label="Select to filter list of rates" color="warn"
-            class="ml-4 mr-2 overflow-hidden open-filter-settings-select" matTooltip="More filters">
-            <mat-icon class="absolute">settings</mat-icon>
-            <mat-form-field class="w-full mt-4 invisible -z-1">
-              <mat-select #filterSelect formControlName="filter" multiple formControlName="moreFilters">
-                @for (filterOption of filterOptions; track $index) {
-                  <mat-option [value]="filterOption.value">
-                    {{filterOption.label}}
-                  </mat-option>
-                }
-                </mat-select>
-            </mat-form-field>
-          </button>
-        </div>
-      </div>
-      <button mat-fab aria-label="Search for rated movie" color="primary" class="ml-2" matTooltip="Filter table"
-        (click)="filterMatchResultList()">
-        <mat-icon>search</mat-icon>
+        <mat-icon>arrow_back</mat-icon>
       </button>
+      <div class="w-full flex" [formGroup]="filterMatchResultForm">
+        <mat-form-field class="w-full">
+          <mat-label>Search by movie title</mat-label>
+          <input
+            matInput
+            placeholder="No country for old man"
+            value=""
+            formControlName="movieTitle" />
+        </mat-form-field>
+        <button
+          (click)="openFilterSettingsSelect()"
+          mat-fab
+          aria-label="Select to filter list of rates"
+          color="warn"
+          class="ml-4 mr-2 overflow-hidden open-filter-settings-select"
+          matTooltip="More filters">
+          <mat-icon class="absolute">settings</mat-icon>
+          <mat-form-field class="w-full mt-4 invisible -z-1">
+            <mat-select
+              #filterSelect
+              formControlName="filter"
+              multiple
+              formControlName="moreFilters">
+              @for (filterOption of filterOptions; track $index) {
+              <mat-option [value]="filterOption.value">
+                {{ filterOption.label }}
+              </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </button>
+      </div>
     </div>
-  
-    <!-- Implement dataSource as stream -->
-    <table *ngIf="findMatchResult?.matchedRates?.length; else noResultFoundRef"
-      mat-table
-      [dataSource]="matchedMovies$.asObservable()"
-      class="mat-elevation-z8 rounded-lg overflow-hidden"
-      (scroll)="handleMatchTableScroll($event)"
-      >
-      <ng-container matColumnDef="view-details">
-        <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let matchedRate">
-          <button mat-mini-fab
+    <button
+      mat-fab
+      aria-label="Search for rated movie"
+      color="primary"
+      class="ml-2"
+      matTooltip="Filter table"
+      (click)="filterMatchResultList()">
+      <mat-icon>search</mat-icon>
+    </button>
+  </div>
+
+  <!-- Implement dataSource as stream -->
+  <table
+    *ngIf="findMatchResult?.matchedRates?.length; else noResultFoundRef"
+    mat-table
+    [dataSource]="matchedMovies$.asObservable()"
+    class="mat-elevation-z8 rounded-lg overflow-hidden"
+    (scroll)="matchTableScrolled$.next($event)">
+    <ng-container matColumnDef="view-details">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let matchedRate">
+        <button
+          mat-mini-fab
           aria-label="More information about the movie"
           matTooltip="More information about the movie"
           (click)="openMovieInfoDialog(matchedRate.movie.id)">
-            <mat-icon>info</mat-icon>
-          </button>
-        </td>
-      </ng-container>
+          <mat-icon>info</mat-icon>
+        </button>
+      </td>
+    </ng-container>
 
-      <ng-container matColumnDef="movie">
-        <th mat-header-cell *matHeaderCellDef> <strong>Movie</strong>  </th>
-        <td mat-cell *matCellDef="let matchedRate"> {{matchedRate.movie.title}} </td>
-      </ng-container>
-    
-      <ng-container matColumnDef="email">
-        <th mat-header-cell *matHeaderCellDef><strong>User</strong></th>
-        <td mat-cell *matCellDef="let matchedRate"> {{matchedRate.user.email}} </td>
-      </ng-container>
+    <ng-container matColumnDef="movie">
+      <th mat-header-cell *matHeaderCellDef><strong>Movie</strong></th>
+      <td mat-cell *matCellDef="let matchedRate">
+        {{ matchedRate.movie.title }}
+      </td>
+    </ng-container>
 
-      <ng-container matColumnDef="is-watched">
-        <th mat-header-cell *matHeaderCellDef> <strong>Did you watch?</strong> </th>
-        <td mat-cell *matCellDef="let matchedRate" class="!text-center">
-          <mat-slide-toggle
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef><strong>User</strong></th>
+      <td mat-cell *matCellDef="let matchedRate">
+        {{ matchedRate.user.email }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="is-watched">
+      <th mat-header-cell *matHeaderCellDef><strong>Did you watch?</strong></th>
+      <td mat-cell *matCellDef="let matchedRate" class="!text-center">
+        <mat-slide-toggle
           #slideToggleRef
           [checked]="matchedRate.isWatched"
           (click)="updateIsMovieWatched(matchedRate, $event, slideToggleRef)">
-      </mat-slide-toggle>
-        </td>
-      </ng-container>
+        </mat-slide-toggle>
+      </td>
+    </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayMatchTableColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayMatchTableColumns;"></tr>
-    </table>
-  
-    <ng-template #noResultFoundRef>
-      <h2 class="w-full text-center">No result found 😶</h2>
-    </ng-template>
+    <tr mat-header-row *matHeaderRowDef="displayMatchTableColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayMatchTableColumns"></tr>
+  </table>
+
+  <ng-template #noResultFoundRef>
+    <h2 class="w-full text-center">No result found 😶</h2>
   </ng-template>
+</ng-template>

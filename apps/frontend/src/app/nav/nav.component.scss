@@ -1,32 +1,34 @@
 :host {
-    @apply z-10;
-    position: fixed;
-}
-
-@media only screen and (max-width: 640px) {
-    
+  @apply z-10 opacity-95;
+  position: fixed;
 }
 
 .cinemate-log {
-    transition: all .4s;
+  transition: all 0.4s;
 }
 
 .active {
-    // border: 1px solid rgba(0,0,0, .1);
-    // filter: invert(25%);
-    background-color: var(--mat-icon-button-state-layer-color);
+  background-color: var(--mat-icon-button-state-layer-color);
 }
 
 .user-app-preferences-container {
-    display: flex;
-    align-items: center;
-    border-color: var(--mat-toolbar-container-text-color);
-    // padding-right: 1rem;
-    // &::after {
-    //     content: '|';
-    //     font-weight: 200;
-    //     margin-left: 1rem;
-    //     display: inline-block;
-    //     transform: scale(1.5);
-    // }
+  display: flex;
+  align-items: center;
+  border-color: var(--mat-toolbar-container-text-color);
+  &.is-vertical {
+    @apply justify-center border-none pr-0 pb-2;
+    border-bottom: 1px solid var(--mat-toolbar-container-text-color);
+  }
+}
+
+::ng-deep {
+  .mat-sidenav {
+    .mat-drawer-inner-container {
+      @apply p-4 flex flex-col gap-3;
+
+      button {
+        @apply m-0;
+      }
+    }
+  }
 }

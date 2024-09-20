@@ -1,20 +1,41 @@
 import { Injectable } from '@angular/core';
-import { GenEntity, Genres, MovieRate, MovieInitData, RateResultDto, FindMatchResult, MovieToRate, UserMatchFilterOptions } from '../typings/common';
-import { Observable } from 'rxjs';
+import {
+  GenEntity,
+  Genres,
+  MovieRate,
+  MovieInitData,
+  RateResultDto,
+  FindMatchResult,
+  MovieToRate,
+  UserMatchFilterOptions,
+} from '../typings/common';
+import { debounceTime, Observable } from 'rxjs';
 import { BasicRestDataService } from './basic-rest-data.service';
 import { HttpParams } from '@angular/common/http';
 import { Memoize } from '../_decorators/memoize.decorator';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class RestDataService extends BasicRestDataService {
-  voteMovie(vote: MovieRate, movieId: string, pageNumber: number): Observable<RateResultDto> {
-    return this.post<RateResultDto>(`movies/rate`, { movieId, rate: vote, pageNumber });
+  voteMovie(
+    vote: MovieRate,
+    movieId: string,
+    pageNumber: number | null
+  ): Observable<RateResultDto> {
+    return this.post<RateResultDto>(`movies/rate`, {
+      movieId,
+      rate: vote,
+      pageNumber,
+    });
   }
 
-  fetchMoviesData(shouldLoadNextPage: boolean = false): Observable<MovieInitData> {
-    return this.get<MovieInitData>(`movies?shouldLoadNextPage=${+shouldLoadNextPage}`)
+  fetchMoviesData(
+    shouldLoadNextPage: boolean = false
+  ): Observable<MovieInitData> {
+    return this.get<MovieInitData>(
+      `movies?shouldLoadNextPage=${+shouldLoadNextPage}`
+    );
   }
 
   fetchMovieData(movieId: number): Observable<MovieToRate> {
@@ -34,23 +55,35 @@ export class RestDataService extends BasicRestDataService {
     return this.get<Array<string>>(`user/emails?startsWith=${startsWith}`);
   }
 
-  fetchUserMatch(genreId: number, userEmails: Array<string>, userMatchFilterOptions: UserMatchFilterOptions = {
-    pageNumber: 0
-  }):
-    Observable<FindMatchResult> {
+  fetchUserMatch(
+    genreId: number,
+    userEmails: Array<string>,
+    userMatchFilterOptions: UserMatchFilterOptions = {
+      pageNumber: 0,
+    }
+  ): Observable<FindMatchResult> {
     let httpParams = new HttpParams();
     httpParams = httpParams.append('genreId', genreId);
-    httpParams = httpParams.appendAll({mailOfUsers: ['', ...userEmails]});
+    httpParams = httpParams.appendAll({ mailOfUsers: ['', ...userEmails] });
 
     for (let key in userMatchFilterOptions) {
-      if ((userMatchFilterOptions as unknown as  Record<string, string | number>)[key] !== undefined) {
-        httpParams = httpParams.append(key, userMatchFilterOptions[key as keyof UserMatchFilterOptions] as true | string);
+      if (
+        (userMatchFilterOptions as unknown as Record<string, string | number>)[
+          key
+        ] !== undefined
+      ) {
+        httpParams = httpParams.append(
+          key,
+          userMatchFilterOptions[key as keyof UserMatchFilterOptions] as
+            | true
+            | string
+        );
       }
     }
 
     return this.get<FindMatchResult>('user/match', {
-      params: httpParams
-    })
+      params: httpParams,
+    });
   }
 
   saveUserPreference(preference: Genres): Observable<boolean> {
@@ -58,7 +91,10 @@ export class RestDataService extends BasicRestDataService {
   }
 
   saveIsMovieWatched(movieId: number, isMovieWatched: boolean) {
-    return this.put<boolean>('movies/mark-watch', { movieId, isWatched: isMovieWatched });
+    return this.put<boolean>('movies/mark-watch', {
+      movieId,
+      isWatched: isMovieWatched,
+    });
   }
 
   tryRegisterUser(userId: string, email: string): Observable<boolean> {

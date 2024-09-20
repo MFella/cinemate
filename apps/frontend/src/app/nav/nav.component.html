@@ -1,52 +1,119 @@
-<mat-toolbar color="primary">
-    <mat-toolbar-row>
-      <img class="cinemate-logo max-h-14 mr-4 absolute left-0 rounded-r-full shadow-md" alt="Cinemate logo" src="../../assets/cinemate-logo.png" />
-      <div class="flex-auto"></div>
-      <button *ngIf="!isUserHasValidToken(); else validTokenTemplateRef" [routerLink]="['./']"
-        [routerLinkActive]="['active']"
-        [routerLinkActiveOptions]="{ exact: true }"
-        class="mr-4 !rounded-3xl" mat-button>
-         <mat-icon>home</mat-icon>   
-        <span>Home</span>
-      </button>
-      <ng-template #validTokenTemplateRef>
-        <button [routerLink]="['/match']" [routerLinkActive]="['active']" class="mr-4 !rounded-3xl" mat-button>
-          <mat-icon>
-            compare_arrows
-          </mat-icon>
-          <span>Match</span>
-        </button>
-        <button [routerLink]="['/preferences']" [routerLinkActive]="['active']" class="mr-4 !rounded-3xl" mat-button>
-          <mat-icon>settings</mat-icon>
-          <span>Preferences</span>
-        </button>
-        <button [routerLink]="['/find']" [routerLinkActive]="['active']" class="!rounded-3xl" mat-button>
-          <mat-icon>search</mat-icon>
-          <span>Find</span>
-        </button>
+<ng-template #navButtonContainer let-vertical="vertical">
+  <button
+    *ngIf="!isUserHasValidToken(); else validTokenTemplateRef"
+    [routerLink]="['./']"
+    [routerLinkActive]="['active']"
+    [routerLinkActiveOptions]="{ exact: true }"
+    class="mr-4 !rounded-3xl"
+    mat-button>
+    <mat-icon>home</mat-icon>
+    <span>Home</span>
+  </button>
+  <ng-template #validTokenTemplateRef>
+    <button
+      [routerLink]="['/match']"
+      [routerLinkActive]="['active']"
+      class="mr-4 !rounded-3xl"
+      mat-button>
+      <mat-icon> compare_arrows </mat-icon>
+      <span>Match</span>
+    </button>
+    <button
+      [routerLink]="['/preferences']"
+      [routerLinkActive]="['active']"
+      class="mr-4 !rounded-3xl"
+      mat-button>
+      <mat-icon>settings</mat-icon>
+      <span>Preferences</span>
+    </button>
+    <button
+      [routerLink]="['/find']"
+      [routerLinkActive]="['active']"
+      class="!rounded-3xl"
+      mat-button>
+      <mat-icon>search</mat-icon>
+      <span>Find</span>
+    </button>
+  </ng-template>
+  <div class="flex-auto"></div>
+  <div
+    class="user-app-preferences-container"
+    [ngClass]="{
+      'border-r-[1px] pr-4': isUserHasValidToken(),
+      'is-vertical': vertical
+    }">
+    <button
+      mat-icon-button
+      color="secondary"
+      aria-label="Toggle theme button"
+      (click)="toggleTheme()">
+      <mat-icon *ngIf="selectedTheme === 'dark'; else lightIconContainer"
+        >brightness_3</mat-icon
+      >
+      <ng-template #lightIconContainer>
+        <mat-icon>wb_sunny</mat-icon>
       </ng-template>
-      <div class="flex-auto"></div>
-      <div class="user-app-preferences-container"
-        [ngClass]="{
-          'border-r-[1px] pr-4': isUserHasValidToken()
-        }">
-        <button mat-icon-button color="secondary" aria-label="Toggle theme button" (click)="toggleTheme()">
-          <mat-icon *ngIf="selectedTheme === 'dark'; else lightIconContainer">brightness_3</mat-icon>
-            <ng-template #lightIconContainer>
-                <mat-icon>wb_sunny</mat-icon>
-            </ng-template>
-        </button>
-      </div>
-      <mat-divider [vertical]="false"></mat-divider>
-      <div class="flex items-center ml-4" *ngIf="isUserHasValidToken()">
-        <span class="text-sm mr-4">Logged as</span>
-          <img mat-icon-button [matMenuTriggerFor]="menu" class="rounded-full w-8 hover:cursor-pointer" [src]="getUserAvatarUrl()" alt="User logo"/>
-        <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="logoutUser()">
-            <mat-icon>logout</mat-icon>
-            <span>Logout</span>
-          </button>
-        </mat-menu>
-      </div>
-    </mat-toolbar-row>
-  </mat-toolbar>
+    </button>
+  </div>
+  <div
+    class="flex items-center justify-center"
+    *ngIf="isUserHasValidToken()"
+    [ngClass]="{
+      'ml-4': !vertical,
+      'p-4 rounded-xl shadow-lg': vertical
+    }">
+    <span class="text-sm mr-4">Logged as</span>
+    <img
+      mat-icon-button
+      [matMenuTriggerFor]="menu"
+      class="rounded-full w-8 hover:cursor-pointer"
+      [ngSrc]="getUserAvatarUrl()"
+      width="30"
+      height="30"
+      alt="User logo" />
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item (click)="logoutUser()">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </mat-menu>
+  </div>
+</ng-template>
+
+<mat-toolbar color="primary">
+  <mat-toolbar-row>
+    @if (mobileQuery.matches) {
+    <button mat-icon-button (click)="toggleSidenav(snav)">
+      <mat-icon>menu</mat-icon>
+    </button>
+    } @else {
+    <img
+      class="cinemate-logo max-h-14 mr-4 absolute left-0 rounded-r-full shadow-md"
+      alt="Cinemate logo"
+      src="../../assets/cinemate-logo.png" />
+    <div class="flex-auto"></div>
+    <ng-container
+      [ngTemplateOutlet]="navButtonContainer"
+      [ngTemplateOutletContext]="{
+        vertical: false
+      }"></ng-container>
+
+    }
+  </mat-toolbar-row>
+</mat-toolbar>
+
+<mat-sidenav-container
+  class="example-sidenav-container"
+  [style.marginTop.px]="mobileQuery.matches ? 56 : 0">
+  <mat-sidenav
+    #snav
+    [mode]="mobileQuery.matches ? 'over' : 'side'"
+    [fixedInViewport]="mobileQuery.matches"
+    fixedTopGap="56">
+    <ng-container
+      [ngTemplateOutlet]="navButtonContainer"
+      [ngTemplateOutletContext]="{
+        vertical: true
+      }"></ng-container>
+  </mat-sidenav>
+</mat-sidenav-container>

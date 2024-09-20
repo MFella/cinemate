@@ -1,36 +1,71 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
-import { CommonModule, NgIf } from '@angular/common';
+import {
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnDestroy,
+  Output,
+  inject,
+} from '@angular/core';
+import { MediaMatcher } from '@angular/cdk/layout';
+import { CommonModule, NgIf, NgOptimizedImage } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import type { AppTheme } from '../typings/common';
-import {MatToolbarModule} from '@angular/material/toolbar';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../_services/auth.service';
 import { Subject } from 'rxjs';
 import { MatDividerModule } from '@angular/material/divider';
-import {MatTooltipModule} from '@angular/material/tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CustomTooltipDirective } from '../_directives/custom-tooltip.directive';
-import {MatMenuModule} from '@angular/material/menu';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 
 @Component({
   selector: 'app-nav',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, NgIf, MatToolbarModule, RouterModule, MatDividerModule, MatTooltipModule,
-      CustomTooltipDirective, MatMenuModule
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatIconModule,
+    NgIf,
+    MatToolbarModule,
+    RouterModule,
+    MatDividerModule,
+    MatTooltipModule,
+    CustomTooltipDirective,
+    MatMenuModule,
+    MatSidenavModule,
+    NgOptimizedImage,
   ],
   templateUrl: './nav.component.html',
   styleUrl: './nav.component.scss',
 })
-export class NavComponent {
+export class NavComponent implements OnDestroy {
   #authService = inject(AuthService);
-  isTokenValid: boolean = false;
-  customTooltipContent: string = `<strong>Hello</strong>`;
+  #changeDetectorRef = inject(ChangeDetectorRef);
 
   @Input()
   selectedTheme!: AppTheme;
 
   @Output()
   readonly toggleTheme$: Subject<AppTheme> = new Subject<AppTheme>();
+
+  mobileQuery: MediaQueryList;
+
+  private _mobileQueryListener: () => void;
+
+  constructor() {
+    const media = inject(MediaMatcher);
+
+    this.mobileQuery = media.matchMedia('(max-width: 700px)');
+    this._mobileQueryListener = () => this.#changeDetectorRef.detectChanges();
+    this.mobileQuery.addListener(this._mobileQueryListener);
+  }
+
+  ngOnDestroy(): void {
+    this.mobileQuery.removeListener(this._mobileQueryListener);
+  }
 
   toggleTheme(): void {
     this.toggleTheme$.next(this.selectedTheme === 'dark' ? 'default' : 'dark');
@@ -52,5 +87,10 @@ export class NavComponent {
 
   logoutUser(): void {
     this.#authService.logout();
+  }
+
+  toggleSidenav(matSidenav: MatSidenav): void {
+    matSidenav.toggle();
+    this.#changeDetectorRef.detectChanges();
   }
 }

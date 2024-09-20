@@ -4,48 +4,57 @@
 @tailwind components;
 @tailwind utilities;
 
-
 @include mat.core();
 
-$default-typography: mat.define-typography-config($font-family: '"Montserrat", sans-serif');
+$default-typography: mat.define-typography-config(
+  $font-family: '"Montserrat", sans-serif',
+);
 @include mat.typography-hierarchy($default-typography);
 
-$default-primary: mat.define-palette(mat.$indigo-palette, 200);
-$default-accent: mat.define-palette(mat.$indigo-palette, A200, A100, A400);
-$default-warn: mat.define-palette(mat.$indigo-palette, 300, 600, A400);
+$default-primary: mat.define-palette(mat.$indigo-palette, 100);
+$default-accent: mat.define-palette(mat.$indigo-palette, A200, 400, A400);
+$default-warn: mat.define-palette(mat.$indigo-palette, 500, 100, A200);
 
-$default-theme: mat.define-light-theme((
- color: (
-   primary: $default-primary,
-   accent: $default-accent,
-   warn: $default-warn
- ),
- typography: $default-typography,
- density: 0,
-));
+$default-theme: mat.define-light-theme(
+  (
+    color: (
+      primary: $default-primary,
+      accent: $default-accent,
+      warn: $default-warn,
+    ),
+    typography: $default-typography,
+    density: 0,
+  )
+);
 
 $dark-primary: mat.define-palette(mat.$grey-palette, 700);
-$dark-accent: mat.define-palette(mat.$grey-palette, A400, A200, A200);
-$dark-warn: mat.define-palette(mat.$grey-palette, A200, A100, A400);
+$dark-accent: mat.define-palette(mat.$grey-palette, A200, 400, A400);
+$dark-warn: mat.define-palette(mat.$grey-palette, 500, 100, A200);
 
-$dark-theme: mat.define-dark-theme((
- color: (
-   primary: $dark-primary,
-   accent: $dark-accent,
-   warn: $dark-warn
- ),
- typography: $default-typography,
- density: 0,
-));
+$dark-theme: mat.define-dark-theme(
+  (
+    color: (
+      primary: $dark-primary,
+      accent: $dark-accent,
+      warn: $dark-warn,
+    ),
+    typography: $default-typography,
+    density: 0,
+  )
+);
 
 /* You can add global styles to this file, and also import other style files */
 :root {
   --mdc-text-button-container-shape: 9999px;
-
 }
 
+::ng-deep {
+  .mat-mdc-dialog-surface {
+    border-radius: 2rem !important;
+  }
+}
 .transparent-loading-spinner .mat-mdc-dialog-container .mdc-dialog__surface {
-  background-color: rgba(0, 0, 0, 0.0) !important;
+  background-color: rgba(0, 0, 0, 0) !important;
   box-shadow: none !important;
 }
 
@@ -73,28 +82,28 @@ $theme-danger: mat.define-palette(mat.$pink-palette, 600);
 $variants-theme: (
   success: $theme-success,
   info: $theme-info,
-  danger: $theme-danger
+  danger: $theme-danger,
 );
 
 .default {
   @include mat.all-component-themes($default-theme);
   @include button-variants.color($default-theme, $variants-theme, default);
   // @include nav-style($default-theme);
-  --mat-icon-button-state-layer-color: rgba(25, 54, 101, .1);
+  --mat-icon-button-state-layer-color: rgba(25, 54, 101, 0.1);
   .cinemate-logo {
-    filter: drop-shadow(1px 1px 1px rgba(255, 255, 255, .2)) brightness(0);
+    filter: drop-shadow(1px 1px 1px rgba(255, 255, 255, 0.2)) brightness(0);
   }
 
-  --mat-app-background-color: rgba(240, 248, 255, .7);
+  --mat-app-background-color: rgba(240, 248, 255, 0.7);
 }
 
 .dark {
   @include mat.all-component-themes($dark-theme);
   @include button-variants.color($dark-theme, $variants-theme, darker);
-  --mat-icon-button-state-layer-color: rgba(255, 255, 255, .1);
+  --mat-icon-button-state-layer-color: rgba(255, 255, 255, 0.1);
   .cinemate-logo {
-    filter: drop-shadow(1px 1px 1px rgba(255, 255, 255, .2)) invert(0);
+    filter: drop-shadow(1px 1px 1px rgba(255, 255, 255, 0.2)) invert(0);
   }
 
-  --mat-app-background-color: rgba(0, 0, 0, .7);
+  --mat-app-background-color: rgba(0, 0, 0, 0.7);
 }

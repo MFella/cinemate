@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
 import { AlertInteractionService } from './alert-interaction.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   #oauthService = inject(OAuthService);
@@ -17,11 +17,14 @@ export class AuthService {
   #alertService = inject(AlertInteractionService);
 
   constructor() {
-    const authConfig = getAuthConfig('google', isPlatformBrowser(this.#platformId));
+    const authConfig = getAuthConfig(
+      'google',
+      isPlatformBrowser(this.#platformId)
+    );
     if (authConfig) {
       this.#oauthService.configure(authConfig);
       this.#oauthService.setupAutomaticSilentRefresh();
-      this.#oauthService.loadDiscoveryDocumentAndTryLogin()
+      this.#oauthService.loadDiscoveryDocumentAndTryLogin();
     }
   }
 
@@ -30,11 +33,12 @@ export class AuthService {
   }
 
   logout(): void {
-    from(Promise.all(
-      [
+    from(
+      Promise.all([
         this.#oauthService.revokeTokenAndLogout(false, true),
-        of(this.#oauthService.logOut())
-      ]))
+        of(this.#oauthService.logOut()),
+      ])
+    )
       .pipe(take(1))
       .subscribe(() => {
         this.#router.navigate(['']);
@@ -54,9 +58,11 @@ export class AuthService {
     return this.getUserIdentityClaim().sub;
   }
 
-  getIdentityClaimValues<T extends keyof IdentityClaim>(...identityClaimKeys: Array<T>): Array<keyof T> {
+  getIdentityClaimValues<T extends keyof IdentityClaim>(
+    ...identityClaimKeys: Array<T>
+  ): Array<keyof T> {
     const identityClaim = this.getUserIdentityClaim();
-    return Object.create(identityClaimKeys.map((key) => identityClaim[key]));
+    return Object.create(identityClaimKeys.map(key => identityClaim[key]));
   }
 
   getAccessToken(): string {
@@ -66,6 +72,6 @@ export class AuthService {
   selectOauthEvent(eventToSelect: EventType): Observable<OAuthEvent> {
     return this.#oauthService.events.pipe(
       filter((event: OAuthEvent) => event.type === eventToSelect)
-    )
+    );
   }
 }

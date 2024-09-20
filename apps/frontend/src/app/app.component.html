@@ -1,5 +1,8 @@
-<app-nav class="absolute top-0 w-full z-[1]" [selectedTheme]="selectedTheme" (toggleTheme$)="onToggleTheme($event)" />
-<div class="w-full pt-32 pb-10 flex justify-center items-center">
-    <router-outlet></router-outlet>
+<app-nav
+  class="absolute top-0 w-full z-[1]"
+  [selectedTheme]="selectedTheme"
+  (toggleTheme$)="onToggleTheme($event)" />
+<div class="w-full pt-24 flex justify-center items-end">
+  <router-outlet></router-outlet>
 </div>
 <ng-toast />

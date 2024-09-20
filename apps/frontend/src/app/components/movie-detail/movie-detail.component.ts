@@ -11,7 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 export type MatDialogAction = 'Close';
-export type CustomThemePalette = 'primary' | 'accent' | 'danger' | 'success' | 'info';
+export type CustomThemePalette = 'primary' | 'accent' | 'danger' | 'success' | 'info' | 'warn';
 
 export type MovieDetailConfig = {
   shouldDisplayContent?: boolean;

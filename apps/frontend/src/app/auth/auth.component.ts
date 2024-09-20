@@ -10,13 +10,18 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-auth',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatDividerModule, MatProgressBarModule, MatButtonModule],
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatDividerModule,
+    MatProgressBarModule,
+    MatButtonModule,
+  ],
   templateUrl: './auth.component.html',
   styleUrl: './auth.component.scss',
-  providers: []
+  providers: [],
 })
 export class AuthComponent {
-
   username: string = '';
   password: string = '';
 
@@ -24,9 +29,9 @@ export class AuthComponent {
     private readonly authService: AuthService,
     private readonly router: Router
   ) {
-    if (authService.hasUserHaveValidToken()) {
-      this.router.navigate(['/match']);
-    }
+    // if (authService.hasUserHaveValidToken()) {
+    //   this.router.navigate(['/match']);
+    // }
   }
 
   login(): void {
@@ -34,7 +39,6 @@ export class AuthComponent {
   }
 
   logout(): void {
-    this.authService.logout(); 
+    this.authService.logout();
   }
-
 }

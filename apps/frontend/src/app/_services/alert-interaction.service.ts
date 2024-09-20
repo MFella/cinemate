@@ -21,4 +21,8 @@ export class AlertInteractionService {
   error(message: string): void {
     this.ngToastService.danger(message);
   }
+
+  info(message: string): void {
+    this.ngToastService.info(message);
+  }
 }

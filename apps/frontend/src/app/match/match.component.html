@@ -3,42 +3,66 @@
     <!-- <div class="current-movie-img h-full w-full absolute"
     [ngStyle]="getMoviePosterStyles(currentMovie.posterPath)">
     </div> -->
-    <img class="current-movie-img h-full w-full absolute"
-    [ngSrc]="getMovieUrl(currentMovie.posterPath)"
-    width="20"
-    height="30"
-    priority
-    [ngStyle]="getMoviePosterStyles(currentMovie.posterPath)" />
-      <!-- <img mat-card-image [src]="getMoviePosterSrc(currentMovie.posterPath)" alt="Photo of current movie" class="current-movie-img shadow-lg !rounded-xl !absolute"> -->
-    
+    <img
+      class="current-movie-img h-full w-full absolute"
+      [ngSrc]="getMovieUrl(currentMovie.posterPath)"
+      width="20"
+      height="30"
+      priority
+      [ngStyle]="getMoviePosterStyles(currentMovie.posterPath)" />
+    <!-- <img mat-card-image [src]="getMoviePosterSrc(currentMovie.posterPath)" alt="Photo of current movie" class="current-movie-img shadow-lg !rounded-xl !absolute"> -->
+
     <mat-card-header>
-      <mat-card-title class="!flex !justify-center"><h1 class="text-center !z-1 relative px-4 py-2">{{ currentMovie.title }}</h1></mat-card-title>
+      <mat-card-title class="!flex !justify-center"
+        ><h1 class="text-center !z-1 relative px-4 py-2">
+          {{ currentMovie.title }}
+        </h1></mat-card-title
+      >
       <mat-card-subtitle class="!flex !justify-between !pt-4">
         <mat-chip-set class="flex-col">
-          <mat-chip class="year-container">{{currentMovie.releaseDate?.split('-')?.at(0)}} </mat-chip>
+          <mat-chip class="year-container"
+            >{{ currentMovie.releaseDate?.split('-')?.at(0) }}
+          </mat-chip>
           <mat-chip class="">
             <div class="vote-container flex justify-center !items-center">
-              <mat-icon class="mb-1 scale-75 text-yellow-400">star_rate</mat-icon>
-              <strong class="ml-1">{{currentMovie.voteAverage.toFixed(1)}}</strong>
+              <mat-icon class="mb-1 scale-75 text-yellow-400"
+                >star_rate</mat-icon
+              >
+              <strong class="ml-1">{{
+                currentMovie.voteAverage.toFixed(1)
+              }}</strong>
             </div>
           </mat-chip>
         </mat-chip-set>
+        @if (genresOnPage?.size) {
         <span class="genres-container">
           <mat-chip-set class="justify-end">
-            <mat-chip *ngFor="let genreId of currentMovie.genreIds"> {{ genresOnPage.get(genreId)?.name }}</mat-chip>
+            <mat-chip *ngFor="let genreId of currentMovie.genreIds">
+              {{ genresOnPage?.get(genreId)?.name }}</mat-chip
+            >
           </mat-chip-set>
         </span>
+        }
       </mat-card-subtitle>
     </mat-card-header>
-    <div class="current-movie-img-container">
-    </div>
-    <mat-card-content class="!z-10 h-40 overflow-y-scroll">
+    <div class="current-movie-img-container"></div>
+    <mat-card-content class="z-[1] h-40 overflow-y-scroll">
       <p>{{ currentMovie.overview }}</p>
     </mat-card-content>
     <mat-divider></mat-divider>
+    @if (!matDialogData) {
     <mat-card-actions class="mx-2 mb-2">
-      <button *ngFor="let item of markActions" [color]="item.buttonColor" [class]="'w-full mark-action-button-' + item.value" mat-flat-button (click)="voteMovie(item)">{{item.label}}</button>
+      <button
+        *ngFor="let item of markActions"
+        [color]="item.buttonColor"
+        [class]="'w-full mark-action-button-' + item.value"
+        [disabled]="isRequestPended"
+        mat-flat-button
+        (click)="voteMovie(item)">
+        {{ item.label }}
+      </button>
     </mat-card-actions>
+    }
     <mat-card-footer>
       <!-- <mat-expansion-panel hideToggle class="border-t-2">
         <mat-expansion-panel-header>
