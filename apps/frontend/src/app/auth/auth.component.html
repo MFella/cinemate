@@ -10,7 +10,11 @@
       <mat-divider></mat-divider>
     </mat-card-content>
     <mat-card-actions class="!p-4">
-      <button class="w-full" mat-raised-button (click)="login()" color="accent">
+      <button
+        class="w-full"
+        mat-raised-button
+        (click)="emitAuthButtonClicked('google')"
+        color="accent">
         {{ 'Log with Google' }}
       </button>
     </mat-card-actions>

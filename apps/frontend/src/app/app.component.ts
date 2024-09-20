@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { NavComponent } from './nav/nav.component';
-import { AppLang, AppTheme } from './typings/common';
+import { AppLang, AppTheme, AuthSource } from './typings/common';
 import { LocalStorageService } from './_services/local-storage.service';
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { AuthService } from './_services/auth.service';
@@ -68,7 +68,7 @@ export class AppComponent {
       this.document.body.classList.add(selectedTheme);
     }
 
-    this.observeUserRegistered();
+    this.observeUserLoggedIn();
     this.observeTokenExpired();
     this.observeLoadingSpinnerChanged();
   }
@@ -80,32 +80,17 @@ export class AppComponent {
     this.document.body.classList.add(theme);
   }
 
-  private observeUserRegistered(): void {
+  private observeUserLoggedIn(): void {
     this.#authService
-      .selectOauthEvent('token_received')
+      .observeAuthButtonClicked()
       .pipe(
-        switchMap(() => {
-          const [userId, userEmail] = this.#authService.getIdentityClaimValues(
-            'sub',
-            'email'
-          );
-          if (
-            TypeUtil.isStringedNumber(userId) &&
-            TypeUtil.isString(userEmail)
-          ) {
-            return this.#restDataService.tryRegisterUser(userId, userEmail);
-          } else {
-            return throwError(
-              () => new Error('Cannot retrieve user id and email')
-            );
-          }
-        }),
+        switchMap((authSource: AuthSource) =>
+          this.#restDataService.tryAuthenticateGoogleUser(authSource)
+        ),
         takeUntilDestroyed(this.#destroyRef)
       )
-      .subscribe((isUserRegistered: boolean) => {
-        if (isUserRegistered) {
-          this.#router.navigate(['/match']);
-        }
+      .subscribe((response: any) => {
+        debugger;
       });
   }
 

@@ -6,6 +6,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../_services/auth.service';
 import { Router } from '@angular/router';
+import { AuthSource } from '../typings/common';
 
 @Component({
   selector: 'app-auth',
@@ -28,14 +29,10 @@ export class AuthComponent {
   constructor(
     private readonly authService: AuthService,
     private readonly router: Router
-  ) {
-    // if (authService.hasUserHaveValidToken()) {
-    //   this.router.navigate(['/match']);
-    // }
-  }
+  ) {}
 
-  login(): void {
-    this.authService.login();
+  emitAuthButtonClicked(authSource: AuthSource): void {
+    this.authService.emitAuthButtonClicked(authSource);
   }
 
   logout(): void {

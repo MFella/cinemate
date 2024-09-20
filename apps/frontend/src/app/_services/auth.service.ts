@@ -1,9 +1,9 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { EventType, OAuthEvent, OAuthService } from 'angular-oauth2-oidc';
-import { IdentityClaim } from '../typings/common';
+import { AuthSource, IdentityClaim } from '../typings/common';
 import { getAuthConfig } from '../auth/oauth.config';
 import { isPlatformBrowser } from '@angular/common';
-import { Observable, filter, from, of, take } from 'rxjs';
+import { Observable, Subject, filter, from, of, take } from 'rxjs';
 import { Router } from '@angular/router';
 import { AlertInteractionService } from './alert-interaction.service';
 
@@ -15,6 +15,7 @@ export class AuthService {
   #platformId = inject(PLATFORM_ID);
   #router = inject(Router);
   #alertService = inject(AlertInteractionService);
+  #authButtonClicked$: Subject<AuthSource> = new Subject<AuthSource>();
 
   constructor() {
     const authConfig = getAuthConfig(
@@ -28,8 +29,12 @@ export class AuthService {
     }
   }
 
-  login(): void {
-    this.#oauthService.initImplicitFlow();
+  emitAuthButtonClicked(authSource: AuthSource): void {
+    this.#authButtonClicked$.next(authSource);
+  }
+
+  observeAuthButtonClicked(): Observable<AuthSource> {
+    return this.#authButtonClicked$.asObservable();
   }
 
   logout(): void {

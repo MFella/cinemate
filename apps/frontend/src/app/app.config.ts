@@ -9,16 +9,12 @@ import {
   withFetch,
   withInterceptors,
 } from '@angular/common/http';
-import { corsInterceptor } from './_interceptors/cors.interceptor';
 import { userIdInterceptor } from './_interceptors/user-id.interceptor';
 import { NgToastModule } from 'ng-angular-popup';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideHttpClient(
-      withInterceptors([corsInterceptor, userIdInterceptor]),
-      withFetch()
-    ),
+    provideHttpClient(withInterceptors([userIdInterceptor]), withFetch()),
     provideClientHydration(),
     provideRouter(appRoutes, withViewTransitions()),
     provideAnimationsAsync(),

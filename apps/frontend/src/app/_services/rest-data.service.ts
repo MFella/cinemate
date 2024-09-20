@@ -8,6 +8,7 @@ import {
   FindMatchResult,
   MovieToRate,
   UserMatchFilterOptions,
+  AuthSource,
 } from '../typings/common';
 import { debounceTime, Observable } from 'rxjs';
 import { BasicRestDataService } from './basic-rest-data.service';
@@ -97,7 +98,8 @@ export class RestDataService extends BasicRestDataService {
     });
   }
 
-  tryRegisterUser(userId: string, email: string): Observable<boolean> {
-    return this.post<boolean>('user/register', { id: parseInt(userId), email });
+  tryAuthenticateGoogleUser(authSource: AuthSource): Observable<boolean> {
+    debugger;
+    return this.get<boolean>(`auth/${authSource}`);
   }
 }
