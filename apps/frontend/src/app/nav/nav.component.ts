@@ -4,10 +4,16 @@ import {
   Input,
   OnDestroy,
   Output,
+  PLATFORM_ID,
   inject,
 } from '@angular/core';
 import { MediaMatcher } from '@angular/cdk/layout';
-import { CommonModule, NgIf, NgOptimizedImage } from '@angular/common';
+import {
+  CommonModule,
+  isPlatformServer,
+  NgIf,
+  NgOptimizedImage,
+} from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import type { AppTheme } from '../typings/common';
@@ -44,6 +50,7 @@ import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 export class NavComponent implements OnDestroy {
   #authService = inject(AuthService);
   #changeDetectorRef = inject(ChangeDetectorRef);
+  #platformId = inject(PLATFORM_ID);
 
   @Input()
   selectedTheme!: AppTheme;
@@ -71,22 +78,28 @@ export class NavComponent implements OnDestroy {
     this.toggleTheme$.next(this.selectedTheme === 'dark' ? 'default' : 'dark');
   }
 
-  getUserEmail(): string {
-    const identityClaim = this.#authService.getUserIdentityClaim();
-    return identityClaim.email;
+  getUserEmail(): string | undefined {
+    const userPayload = this.#authService.getUserPayload();
+    return userPayload?.email;
   }
 
-  getUserAvatarUrl(): string {
-    const identityClaim = this.#authService.getUserIdentityClaim();
-    return identityClaim.picture;
+  getUserAvatarUrl(): string | undefined {
+    const userPayload = this.#authService.getUserPayload();
+    return userPayload?.picture;
   }
 
   isUserHasValidToken(): boolean {
+    if (isPlatformServer(this.#platformId)) {
+      return false;
+    }
+
     return this.#authService.hasUserHaveValidToken();
   }
 
   logoutUser(): void {
+    debugger;
     this.#authService.logout();
+    this.#changeDetectorRef.detectChanges();
   }
 
   toggleSidenav(matSidenav: MatSidenav): void {

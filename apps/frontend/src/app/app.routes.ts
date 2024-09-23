@@ -1,15 +1,12 @@
-import { Route } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  Route,
+  RouterStateSnapshot,
+} from '@angular/router';
 import { movieInitDataResolver } from './_resolvers/movie-init-data.resolver';
 import { authGuard } from './_guards/auth.guard';
-import { inject } from '@angular/core';
-import { AuthService } from './_services/auth.service';
 import { preferencesResolver } from './_resolvers/preferences.resolver';
 import { findResolver } from './_resolvers/find.resolver';
-
-const componentNames = ['match', 'home', 'preferences'] as const;
-const importedComponentFiles = componentNames.map(
-  componentName => `./${componentName}/${componentName}.component` as const
-);
 
 type ImportedMatchFile = typeof import('./match/match.component');
 type ImportedAuthFile = typeof import('./auth/auth.component');
@@ -24,6 +21,14 @@ export const appRoutes: Route[] = [
       import('./auth/auth.component').then(
         (importedFile: ImportedAuthFile) => importedFile.AuthComponent
       ),
+    canActivate: [
+      function isNotAuthorized(
+        _route: ActivatedRouteSnapshot,
+        _state: RouterStateSnapshot
+      ) {
+        return !authGuard(_route, _state);
+      },
+    ],
   },
   {
     path: 'match',

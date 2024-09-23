@@ -10,6 +10,7 @@ import { ConfigModule } from '@nestjs/config';
 import baseConfiguration from './configuration/base-configuration';
 import { BaseRestDataService } from './common/base-rest-data.service';
 import { AuthModule } from './auth/auth.module';
+import { AuthGuard } from './_guards/auth.guard';
 
 @Module({
   imports: [

@@ -13,18 +13,15 @@ import { MoviesService } from './app/movies/movies.service';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get<ConfigService>(ConfigService);
-
   const appPort = configService.get<number>('port');
   const globalPrefix = 'api';
+
   app.setGlobalPrefix(globalPrefix);
   app.useGlobalPipes(
     new ValidationPipe({ transform: true, disableErrorMessages: true })
   );
   app.enableCors({
-    origin: [
-      'http://localhost:4200',
-      'https://accounts.google.com/o/oauth2/v2/auth',
-    ],
+    origin: [configService.get<string>('frontendUrl')],
   });
   await app.listen(appPort);
   const moviesService = app.get<MoviesService>(MoviesService);

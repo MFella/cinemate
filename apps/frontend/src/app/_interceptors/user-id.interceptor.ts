@@ -1,6 +1,6 @@
+import { DOCUMENT } from '@angular/common';
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { OAuthService } from 'angular-oauth2-oidc';
 
 const excludedUrlsFromUserIdInterception = [
   'https://accounts.google.com/.well-known/openid-configuration',
@@ -8,14 +8,18 @@ const excludedUrlsFromUserIdInterception = [
 ];
 
 export const userIdInterceptor: HttpInterceptorFn = (req, next) => {
-  debugger;
+  const document = inject(DOCUMENT);
   if (excludedUrlsFromUserIdInterception.includes(req.url)) {
     return next(req);
   }
 
+  debugger;
   const clonedRequest = req.clone({
     setHeaders: {
-      ['access-token']: document.cookie,
+      ['authorization']: `Bearer ${document.cookie.replace(
+        'access_token=',
+        ''
+      )}`,
     },
   });
   return next(clonedRequest);

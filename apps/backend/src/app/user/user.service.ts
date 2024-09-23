@@ -128,8 +128,9 @@ export class UserService {
   }
 
   async tryRegisterUser(
-    userId: number,
-    userEmail: string
+    userId: string,
+    userEmail: string,
+    userPicture: string
   ): Promise<User | null> {
     const genreId = await this.getRandomGenreId();
     const userFromDb = await this.prismaService.user.findFirst({
@@ -138,7 +139,8 @@ export class UserService {
       },
     });
 
-    if (Object.values(userFromDb)?.length) {
+    console.log('user ', userFromDb);
+    if (Object.values(userFromDb ?? {})?.length) {
       Logger.log('User already registered');
       return userFromDb;
     }
@@ -148,6 +150,7 @@ export class UserService {
         id: userId,
         email: userEmail,
         genreId,
+        picture: userPicture,
       },
     });
 

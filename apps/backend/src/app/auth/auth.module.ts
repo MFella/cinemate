@@ -7,15 +7,22 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PrismaService } from '../database/prisma.service';
 import { UserService } from '../user/user.service';
+import { AuthGuard } from '../_guards/auth.guard';
 
 @Module({
-  imports: [PassportModule.register({ defaultStrategy: 'google' }), JwtModule],
+  imports: [
+    PassportModule.register({ defaultStrategy: 'google' }),
+    JwtModule.register({
+      global: true,
+    }),
+  ],
   providers: [
     AuthService,
     GoogleOauthStrategy,
     GoogleOauthGuard,
     PrismaService,
     UserService,
+    AuthGuard,
   ],
   exports: [PassportModule],
   controllers: [AuthController],

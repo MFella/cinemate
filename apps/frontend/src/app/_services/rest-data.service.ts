@@ -98,8 +98,7 @@ export class RestDataService extends BasicRestDataService {
     });
   }
 
-  tryAuthenticateGoogleUser(authSource: AuthSource): Observable<boolean> {
-    debugger;
-    return this.get<boolean>(`auth/${authSource}`);
+  tryAuthenticateUser(authSource: AuthSource): void {
+    window.location.replace(`${BACKEND_API_URL}/api/auth/${authSource}`);
   }
 }

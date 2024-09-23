@@ -168,7 +168,7 @@ export class FindComponent implements OnInit {
           };
         });
         const currentUserEmail = this.#authService
-          .getIdentityClaimValues('email')
+          .getUserPayloadValues('email')
           ?.at(0);
         this.allUsers = (data['findData'][2] as Array<string>).filter(
           (email: string) => email !== currentUserEmail

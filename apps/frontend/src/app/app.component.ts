@@ -1,12 +1,11 @@
 import {
-  ChangeDetectorRef,
   Component,
   DestroyRef,
   Inject,
   PLATFORM_ID,
   inject,
 } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { NavComponent } from './nav/nav.component';
 import { AppLang, AppTheme, AuthSource } from './typings/common';
 import { LocalStorageService } from './_services/local-storage.service';
@@ -16,9 +15,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AlertInteractionService } from './_services/alert-interaction.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ProgressSpinnerComponent } from './progress-spinner/progress-spinner.component';
-import { debounceTime, switchMap, throwError } from 'rxjs';
 import { RestDataService } from './_services/rest-data.service';
-import { TypeUtil } from './typings/util';
 import { NgToastModule } from 'ng-angular-popup';
 
 @Component({
@@ -38,8 +35,6 @@ export class AppComponent {
   #intercationService = inject(AlertInteractionService);
   #restDataService = inject(RestDataService);
   #matDialog = inject(MatDialog);
-  #router = inject(Router);
-  #changeDetectorRef = inject(ChangeDetectorRef);
   #matDialogRef: MatDialogRef<any> | null = null;
 
   title = 'frontend';
@@ -68,8 +63,7 @@ export class AppComponent {
       this.document.body.classList.add(selectedTheme);
     }
 
-    this.observeUserLoggedIn();
-    this.observeTokenExpired();
+    this.observeUserClickedLoginButton();
     this.observeLoadingSpinnerChanged();
   }
 
@@ -80,32 +74,12 @@ export class AppComponent {
     this.document.body.classList.add(theme);
   }
 
-  private observeUserLoggedIn(): void {
+  private observeUserClickedLoginButton(): void {
     this.#authService
       .observeAuthButtonClicked()
-      .pipe(
-        switchMap((authSource: AuthSource) =>
-          this.#restDataService.tryAuthenticateGoogleUser(authSource)
-        ),
-        takeUntilDestroyed(this.#destroyRef)
-      )
-      .subscribe((response: any) => {
-        debugger;
-      });
-  }
-
-  private observeTokenExpired(): void {
-    this.#authService
-      .selectOauthEvent('token_error')
-      .pipe(
-        debounceTime(AppComponent.TOKEN_EXPIRATION_DEBOUNCE_TIME),
-        takeUntilDestroyed(this.#destroyRef)
-      )
-      .subscribe(() => {
-        this.#authService.logout();
-        this.#router.navigate(['']);
-        this.#intercationService.info('Token expired - log in again');
-        this.#changeDetectorRef.detectChanges();
+      .pipe(takeUntilDestroyed(this.#destroyRef))
+      .subscribe((authSource: AuthSource) => {
+        this.#restDataService.tryAuthenticateUser(authSource);
       });
   }
 

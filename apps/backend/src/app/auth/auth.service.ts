@@ -8,25 +8,45 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../database/prisma.service';
 import { UserService } from '../user/user.service';
 import { User } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
+import {
+  AuthSource,
+  JwtAuthConfig,
+  OauthGoogleUserInfo,
+} from '../typings/common';
 
 type UserToRegister = {
   id: number;
   email: string;
+  picture: string;
+};
+
+type UserJwtPayload = {
+  sub: number;
+  email: string;
+  picture: string;
 };
 
 @Injectable()
 export class AuthService {
   constructor(
-    private jwtService: JwtService,
+    private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
     private readonly prismaService: PrismaService,
     private readonly userService: UserService
   ) {}
 
-  generateJwt(payload): string {
-    return this.jwtService.sign(payload);
+  generateJwt(payload: UserJwtPayload): string {
+    const jwtSecret =
+      this.configService.get<JwtAuthConfig>('jwtConfig')?.secret ?? '';
+    return this.jwtService.sign(payload, {
+      secret: jwtSecret,
+    });
   }
 
-  async signInUser(userToRegister: UserToRegister): Promise<string> {
+  async signInUser<T extends AuthSource>(
+    userToRegister: OauthGoogleUserInfo<T>
+  ): Promise<string> {
     if (!userToRegister) {
       throw new BadRequestException('Unauthenticated');
     }
@@ -36,7 +56,8 @@ export class AuthService {
     if (!userFromDb) {
       userFromDb = await this.userService.tryRegisterUser(
         userToRegister.id,
-        userToRegister.email
+        userToRegister.email,
+        userToRegister.picture
       );
       if (!userFromDb) {
         throw new InternalServerErrorException(
@@ -46,12 +67,13 @@ export class AuthService {
     }
 
     return this.generateJwt({
-      sub: userFromDb.id,
+      sub: userFromDb.id.toNumber(),
       email: userFromDb.email,
+      picture: userFromDb.picture,
     });
   }
 
-  async getUserById(userId: number): Promise<User> {
+  async getUserById(userId: string): Promise<User> {
     return await this.prismaService.user.findFirst({
       where: {
         id: userId,

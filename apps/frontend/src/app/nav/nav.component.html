@@ -67,7 +67,7 @@
       mat-icon-button
       [matMenuTriggerFor]="menu"
       class="rounded-full w-8 hover:cursor-pointer"
-      [ngSrc]="getUserAvatarUrl()"
+      [ngSrc]="getUserAvatarUrl() ?? ''"
       width="30"
       height="30"
       alt="User logo" />
