@@ -5,7 +5,6 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../_services/auth.service';
-import { Router } from '@angular/router';
 import { AuthSource } from '../typings/common';
 
 @Component({
@@ -26,16 +25,9 @@ export class AuthComponent {
   username: string = '';
   password: string = '';
 
-  constructor(
-    private readonly authService: AuthService,
-    private readonly router: Router
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   emitAuthButtonClicked(authSource: AuthSource): void {
     this.authService.emitAuthButtonClicked(authSource);
-  }
-
-  logout(): void {
-    this.authService.logout();
   }
 }

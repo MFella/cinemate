@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { UserId } from '../decorators/user-id.decorator';
 import { UserService } from './user.service';
 import { UserPreferenceDto } from '../dtos/user-preference.dto';
@@ -6,12 +6,14 @@ import { Genre } from '@prisma/client';
 import { UsersFilterQuery } from '../dtos/user/users-filter.query';
 import { FindMatchResultDto } from '../dtos/user/find-match-result.dto';
 import { UserMatchQuery } from '../dtos/user/user-match.query';
+import { AuthGuard } from '../_guards/auth.guard';
 
 type UserPreferenceBody = {
   genreId: number;
 };
 
 @Controller('user')
+@UseGuards(AuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

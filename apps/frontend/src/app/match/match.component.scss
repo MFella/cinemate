@@ -21,10 +21,26 @@
   }
 }
 
+.is-movie-watched-slide-toggle {
+  @apply backdrop-blur-3xl backdrop-contrast-50 flex justify-center p-4 mt-2;
+
+  &:before {
+    @apply pr-2 text-gray-50;
+    content: 'Is watched: ';
+  }
+}
 ::ng-deep {
   .mat-mdc-card-header-text {
     width: 100%;
   }
+
+  // .mat-mdc-chip-set {
+  //   @apply w-full;
+
+  //   .mdc-evolution-chip-set__chips {
+  //     @apply w-full flex justify-between;
+  //   }
+  // }
 
   .mat-mdc-card-header {
     height: 180px;

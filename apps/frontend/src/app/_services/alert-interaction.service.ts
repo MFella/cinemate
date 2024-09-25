@@ -3,12 +3,13 @@ import { NgToastService } from 'ng-angular-popup';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AlertInteractionService {
-  readonly isLoadingSpinnerActive$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  readonly isLoadingSpinnerActive$: BehaviorSubject<boolean> =
+    new BehaviorSubject<boolean>(false);
 
-  constructor(private readonly ngToastService: NgToastService) { }
+  constructor(private readonly ngToastService: NgToastService) {}
 
   selectLoadingSpinnerChanged(): Observable<boolean> {
     return this.isLoadingSpinnerActive$.asObservable();

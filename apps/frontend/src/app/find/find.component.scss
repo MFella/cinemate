@@ -9,6 +9,39 @@
   }
 }
 
+@media only screen and (max-width: 1180px) {
+  .founds-movie__container {
+    @apply grid-cols-4;
+  }
+}
+
+@media only screen and (max-width: 940px) {
+  .founds-movie__container {
+    @apply grid-cols-3;
+  }
+}
+
+@media only screen and (max-width: 770px) {
+  .founds-movie__container {
+    @apply grid-cols-2;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .founds-movie__container {
+    @apply grid-cols-1;
+  }
+
+  .filter-results__container {
+    .mat-mdc-form-field:first-child {
+      width: 40vw;
+    }
+    button {
+      @apply w-8 h-8 overflow-hidden;
+    }
+  }
+}
+
 ::ng-deep {
   .mdc-evolution-chip-set__chips {
     overflow-y: scroll;

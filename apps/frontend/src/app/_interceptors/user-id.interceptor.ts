@@ -1,6 +1,6 @@
-import { DOCUMENT } from '@angular/common';
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { LocalStorageService } from '../_services/local-storage.service';
 
 const excludedUrlsFromUserIdInterception = [
   'https://accounts.google.com/.well-known/openid-configuration',
@@ -8,18 +8,14 @@ const excludedUrlsFromUserIdInterception = [
 ];
 
 export const userIdInterceptor: HttpInterceptorFn = (req, next) => {
-  const document = inject(DOCUMENT);
+  const lsService = inject(LocalStorageService);
   if (excludedUrlsFromUserIdInterception.includes(req.url)) {
     return next(req);
   }
 
-  debugger;
   const clonedRequest = req.clone({
     setHeaders: {
-      ['authorization']: `Bearer ${document.cookie.replace(
-        'access_token=',
-        ''
-      )}`,
+      ['authorization']: `Bearer ${lsService.getCookie('access_token', true)}`,
     },
   });
   return next(clonedRequest);

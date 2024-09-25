@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 
 export const UserId = createParamDecorator(
-  (_data: unknown, context: ExecutionContext) => {
+  (_data: unknown, context: ExecutionContext): string => {
     const request = context.switchToHttp().getRequest();
     if (!request?.['user']) {
       throw new UnauthorizedException(

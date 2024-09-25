@@ -1,11 +1,12 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { AuthSource, IdentityClaim } from '../typings/common';
-import { Observable, Subject, filter, from, of, take } from 'rxjs';
+import { Observable, Subject, filter, from, map, of, take } from 'rxjs';
 import { Router } from '@angular/router';
 import { AlertInteractionService } from './alert-interaction.service';
-import { DOCUMENT } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
+import { LocalStorageService } from './local-storage.service';
 
-type UserJwtPayload = {
+export type UserJwtPayload = {
   sub: number;
   iat: number;
   email: string;
@@ -18,7 +19,8 @@ type UserJwtPayload = {
 export class AuthService {
   #router = inject(Router);
   #alertService = inject(AlertInteractionService);
-  #document = inject(DOCUMENT);
+  #lsService = inject(LocalStorageService);
+  #isPlatformBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   #authButtonClicked$: Subject<AuthSource> = new Subject<AuthSource>();
 
   emitAuthButtonClicked(authSource: AuthSource): void {
@@ -29,21 +31,27 @@ export class AuthService {
     return this.#authButtonClicked$.asObservable();
   }
 
-  logout(): void {
-    this.#document.cookie = '';
+  logout(reason?: string): void {
+    this.#lsService.deleteCookie('access_token');
     this.#router.navigate(['']);
-    this.#alertService.success('You have been logged out successfully');
+    this.#alertService.success(
+      'You have been logged out successfully' + (reason ?? '')
+    );
   }
 
-  hasUserHaveValidToken(): boolean {
-    if (!this.#document.cookie) {
+  hasUserValidToken(userJwtPayload: UserJwtPayload | null): boolean {
+    if (!this.#isPlatformBrowser || !userJwtPayload) {
       return false;
     }
 
     const timeFromNow = new Date().getTime();
-    return (
-      timeFromNow < new Date(timeFromNow + this.getUserPayload()!.iat).getTime()
-    );
+    return timeFromNow < new Date(timeFromNow + userJwtPayload.iat).getTime();
+  }
+
+  observeHasUserValidToken(): Observable<boolean> {
+    return this.#lsService
+      .observeAccessTokenChange()
+      .pipe(map(this.hasUserValidToken.bind(this)));
   }
 
   getUserPayloadValues<T extends keyof UserJwtPayload>(
@@ -56,9 +64,7 @@ export class AuthService {
   }
 
   getUserPayload(): UserJwtPayload | null {
-    if (this.#document.cookie) {
-      return JSON.parse(window.atob(this.#document.cookie.split('.')[1]));
-    } else return null;
+    return this.#lsService.getCookie('access_token');
   }
 
   getUserId(): string | undefined {

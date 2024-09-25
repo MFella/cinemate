@@ -1,6 +1,6 @@
 <ng-template #navButtonContainer let-vertical="vertical">
   <button
-    *ngIf="!isUserHasValidToken(); else validTokenTemplateRef"
+    *ngIf="!isUserHasValidToken; else validTokenTemplateRef"
     [routerLink]="['./']"
     [routerLinkActive]="['active']"
     [routerLinkActiveOptions]="{ exact: true }"
@@ -39,7 +39,7 @@
   <div
     class="user-app-preferences-container"
     [ngClass]="{
-      'border-r-[1px] pr-4': isUserHasValidToken(),
+      'border-r-[1px] pr-4': isUserHasValidToken,
       'is-vertical': vertical
     }">
     <button
@@ -57,7 +57,7 @@
   </div>
   <div
     class="flex items-center justify-center"
-    *ngIf="isUserHasValidToken()"
+    *ngIf="isUserHasValidToken"
     [ngClass]="{
       'ml-4': !vertical,
       'p-4 rounded-xl shadow-lg': vertical

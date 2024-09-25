@@ -21,7 +21,7 @@ import { Memoize } from '../_decorators/memoize.decorator';
 export class RestDataService extends BasicRestDataService {
   voteMovie(
     vote: MovieRate,
-    movieId: string,
+    movieId: number,
     pageNumber: number | null
   ): Observable<RateResultDto> {
     return this.post<RateResultDto>(`movies/rate`, {

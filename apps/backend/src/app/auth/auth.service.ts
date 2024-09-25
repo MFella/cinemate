@@ -15,14 +15,8 @@ import {
   OauthGoogleUserInfo,
 } from '../typings/common';
 
-type UserToRegister = {
-  id: number;
-  email: string;
-  picture: string;
-};
-
 type UserJwtPayload = {
-  sub: number;
+  sub: string;
   email: string;
   picture: string;
 };
@@ -67,7 +61,7 @@ export class AuthService {
     }
 
     return this.generateJwt({
-      sub: userFromDb.id.toNumber(),
+      sub: userFromDb.id.toString(),
       email: userFromDb.email,
       picture: userFromDb.picture,
     });

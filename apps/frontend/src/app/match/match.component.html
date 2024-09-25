@@ -1,8 +1,14 @@
 <div class="flex justify-center items-center">
+  @if (matDialogData) {
+  <button
+    class="!absolute top-4 right-4 z-[2]"
+    mat-mini-fab
+    aria-label="Example icon button with a menu icon"
+    (click)="closeDialog()">
+    <mat-icon>close</mat-icon>
+  </button>
+  }
   <mat-card class="match-card overflow-hidden !rounded-xl">
-    <!-- <div class="current-movie-img h-full w-full absolute"
-    [ngStyle]="getMoviePosterStyles(currentMovie.posterPath)">
-    </div> -->
     <img
       class="current-movie-img h-full w-full absolute"
       [ngSrc]="getMovieUrl(currentMovie.posterPath)"
@@ -10,7 +16,6 @@
       height="30"
       priority
       [ngStyle]="getMoviePosterStyles(currentMovie.posterPath)" />
-    <!-- <img mat-card-image [src]="getMoviePosterSrc(currentMovie.posterPath)" alt="Photo of current movie" class="current-movie-img shadow-lg !rounded-xl !absolute"> -->
 
     <mat-card-header>
       <mat-card-title class="!flex !justify-center"
@@ -19,7 +24,7 @@
         </h1></mat-card-title
       >
       <mat-card-subtitle class="!flex !justify-between !pt-4">
-        <mat-chip-set class="flex-col">
+        <mat-chip-set class="flex-col max-w-20">
           <mat-chip class="year-container"
             >{{ currentMovie.releaseDate?.split('-')?.at(0) }}
           </mat-chip>
@@ -50,7 +55,21 @@
       <p>{{ currentMovie.overview }}</p>
     </mat-card-content>
     <mat-divider></mat-divider>
-    @if (!matDialogData) {
+    @if (matDialogData) {
+    <mat-slide-toggle
+      class="is-movie-watched-slide-toggle"
+      #slideToggleRef
+      [checked]="matDialogData.matchedMovie.isWatched"
+      (click)="
+        updateIsMovieWatched(
+          matDialogData.movie,
+          matDialogData.matchedMovie,
+          $event,
+          slideToggleRef
+        )
+      ">
+    </mat-slide-toggle>
+    } @else {
     <mat-card-actions class="mx-2 mb-2">
       <button
         *ngFor="let item of markActions"
@@ -63,13 +82,5 @@
       </button>
     </mat-card-actions>
     }
-    <mat-card-footer>
-      <!-- <mat-expansion-panel hideToggle class="border-t-2">
-        <mat-expansion-panel-header>
-          <mat-panel-title> Description </mat-panel-title>
-        </mat-expansion-panel-header>
-        <p>{{ currentMovie.overview }}</p>
-      </mat-expansion-panel> -->
-    </mat-card-footer>
   </mat-card>
 </div>

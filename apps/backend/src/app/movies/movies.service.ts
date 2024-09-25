@@ -53,7 +53,7 @@ export class MoviesService {
   }
 
   async getMoviesData(
-    userId: number,
+    userId: string,
     shouldLoadNextPage: 0 | 1
   ): Promise<MoviesListDTO> {
     if (shouldLoadNextPage !== 1) {
@@ -208,7 +208,7 @@ export class MoviesService {
   }
 
   async retrieveMovieListDtoFromDb(
-    userId: number,
+    userId: string,
     pageOfMovie?: PageOfMovie
   ): Promise<MoviesListDTO> {
     const userFromDb = await this.prismaService.user.findFirst({
@@ -294,7 +294,7 @@ export class MoviesService {
 
   private async saveMovieListDto(
     moviesListDto: MoviesListDTO,
-    userId: number,
+    userId: string,
     currentPageNumber: number
   ): Promise<void> {
     // prisma work ...
@@ -399,7 +399,7 @@ export class MoviesService {
   async rateMovie(
     movieId: number,
     rate: Rate,
-    userId: number
+    userId: string
   ): Promise<RateResultDto> {
     const rateFromDb = await this.prismaService.rate.findFirst({
       where: {
@@ -501,7 +501,7 @@ export class MoviesService {
   }
 
   async markMovieToWatch(
-    userId: number,
+    userId: string,
     movieId: number,
     isWatched: boolean
   ): Promise<boolean> {
@@ -671,7 +671,7 @@ export class MoviesService {
   }
 
   private async getTmdbMovieRequestOptions(
-    userId: number,
+    userId: string,
     shouldLoadNextPage?: 0 | 1
   ): Promise<TmdbMovieGetListRequestOptions> {
     const userGenreFromDb = await this.prismaService.user.findFirst({

@@ -28,10 +28,9 @@ export class MoviesController {
 
   @Get()
   async getMoviesList(
-    @UserId() userId: number,
+    @UserId() userId: string,
     @Query() moviesListQuery: Record<'shouldLoadNextPage', '0' | '1'>
   ): Promise<MoviesListDTO> {
-    console.log('hehe', userId);
     return this.moviesService.getMoviesData(
       userId,
       parseInt(moviesListQuery.shouldLoadNextPage) as 0 | 1
@@ -47,7 +46,7 @@ export class MoviesController {
 
   @Post('rate')
   async rateMovie(
-    @UserId() userId: number,
+    @UserId() userId: string,
     @Body() rateOfMovie: RateOfMovie
   ): Promise<RateResultDto> {
     return this.moviesService.rateMovie(
@@ -59,7 +58,7 @@ export class MoviesController {
 
   @Put('mark-watch')
   async markMovieToWatch(
-    @UserId() userId: number,
+    @UserId() userId: string,
     @Body() markMovieToWatchBody: markMovieToWatchBody
   ): Promise<boolean> {
     return this.moviesService.markMovieToWatch(

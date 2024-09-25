@@ -3,29 +3,25 @@ import {
   Component,
   Input,
   OnDestroy,
+  OnInit,
   Output,
-  PLATFORM_ID,
   inject,
 } from '@angular/core';
 import { MediaMatcher } from '@angular/cdk/layout';
-import {
-  CommonModule,
-  isPlatformServer,
-  NgIf,
-  NgOptimizedImage,
-} from '@angular/common';
+import { CommonModule, NgIf, NgOptimizedImage } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import type { AppTheme } from '../typings/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
-import { AuthService } from '../_services/auth.service';
-import { Subject } from 'rxjs';
+import { AuthService, UserJwtPayload } from '../_services/auth.service';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CustomTooltipDirective } from '../_directives/custom-tooltip.directive';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
+import { LocalStorageService } from '../_services/local-storage.service';
 
 @Component({
   selector: 'app-nav',
@@ -47,10 +43,10 @@ import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
   templateUrl: './nav.component.html',
   styleUrl: './nav.component.scss',
 })
-export class NavComponent implements OnDestroy {
+export class NavComponent implements OnDestroy, OnInit {
   #authService = inject(AuthService);
   #changeDetectorRef = inject(ChangeDetectorRef);
-  #platformId = inject(PLATFORM_ID);
+  #lsService = inject(LocalStorageService);
 
   @Input()
   selectedTheme!: AppTheme;
@@ -59,6 +55,7 @@ export class NavComponent implements OnDestroy {
   readonly toggleTheme$: Subject<AppTheme> = new Subject<AppTheme>();
 
   mobileQuery: MediaQueryList;
+  isUserHasValidToken: boolean = false;
 
   private _mobileQueryListener: () => void;
 
@@ -68,6 +65,10 @@ export class NavComponent implements OnDestroy {
     this.mobileQuery = media.matchMedia('(max-width: 700px)');
     this._mobileQueryListener = () => this.#changeDetectorRef.detectChanges();
     this.mobileQuery.addListener(this._mobileQueryListener);
+  }
+
+  ngOnInit(): void {
+    this.observeHasUserValidToken();
   }
 
   ngOnDestroy(): void {
@@ -88,22 +89,26 @@ export class NavComponent implements OnDestroy {
     return userPayload?.picture;
   }
 
-  isUserHasValidToken(): boolean {
-    if (isPlatformServer(this.#platformId)) {
-      return false;
-    }
-
-    return this.#authService.hasUserHaveValidToken();
-  }
-
   logoutUser(): void {
-    debugger;
-    this.#authService.logout();
+    this.#lsService.deleteCookie('access_token');
     this.#changeDetectorRef.detectChanges();
   }
 
   toggleSidenav(matSidenav: MatSidenav): void {
     matSidenav.toggle();
     this.#changeDetectorRef.detectChanges();
+  }
+
+  private observeHasUserValidToken(): void {
+    this.#authService
+      .observeHasUserValidToken()
+      // .pipe(debounceTime(200))
+      .subscribe((isTokenValid: boolean) => {
+        if (!isTokenValid && isTokenValid !== this.isUserHasValidToken) {
+          this.#authService.logout();
+        }
+
+        this.isUserHasValidToken = isTokenValid;
+      });
   }
 }

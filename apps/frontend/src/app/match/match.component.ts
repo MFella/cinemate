@@ -18,6 +18,7 @@ import type {
   MovieInitData,
   MovieToRate,
   RateResultDto,
+  MatchedMovie,
 } from '../typings/common';
 import { ActivatedRoute } from '@angular/router';
 import { map, take } from 'rxjs';
@@ -28,7 +29,11 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatChipsModule } from '@angular/material/chips';
 import { MarkButtonData } from '../components/movie-detail/movie-detail.component';
 import { MatIconModule } from '@angular/material/icon';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MatSlideToggle,
+  MatSlideToggleModule,
+} from '@angular/material/slide-toggle';
 
 @Component({
   selector: 'app-match',
@@ -44,6 +49,7 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
     MatChipsModule,
     NgOptimizedImage,
     MatIconModule,
+    MatSlideToggleModule,
   ],
   providers: [],
   templateUrl: './match.component.html',
@@ -56,6 +62,9 @@ export class MatchComponent implements OnInit {
   private static readonly POSTER_URL_PLACEHOLDER = './assets/no-image.svg';
 
   readonly matDialogData = inject(MAT_DIALOG_DATA, { optional: true });
+  readonly matDialogRef = inject(MatDialogRef, { optional: true });
+  readonly #restDataService = inject(RestDataService);
+  readonly #alertInteractionService = inject(AlertInteractionService);
   isRequestPended: boolean = false;
 
   markActions: Array<MarkButtonData> = [
@@ -152,6 +161,33 @@ export class MatchComponent implements OnInit {
       : MatchComponent.POSTER_URL_PLACEHOLDER;
   }
 
+  closeDialog(): void {
+    this.matDialogRef?.close();
+  }
+
+  updateIsMovieWatched(
+    matchedRate: MovieToRate,
+    matchedMovie: MatchedMovie,
+    $event: MouseEvent,
+    slideToggleRef: MatSlideToggle
+  ): void {
+    $event.stopPropagation();
+    this.#restDataService
+      .saveIsMovieWatched(matchedRate.id as any, !matchedMovie.isWatched)
+      .pipe(take(1))
+      .subscribe((isResultSaved: boolean) => {
+        if (!isResultSaved) {
+          slideToggleRef.writeValue(matchedMovie.isWatched);
+          this.#alertInteractionService.error(
+            'Movie "is-watched" cannot be saved'
+          );
+        } else {
+          matchedMovie.isWatched = !matchedMovie.isWatched;
+          slideToggleRef.setDisabledState(false);
+        }
+      });
+  }
+
   private resolvePageNumber(): number | null {
     if (this.pageNumber === null) {
       return this.pageNumber;
@@ -194,6 +230,5 @@ export class MatchComponent implements OnInit {
 
   private assignMatDialogData(): void {
     this.currentMovie = this.matDialogData.movie;
-    debugger;
   }
 }

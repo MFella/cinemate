@@ -1,5 +1,5 @@
 <form
-  *ngIf="isInSearchMode; else matchTable"
+  *ngIf="isInSearchMode; else matchMatrix"
   class="search-user-form flex justify-center"
   [formGroup]="searchUserForm">
   <mat-card class="w-full" appearance="outlined">
@@ -65,68 +65,12 @@
         <mat-icon>search</mat-icon>
         <span>Find</span>
       </button>
-      <!-- <button class="w-full" mat-raised-button>Basic</button> -->
     </mat-card-footer>
   </mat-card>
 </form>
 
-<ng-template #matchTable>
-  <div class="flex justify-between items-center mb-4 min-w-96">
-    <div class="flex justify-between items-center border-r-2 w-full">
-      <button
-        mat-fab
-        aria-label="Return to search form"
-        color="accent"
-        class="mr-4"
-        matTooltip="Go back"
-        (click)="returnToSearchMode()">
-        <mat-icon>arrow_back</mat-icon>
-      </button>
-      <div class="w-full flex" [formGroup]="filterMatchResultForm">
-        <mat-form-field class="w-full">
-          <mat-label>Search by movie title</mat-label>
-          <input
-            matInput
-            placeholder="No country for old man"
-            value=""
-            formControlName="movieTitle" />
-        </mat-form-field>
-        <button
-          (click)="openFilterSettingsSelect()"
-          mat-fab
-          aria-label="Select to filter list of rates"
-          color="warn"
-          class="ml-4 mr-2 overflow-hidden open-filter-settings-select"
-          matTooltip="More filters">
-          <mat-icon class="absolute">settings</mat-icon>
-          <mat-form-field class="w-full mt-4 invisible -z-1">
-            <mat-select
-              #filterSelect
-              formControlName="filter"
-              multiple
-              formControlName="moreFilters">
-              @for (filterOption of filterOptions; track $index) {
-              <mat-option [value]="filterOption.value">
-                {{ filterOption.label }}
-              </mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </button>
-      </div>
-    </div>
-    <button
-      mat-fab
-      aria-label="Search for rated movie"
-      color="primary"
-      class="ml-2"
-      matTooltip="Filter table"
-      (click)="filterMatchResultList()">
-      <mat-icon>search</mat-icon>
-    </button>
-  </div>
+<!-- <ng-template #matchTable>
 
-  <!-- Implement dataSource as stream -->
   <table
     *ngIf="findMatchResult?.matchedRates?.length; else noResultFoundRef"
     mat-table
@@ -178,4 +122,73 @@
   <ng-template #noResultFoundRef>
     <h2 class="w-full text-center">No result found 😶</h2>
   </ng-template>
+</ng-template> -->
+<ng-template #matchMatrix>
+  <div class="filter-results__container flex justify-center items-center mb-4">
+    <div class="flex justify-between items-center border-r-2">
+      <button
+        mat-fab
+        aria-label="Return to search form"
+        color="accent"
+        class="mr-4"
+        matTooltip="Go back"
+        (click)="returnToSearchMode()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="w-full flex items-center" [formGroup]="filterMatchResultForm">
+        <mat-form-field class="md:!min-w-96 sm:!min-w-44">
+          <mat-label>Search by movie title</mat-label>
+          <input
+            matInput
+            placeholder="No country for old man"
+            value=""
+            formControlName="movieTitle" />
+        </mat-form-field>
+        <button
+          (click)="openFilterSettingsSelect()"
+          mat-fab
+          aria-label="Select to filter list of rates"
+          color="warn"
+          class="ml-4 mr-2 overflow-hidden open-filter-settings-select"
+          matTooltip="More filters">
+          <mat-icon class="absolute">settings</mat-icon>
+          <mat-form-field class="w-full mt-4 invisible -z-1">
+            <mat-select
+              #filterSelect
+              formControlName="filter"
+              multiple
+              formControlName="moreFilters">
+              @for (filterOption of filterOptions; track $index) {
+              <mat-option [value]="filterOption.value">
+                {{ filterOption.label }}
+              </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </button>
+      </div>
+    </div>
+    <button
+      mat-fab
+      aria-label="Search for rated movie"
+      color="primary"
+      class="ml-2"
+      matTooltip="Filter table"
+      (click)="filterMatchResultList()">
+      <mat-icon>search</mat-icon>
+    </button>
+  </div>
+  @if (matchedMovies$.getValue().length) {
+  <div
+    class="founds-movie__container grid lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-2 gap-4 p-8">
+    @for (item of matchedMovies$.asObservable() | async; track $index) {
+    <app-movie-preview
+      [posterPath]="item.movie.posterPath"
+      (click)="openMovieInfoDialog(item)"
+      class="rounded-xl shadow-lg hover:cursor-pointer overflow-hidden"></app-movie-preview>
+    }
+  </div>
+  } @else {
+  <h2 class="w-full text-center">No results found 😶</h2>
+  }
 </ng-template>

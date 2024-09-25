@@ -77,8 +77,7 @@ export type MovieInitData = {
 };
 
 export interface MovieToRate {
-  id: string;
-  movieId: number;
+  id: number;
   genreIds?: number[] | null;
   posterPath: string;
   releaseDate: string;
@@ -105,7 +104,7 @@ export type FindMatchResult = {
 };
 
 export type MatchedMovie = {
-  id: string;
+  id: number;
   movie: MovieToRate;
   user: Record<'id' | 'email', string>;
   isWatched: boolean;

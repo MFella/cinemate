@@ -63,6 +63,7 @@ import { MovieDetailComponent } from '../components/movie-detail/movie-detail.co
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AlertInteractionService } from '../_services/alert-interaction.service';
 import { MatchComponent } from '../match/match.component';
+import { MoviePreviewComponent } from '../movie-preview/movie-preview.component';
 
 @Component({
   selector: 'app-find',
@@ -83,6 +84,7 @@ import { MatchComponent } from '../match/match.component';
     MatTableModule,
     MatSlideToggleModule,
     MatTooltipModule,
+    MoviePreviewComponent,
   ],
   providers: [
     {
@@ -184,7 +186,7 @@ export class FindComponent implements OnInit {
           this.searchUserForm.get('genre')?.setValue(userGenreId);
       });
 
-    of(this.allUsers).subscribe((response: Array<string>) => {
+    of(this.allUsers).subscribe(() => {
       this.selectedEmails.update(fetchedUsers => [...fetchedUsers]);
     });
   }
@@ -219,28 +221,36 @@ export class FindComponent implements OnInit {
   }
 
   getUserMatch(): void {
+    this.#alertInteractionService.isLoadingSpinnerActive$.next(true);
     this.#restDataService
       .fetchUserMatch(
         this.searchUserForm.value.genre,
         this.searchUserForm.value.mailOfUsers
       )
       .pipe(take(1), takeUntilDestroyed(this.#destroyRef))
-      .subscribe((findMatchResult: FindMatchResult) => {
-        this.findMatchResult = findMatchResult;
-        this.matchedMovies$.next(findMatchResult.matchedRates);
-        this.isInSearchMode = false;
-      });
+      .subscribe(
+        (findMatchResult: FindMatchResult) => {
+          this.findMatchResult = findMatchResult;
+          this.matchedMovies$.next(findMatchResult.matchedRates);
+          this.isInSearchMode = false;
+        },
+        () => {},
+        () => {
+          this.#alertInteractionService.isLoadingSpinnerActive$.next(false);
+        }
+      );
   }
 
-  async openMovieInfoDialog(movieId: number): Promise<void> {
+  async openMovieInfoDialog(matchedMovie: MatchedMovie): Promise<void> {
     this.#restDataService
-      .fetchMovieData(movieId)
+      .fetchMovieData(matchedMovie.movie.id)
       .pipe(take(1))
       .subscribe((movieToRate: MovieToRate) => {
-        debugger;
         this.#matDialog.open(MatchComponent, {
+          panelClass: 'movie-detail-dialog',
           data: {
             withActionButtons: false,
+            matchedMovie,
             movie: movieToRate,
           },
         });
@@ -253,30 +263,6 @@ export class FindComponent implements OnInit {
 
     // clear state of fetched rate results
     this.findMatchResult = null;
-  }
-
-  updateIsMovieWatched(
-    matchedRate: MatchedMovie,
-    $event: MouseEvent,
-    slideToggleRef: MatSlideToggle
-  ): void {
-    $event.stopPropagation();
-    // slideToggleRef.setDisabledState(true);
-    debugger;
-    this.#restDataService
-      .saveIsMovieWatched(matchedRate.movie.id as any, !matchedRate.isWatched)
-      .pipe(take(1))
-      .subscribe((isResultSaved: boolean) => {
-        if (!isResultSaved) {
-          slideToggleRef.writeValue(matchedRate.isWatched);
-          this.#alertInteractionService.error(
-            'Movie "is-watched" cannot be saved'
-          );
-        } else {
-          matchedRate.isWatched = !matchedRate.isWatched;
-          slideToggleRef.setDisabledState(false);
-        }
-      });
   }
 
   openFilterSettingsSelect(): void {

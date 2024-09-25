@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   HttpStatus,
   Post,
@@ -33,7 +34,7 @@ export class AuthController {
     );
 
     response.cookie('access_token', accessToken, {
-      maxAge: 3600 * 24,
+      maxAge: 3600 * 24 * 1000,
       sameSite: true,
       secure: false,
     });

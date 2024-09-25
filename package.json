@@ -38,6 +38,7 @@
     "joi": "^17.13.3",
     "jwks-rsa": "^3.1.0",
     "ng-angular-popup": "^0.6.2",
+    "ngx-cookie-service-ssr": "^17.1.0",
     "openid-client": "^5.7.0",
     "passport": "^0.7.0",
     "passport-facebook": "^3.0.0",

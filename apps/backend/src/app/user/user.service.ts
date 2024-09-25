@@ -139,7 +139,6 @@ export class UserService {
       },
     });
 
-    console.log('user ', userFromDb);
     if (Object.values(userFromDb ?? {})?.length) {
       Logger.log('User already registered');
       return userFromDb;

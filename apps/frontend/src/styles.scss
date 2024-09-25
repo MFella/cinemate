@@ -43,6 +43,10 @@ $dark-theme: mat.define-dark-theme(
   )
 );
 
+.movie-detail-dialog .mat-mdc-dialog-container {
+  @apply overflow-hidden rounded-xl;
+}
+
 /* You can add global styles to this file, and also import other style files */
 :root {
   --mdc-text-button-container-shape: 9999px;
