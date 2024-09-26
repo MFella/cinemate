@@ -22,14 +22,23 @@
 }
 
 .is-movie-watched-slide-toggle {
-  @apply backdrop-blur-3xl backdrop-contrast-50 flex justify-center p-4 mt-2;
+  @apply flex hover:cursor-pointer p-2 rounded-xl shadow-inner z-[1];
+  &__container {
+    @apply flex justify-center p-2 mt-2 relative;
+    .slide-toggle__background-container {
+      @apply absolute w-full h-full m-0 backdrop-contrast-50 top-0;
+    }
+  }
 
   &:before {
-    @apply pr-2 text-gray-50;
-    content: 'Is watched: ';
+    @apply pr-2 text-gray-50 font-semibold;
+    content: 'Is watched ';
   }
 }
 ::ng-deep {
+  .mat-mdc-chip {
+    border: 1px solid rgba(0, 0, 0, 0.3);
+  }
   .mat-mdc-card-header-text {
     width: 100%;
   }

@@ -1,5 +1,9 @@
+:host {
+  @apply w-full px-4 lg:max-w-[960px] md:max-w-[600px];
+}
+
 ::ng-deep {
-    .mdc-notched-outline__notch {
-        border-right: none;
-    }
+  .mdc-notched-outline__notch {
+    border-right: none;
+  }
 }

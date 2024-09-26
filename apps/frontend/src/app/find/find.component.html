@@ -125,7 +125,7 @@
 </ng-template> -->
 <ng-template #matchMatrix>
   <div class="filter-results__container flex justify-center items-center mb-4">
-    <div class="flex justify-between items-center border-r-2">
+    <div class="flex justify-between items-center">
       <button
         mat-fab
         aria-label="Return to search form"
@@ -189,6 +189,9 @@
     }
   </div>
   } @else {
-  <h2 class="w-full text-center">No results found 😶</h2>
+  <h2
+    class="no-results-found-header w-full text-center p-4 rounded-xl shadow-inner">
+    No results found 😶
+  </h2>
   }
 </ng-template>

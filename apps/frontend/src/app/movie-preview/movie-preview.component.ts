@@ -28,4 +28,8 @@ export class MoviePreviewComponent {
       ? MoviePreviewComponent.POSTER_URL_PREFIX + this.posterPath
       : MoviePreviewComponent.POSTER_URL_PLACEHOLDER;
   }
+
+  getMoviePosterPlaceholderUrl(): string {
+    return MoviePreviewComponent.POSTER_URL_PLACEHOLDER;
+  }
 }

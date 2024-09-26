@@ -1,9 +1,9 @@
 <div class="flex justify-center items-center">
   @if (matDialogData) {
   <button
-    class="!absolute top-4 right-4 z-[2]"
+    class="!absolute top-2 right-2 z-[2] !w-8 !h-8 overflow-hidden"
     mat-mini-fab
-    aria-label="Example icon button with a menu icon"
+    aria-label="Close dialog button"
     (click)="closeDialog()">
     <mat-icon>close</mat-icon>
   </button>
@@ -56,19 +56,22 @@
     </mat-card-content>
     <mat-divider></mat-divider>
     @if (matDialogData) {
-    <mat-slide-toggle
-      class="is-movie-watched-slide-toggle"
-      #slideToggleRef
-      [checked]="matDialogData.matchedMovie.isWatched"
-      (click)="
-        updateIsMovieWatched(
-          matDialogData.movie,
-          matDialogData.matchedMovie,
-          $event,
-          slideToggleRef
-        )
-      ">
-    </mat-slide-toggle>
+    <div class="is-movie-watched-slide-toggle__container">
+      <div class="slide-toggle__background-container"></div>
+      <mat-slide-toggle
+        class="is-movie-watched-slide-toggle"
+        #slideToggleRef
+        [checked]="matDialogData.matchedMovie.isWatched"
+        (click)="
+          updateIsMovieWatched(
+            matDialogData.movie,
+            matDialogData.matchedMovie,
+            $event,
+            slideToggleRef
+          )
+        ">
+      </mat-slide-toggle>
+    </div>
     } @else {
     <mat-card-actions class="mx-2 mb-2">
       <button
