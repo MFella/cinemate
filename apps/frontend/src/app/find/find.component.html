@@ -8,7 +8,7 @@
     </mat-card-header>
     <mat-divider></mat-divider>
     <mat-card-content class="!flex !flex-col m-4">
-      <mat-form-field>
+      <mat-form-field class="mail-of-users">
         <mat-label>Put mails</mat-label>
         <mat-chip-grid
           #chipGrid
@@ -68,61 +68,6 @@
     </mat-card-footer>
   </mat-card>
 </form>
-
-<!-- <ng-template #matchTable>
-
-  <table
-    *ngIf="findMatchResult?.matchedRates?.length; else noResultFoundRef"
-    mat-table
-    [dataSource]="matchedMovies$.asObservable()"
-    class="mat-elevation-z8 rounded-lg overflow-hidden"
-    (scroll)="matchTableScrolled$.next($event)">
-    <ng-container matColumnDef="view-details">
-      <th mat-header-cell *matHeaderCellDef></th>
-      <td mat-cell *matCellDef="let matchedRate">
-        <button
-          mat-mini-fab
-          aria-label="More information about the movie"
-          matTooltip="More information about the movie"
-          (click)="openMovieInfoDialog(matchedRate.movie.id)">
-          <mat-icon>info</mat-icon>
-        </button>
-      </td>
-    </ng-container>
-
-    <ng-container matColumnDef="movie">
-      <th mat-header-cell *matHeaderCellDef><strong>Movie</strong></th>
-      <td mat-cell *matCellDef="let matchedRate">
-        {{ matchedRate.movie.title }}
-      </td>
-    </ng-container>
-
-    <ng-container matColumnDef="email">
-      <th mat-header-cell *matHeaderCellDef><strong>User</strong></th>
-      <td mat-cell *matCellDef="let matchedRate">
-        {{ matchedRate.user.email }}
-      </td>
-    </ng-container>
-
-    <ng-container matColumnDef="is-watched">
-      <th mat-header-cell *matHeaderCellDef><strong>Did you watch?</strong></th>
-      <td mat-cell *matCellDef="let matchedRate" class="!text-center">
-        <mat-slide-toggle
-          #slideToggleRef
-          [checked]="matchedRate.isWatched"
-          (click)="updateIsMovieWatched(matchedRate, $event, slideToggleRef)">
-        </mat-slide-toggle>
-      </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="displayMatchTableColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayMatchTableColumns"></tr>
-  </table>
-
-  <ng-template #noResultFoundRef>
-    <h2 class="w-full text-center">No result found 😶</h2>
-  </ng-template>
-</ng-template> -->
 <ng-template #matchMatrix>
   <div class="filter-results__container flex justify-center items-center mb-4">
     <div class="flex justify-between items-center">
@@ -130,7 +75,7 @@
         mat-fab
         aria-label="Return to search form"
         color="accent"
-        class="mr-4"
+        class="mr-4 go-back-button"
         matTooltip="Go back"
         (click)="returnToSearchMode()">
         <mat-icon>arrow_back</mat-icon>
@@ -180,7 +125,7 @@
   </div>
   @if (matchedMovies$.getValue().length) {
   <div
-    class="founds-movie__container grid lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-2 gap-4 p-8">
+    class="found-movies__container grid lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-2 gap-4 p-8">
     @for (item of matchedMovies$.asObservable() | async; track $index) {
     <app-movie-preview
       [posterPath]="item.movie.posterPath"
