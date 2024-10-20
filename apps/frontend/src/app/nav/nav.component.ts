@@ -14,11 +14,10 @@ import { MatIconModule } from '@angular/material/icon';
 import type { AppTheme } from '../typings/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
-import { AuthService, UserJwtPayload } from '../_services/auth.service';
-import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { AuthService } from '../_services/auth.service';
+import { Subject } from 'rxjs';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { CustomTooltipDirective } from '../_directives/custom-tooltip.directive';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { LocalStorageService } from '../_services/local-storage.service';
@@ -35,7 +34,6 @@ import { LocalStorageService } from '../_services/local-storage.service';
     RouterModule,
     MatDividerModule,
     MatTooltipModule,
-    CustomTooltipDirective,
     MatMenuModule,
     MatSidenavModule,
     NgOptimizedImage,
@@ -55,7 +53,7 @@ export class NavComponent implements OnDestroy, OnInit {
   readonly toggleTheme$: Subject<AppTheme> = new Subject<AppTheme>();
 
   mobileQuery: MediaQueryList;
-  isUserHasValidToken: boolean = false;
+  isUserHasValidToken = false;
 
   private _mobileQueryListener: () => void;
 

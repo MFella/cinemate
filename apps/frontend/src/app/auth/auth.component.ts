@@ -22,8 +22,8 @@ import { AuthSource } from '../typings/common';
   providers: [],
 })
 export class AuthComponent {
-  username: string = '';
-  password: string = '';
+  username = '';
+  password = '';
 
   constructor(private readonly authService: AuthService) {}
 

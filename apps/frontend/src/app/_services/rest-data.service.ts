@@ -10,7 +10,7 @@ import {
   UserMatchFilterOptions,
   AuthSource,
 } from '../typings/common';
-import { debounceTime, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { BasicRestDataService } from './basic-rest-data.service';
 import { HttpParams } from '@angular/common/http';
 import { Memoize } from '../_decorators/memoize.decorator';
@@ -31,9 +31,7 @@ export class RestDataService extends BasicRestDataService {
     });
   }
 
-  fetchMoviesData(
-    shouldLoadNextPage: boolean = false
-  ): Observable<MovieInitData> {
+  fetchMoviesData(shouldLoadNextPage = false): Observable<MovieInitData> {
     return this.get<MovieInitData>(
       `movies?shouldLoadNextPage=${+shouldLoadNextPage}`
     );
@@ -52,7 +50,7 @@ export class RestDataService extends BasicRestDataService {
     return this.get<Array<GenEntity>>('user/preferences');
   }
 
-  fetchUsersEmails(startsWith: string = ''): Observable<Array<string>> {
+  fetchUsersEmails(startsWith = ''): Observable<Array<string>> {
     return this.get<Array<string>>(`user/emails?startsWith=${startsWith}`);
   }
 
@@ -67,7 +65,7 @@ export class RestDataService extends BasicRestDataService {
     httpParams = httpParams.append('genreId', genreId);
     httpParams = httpParams.appendAll({ mailOfUsers: ['', ...userEmails] });
 
-    for (let key in userMatchFilterOptions) {
+    for (const key in userMatchFilterOptions) {
       if (
         (userMatchFilterOptions as unknown as Record<string, string | number>)[
           key

@@ -10,7 +10,6 @@ import { ConfigModule } from '@nestjs/config';
 import baseConfiguration from './configuration/base-configuration';
 import { BaseRestDataService } from './common/base-rest-data.service';
 import { AuthModule } from './auth/auth.module';
-import { AuthGuard } from './_guards/auth.guard';
 
 @Module({
   imports: [
@@ -18,13 +17,6 @@ import { AuthGuard } from './_guards/auth.guard';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [baseConfiguration],
-      // validationSchema: Joi.object({
-      //   PORT: Joi.number().port().default(3000),
-      //   DATABASE_URL: Joi.string(),
-      //   DIRECT_URL: Joi.string(),
-      //   TMDB_API_TOKEN: Joi.string(),
-      //   TMDB_API_URL: Joi.string()
-      // })
     }),
     AuthModule,
   ],

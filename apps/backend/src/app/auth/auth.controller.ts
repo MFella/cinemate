@@ -1,10 +1,7 @@
 import {
   Controller,
-  Delete,
   Get,
   HttpStatus,
-  Post,
-  Req,
   Request,
   Response,
   UseGuards,
@@ -22,12 +19,13 @@ export class AuthController {
   ) {}
 
   @Get('google')
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   async loginUser(): Promise<void> {}
 
   @Get('google/cb')
   async afterGoogleAuthCallback(
-    @Request() request: any,
-    @Response() response: any
+    @Request() request,
+    @Response() response
   ): Promise<void> {
     const accessToken = await this.authService.signInUser<'google'>(
       request.user

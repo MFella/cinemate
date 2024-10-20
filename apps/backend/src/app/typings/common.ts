@@ -1,4 +1,4 @@
-import { MovieToRate, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { TransformedTmdbMovie } from '../dtos/movies-list.dto';
 
 export const genres = [

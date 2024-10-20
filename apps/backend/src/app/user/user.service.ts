@@ -7,7 +7,7 @@ import {
 import { PrismaService } from '../database/prisma.service';
 import { genres, Genres } from '../typings/common';
 import { UserPreferenceDto } from '../dtos/user-preference.dto';
-import { Genre, MovieToRate, RateValue, User } from '@prisma/client';
+import { Genre, RateValue, User } from '@prisma/client';
 import { FindMatchResultDto } from '../dtos/user/find-match-result.dto';
 import { Rate } from '../dtos/rate-of-movie';
 import { MoviesUtil } from '../movies/movies.util';
@@ -124,6 +124,7 @@ export class UserService {
         };
       });
     }
+
     return genresFromDb;
   }
 
@@ -181,7 +182,7 @@ export class UserService {
     userId: number,
     genreId: number,
     mailOfUsers: Array<string>,
-    pageNumber: number = 0,
+    pageNumber = 0,
     onlyUnwatched?: boolean,
     onlyWatched?: boolean,
     searchedMovieTitle?: string

@@ -29,10 +29,8 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import {
   BehaviorSubject,
-  debounceTime,
   filter,
   of,
-  scan,
   Subject,
   switchMap,
   take,
@@ -54,12 +52,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../_services/auth.service';
 import { MatTableModule } from '@angular/material/table';
 import { RestDataService } from '../_services/rest-data.service';
-import {
-  MatSlideToggle,
-  MatSlideToggleModule,
-} from '@angular/material/slide-toggle';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDialog } from '@angular/material/dialog';
-import { MovieDetailComponent } from '../components/movie-detail/movie-detail.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AlertInteractionService } from '../_services/alert-interaction.service';
 import { MatchComponent } from '../match/match.component';
@@ -107,7 +101,7 @@ export class FindComponent implements OnInit {
   readonly #destroyRef = inject(DestroyRef);
   readonly #authService = inject(AuthService);
   readonly #restDataService = inject(RestDataService);
-  readonly #matDialog = inject<any>(MatDialog);
+  readonly #matDialog = inject<MatDialog>(MatDialog);
   readonly #alertInteractionService = inject(AlertInteractionService);
 
   readonly fetchedGenres = signal<Array<GenEntity>>([]);
@@ -144,9 +138,9 @@ export class FindComponent implements OnInit {
     new BehaviorSubject<Array<MatchedMovie>>([]);
   readonly matchTableScrolled$: Subject<Event> = new Subject<Event>();
 
-  pageNumber: number = 0;
+  pageNumber = 0;
   findMatchResult: FindMatchResult | null = null;
-  isInSearchMode: boolean = true;
+  isInSearchMode = true;
   allUsers: Array<string> = [];
   genreOptions: Array<SelectOption> = [];
   displayMatchTableColumns: string[] = [
@@ -234,6 +228,7 @@ export class FindComponent implements OnInit {
           this.matchedMovies$.next(findMatchResult.matchedRates);
           this.isInSearchMode = false;
         },
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         () => {},
         () => {
           this.#alertInteractionService.isLoadingSpinnerActive$.next(false);

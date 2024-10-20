@@ -94,15 +94,15 @@ export class MoviesService {
     //   );
     // }
 
-    let { pageNumber, genreId } = await this.getTmdbMovieRequestOptions(
+    const tmdbRequestOptions = await this.getTmdbMovieRequestOptions(
       userId,
       shouldLoadNextPage
     );
 
     const pageOfMovie = await this.prismaService.pageOfMovie.findFirst({
       where: {
-        genreId,
-        pageNumber,
+        genreId: tmdbRequestOptions.genreId,
+        pageNumber: tmdbRequestOptions.pageNumber,
       },
     });
 
@@ -115,7 +115,7 @@ export class MoviesService {
         })) !== 0;
 
       if (isPageAlreadyCompleted) {
-        pageNumber++;
+        tmdbRequestOptions.pageNumber++;
       } else {
         const moviesListDtoFromCache = await this.retrieveMovieListDtoFromDb(
           userId,
@@ -137,7 +137,7 @@ export class MoviesService {
             },
           });
 
-          pageNumber++;
+          tmdbRequestOptions.pageNumber++;
         }
       }
     }
@@ -145,13 +145,13 @@ export class MoviesService {
     const response = await this.baseRestDataService.get<TmdbDiscoverResult>(
       'movies',
       {
-        genreId,
-        pageNumber,
+        genreId: tmdbRequestOptions.genreId,
+        pageNumber: tmdbRequestOptions.pageNumber,
       }
     );
 
     if (response.data && !pageOfMovie) {
-      const pageGenre = await this.extractGenreById(genreId);
+      const pageGenre = await this.extractGenreById(tmdbRequestOptions.genreId);
       const genresOnPage = await this.extractGenresOnPageFromMovies(
         response.data.results
       );
@@ -159,9 +159,13 @@ export class MoviesService {
         response.data.results,
         genresOnPage,
         pageGenre.id,
-        pageNumber
+        tmdbRequestOptions.pageNumber
       );
-      await this.saveMovieListDto(moviesListDto, userId, pageNumber);
+      await this.saveMovieListDto(
+        moviesListDto,
+        userId,
+        tmdbRequestOptions.pageNumber
+      );
       return moviesListDto;
     } else if (pageOfMovie) {
       const moviesOnPage = await this.prismaService.movieToRate.findMany({
@@ -177,8 +181,8 @@ export class MoviesService {
       return MoviesUtil.convertMoviesToRateToMoviesListDto(
         moviesOnPage,
         genresOnPage,
-        genreId,
-        pageNumber
+        tmdbRequestOptions.genreId,
+        tmdbRequestOptions.pageNumber
       );
     } else {
       console.error('Received data is undefined');
@@ -312,7 +316,7 @@ export class MoviesService {
     );
 
     const areMoviesInDbQuery = [];
-    for (let movieId of movieIds) {
+    for (const movieId of movieIds) {
       areMoviesInDbQuery.push(
         await this.prismaService.movieToRate.count({
           where: {
@@ -342,7 +346,7 @@ export class MoviesService {
         genresFromDb.map(g => [g.id, g])
       ).values(),
     ];
-    let genreId =
+    const genreId =
       userGenre?.genreId !== undefined && userGenre?.genreId !== null
         ? userGenre.genreId
         : MoviesService.DEFAULT_GENRE_ID;
@@ -435,6 +439,7 @@ export class MoviesService {
       },
     });
 
+    // eslint-disable-next-line prefer-const
     let genreId = userGenre?.genreId;
 
     if (genreId === undefined || genreId === null) {
@@ -657,7 +662,9 @@ export class MoviesService {
     });
   }
 
-  private static isMovieToRate(obj: any): obj is MovieToRate {
+  private static isMovieToRate(
+    obj: TmdbMovie | MovieToRate
+  ): obj is MovieToRate {
     return (
       'id' in obj &&
       'movieId' in obj &&
@@ -683,7 +690,7 @@ export class MoviesService {
       },
     });
 
-    let userGenreId = userGenreFromDb?.genre?.id;
+    const userGenreId = userGenreFromDb?.genre?.id;
 
     const userCompletedPages =
       await this.prismaService.completedPageOfMovie.findMany({

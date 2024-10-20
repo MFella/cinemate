@@ -6,7 +6,7 @@ import { firstValueFrom } from 'rxjs';
 
 const originPaths = ['genres', 'movies'] as const;
 type PathParams<T extends OriginPaths = 'genres'> = T extends 'genres'
-  ? {}
+  ? Record<string, string>
   : {
       genreId: number;
       pageNumber: number;
@@ -17,10 +17,7 @@ const baseRestDataPaths: Map<
   OriginPaths,
   (pathParams: PathParams<OriginPaths>) => string
 > = new Map<OriginPaths, (pathParams: PathParams<OriginPaths>) => string>([
-  [
-    'genres',
-    (_pathParams: PathParams<OriginPaths>) => 'genre/movie/list?language=en-US',
-  ],
+  ['genres', () => 'genre/movie/list?language=en-US'],
   [
     'movies',
     (pathParams: PathParams<OriginPaths>) =>

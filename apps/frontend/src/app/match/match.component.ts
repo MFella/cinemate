@@ -1,11 +1,4 @@
-import {
-  Component,
-  Inject,
-  inject,
-  Input,
-  OnInit,
-  Optional,
-} from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
@@ -13,8 +6,6 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButtonModule } from '@angular/material/button';
 import type {
   GenEntity,
-  Genres,
-  MovieRate,
   MovieInitData,
   MovieToRate,
   RateResultDto,
@@ -65,7 +56,7 @@ export class MatchComponent implements OnInit {
   readonly matDialogRef = inject(MatDialogRef, { optional: true });
   readonly #restDataService = inject(RestDataService);
   readonly #alertInteractionService = inject(AlertInteractionService);
-  isRequestPended: boolean = false;
+  isRequestPended = false;
 
   markActions: Array<MarkButtonData> = [
     { label: 'No 🤨', value: 'NO', buttonColor: 'primary' },
@@ -74,7 +65,7 @@ export class MatchComponent implements OnInit {
   ];
   fetchedMovies: Array<MovieToRate> = [];
   currentMovie!: MovieToRate;
-  isLoadingMovies: boolean = false;
+  isLoadingMovies = false;
   genresOnPage!: Map<number, GenEntity>;
   pageNumber: number | null = 1;
   lastRateResult!: RateResultDto;
@@ -111,13 +102,15 @@ export class MatchComponent implements OnInit {
           }
 
           this.lastRateResult = rateResult;
-          this.currentMovie = this.fetchedMovies.shift()!;
+          const fetchMovieRemovalResult = this.fetchedMovies.shift();
+          if (fetchMovieRemovalResult) {
+            this.currentMovie = fetchMovieRemovalResult;
+          }
 
           if (
             !rateResult.isRateSaved ||
             rateResult.moviesCountLeftOnPage === null
           ) {
-            // this.alertInteractionService.error(rateResult?.reason ?? 'Error occured');
             return;
           }
 
@@ -137,7 +130,7 @@ export class MatchComponent implements OnInit {
               });
           }
         },
-        (err: unknown) => {
+        () => {
           this.alertInteractionService.error(
             'Error occured during voting movie'
           );
@@ -173,7 +166,7 @@ export class MatchComponent implements OnInit {
   ): void {
     $event.stopPropagation();
     this.#restDataService
-      .saveIsMovieWatched(matchedRate.id as any, !matchedMovie.isWatched)
+      .saveIsMovieWatched(matchedRate.id, !matchedMovie.isWatched)
       .pipe(take(1))
       .subscribe((isResultSaved: boolean) => {
         if (!isResultSaved) {
@@ -220,7 +213,10 @@ export class MatchComponent implements OnInit {
         this.pageNumber = movieInitData.pageNumber;
 
         if (movieInitData?.movies?.length) {
-          this.currentMovie = movieInitData?.movies?.shift()!;
+          const movieRemovalResult = movieInitData.movies.shift();
+          if (movieRemovalResult) {
+            this.currentMovie = movieRemovalResult;
+          }
           this.fetchedMovies = movieInitData?.movies;
         } else {
           console.log('Display load data again screen');

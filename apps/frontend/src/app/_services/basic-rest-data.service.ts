@@ -22,14 +22,14 @@ export abstract class BasicRestDataService {
     );
   }
 
-  protected post<T>(urlSuffix: string, body: any | null): Observable<T> {
+  protected post<T>(urlSuffix: string, body: unknown | null): Observable<T> {
     return this.httpClient.post<T>(
       `${BACKEND_API_URL}/${BasicRestDataService.API_URL_SUFFIX}/${urlSuffix}`,
       body
     );
   }
 
-  protected put<T>(urlSuffix: string, body: any | null): Observable<T> {
+  protected put<T>(urlSuffix: string, body: unknown | null): Observable<T> {
     return this.httpClient.put<T>(
       `${BACKEND_API_URL}/${BasicRestDataService.API_URL_SUFFIX}/${urlSuffix}`,
       body

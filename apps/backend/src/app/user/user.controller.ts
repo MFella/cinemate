@@ -40,11 +40,6 @@ export class UserController {
     return this.userService.getAllPreferences();
   }
 
-  // @Post('register')
-  // async registerUser(@Body() registerUserDto: RegisterUserDto): Promise<boolean> {
-  //     return this.userService.tryRegisterUser(registerUserDto.id, registerUserDto.email);
-  // }
-
   @Get('emails')
   async getUsersEmails(
     @Query() usersFilterQuery: UsersFilterQuery

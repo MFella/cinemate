@@ -1,6 +1,6 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
-import { AuthSource, IdentityClaim } from '../typings/common';
-import { Observable, Subject, filter, from, map, of, take } from 'rxjs';
+import { AuthSource } from '../typings/common';
+import { Observable, Subject, map } from 'rxjs';
 import { Router } from '@angular/router';
 import { AlertInteractionService } from './alert-interaction.service';
 import { isPlatformBrowser } from '@angular/common';

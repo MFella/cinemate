@@ -35,7 +35,7 @@ export class AppComponent {
   #intercationService = inject(AlertInteractionService);
   #restDataService = inject(RestDataService);
   #matDialog = inject(MatDialog);
-  #matDialogRef: MatDialogRef<any> | null = null;
+  #matDialogRef: MatDialogRef<unknown> | null = null;
 
   title = 'frontend';
   selectedTheme: AppTheme = 'default';
