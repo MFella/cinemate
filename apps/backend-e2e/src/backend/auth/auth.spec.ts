@@ -1,11 +1,12 @@
 import request from 'supertest';
 import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { AuthModule } from '../../../../backend/src/app/auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthService } from 'backend/auth/auth.service';
-import { AuthController } from 'backend/auth/auth.controller';
-import { mockAuthConfig } from '../../mocks/auth.mocks';
+import { AuthService } from '../../../../backend/src/app/auth/auth.service';
+import { AuthController } from '../../../../backend/src/app/auth/auth.controller';
+import { getMockAuthGuard, mockAuthConfig } from '../../mocks/auth.mocks';
+import { GoogleOauthGuard } from '../../../../backend/src/app/auth/guards/google-oauth.guard';
+import { PrismaService } from '../../../../backend/src/app/database/prisma.service';
 
 describe('Auth paths test', () => {
   let app: INestApplication;
@@ -19,13 +20,16 @@ describe('Auth paths test', () => {
         ConfigModule.forRoot({
           load: [mockAuthConfig],
         }),
-        AuthModule,
       ],
-      providers: [AuthService, ConfigService],
+      providers: [AuthService, ConfigService, GoogleOauthGuard],
       controllers: [AuthController],
     })
       .overrideProvider(AuthService)
       .useValue(authService)
+      .overrideGuard(GoogleOauthGuard)
+      .useValue(getMockAuthGuard(true))
+      .overrideProvider(PrismaService)
+      .useValue(null)
       .compile();
     app = moduleRef.createNestApplication();
 
@@ -38,11 +42,29 @@ describe('Auth paths test', () => {
   });
 
   it('/GET google should redirect', async () => {
-    const expectedRedirectUrl =
-      'https://accounts.google.com/o/oauth2/v2/auth?response_type=code&scope=local&client_id=client-id';
-    await request(app.getHttpServer())
+    return await request(app.getHttpServer())
       .get('/api/auth/google')
+      .expect(200);
+  });
+
+  it('/GET google/cb should set access token cookie', async () => {
+    const expectedSetCookieHeaderValues = [
+      'access_token=access_token',
+      'Max-Age=86400',
+      'Path=/',
+    ];
+    return await request(app.getHttpServer())
+      .get('/api/auth/google/cb')
       .expect(302)
-      .expect('location', expectedRedirectUrl);
+      .expect(response => {
+        const resultSetCookieHeaderValues = response.headers['set-cookie']
+          .at(0)
+          .split(';')
+          .splice(0, 3)
+          .map(value => value.trim());
+        expect(resultSetCookieHeaderValues).toEqual(
+          expectedSetCookieHeaderValues
+        );
+      });
   });
 });
