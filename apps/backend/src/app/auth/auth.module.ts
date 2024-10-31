@@ -8,9 +8,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { PrismaService } from '../database/prisma.service';
 import { UserService } from '../user/user.service';
 import { AuthGuard } from '../_guards/auth.guard';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule,
     PassportModule.register({ defaultStrategy: 'google' }),
     JwtModule.register({
       global: true,
@@ -24,7 +26,7 @@ import { AuthGuard } from '../_guards/auth.guard';
     UserService,
     AuthGuard,
   ],
-  exports: [PassportModule],
+  exports: [PassportModule, AuthService],
   controllers: [AuthController],
 })
 export class AuthModule {}

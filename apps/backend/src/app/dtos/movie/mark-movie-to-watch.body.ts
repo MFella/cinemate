@@ -1,11 +1,11 @@
-import { IsBoolean, IsDefined, IsNumber } from "class-validator";
+import { IsBoolean, IsDefined, IsNumber } from 'class-validator';
 
-export class markMovieToWatchBody {
-    @IsNumber()
-    @IsDefined()
-    movieId: number;
+export class MarkMovieToWatchBody {
+  @IsNumber()
+  @IsDefined()
+  movieId: number;
 
-    @IsBoolean()
-    @IsDefined()
-    isWatched: boolean;
+  @IsBoolean()
+  @IsDefined()
+  isWatched: boolean;
 }

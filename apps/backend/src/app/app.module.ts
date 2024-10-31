@@ -10,6 +10,8 @@ import { ConfigModule } from '@nestjs/config';
 import baseConfiguration from './configuration/base-configuration';
 import { BaseRestDataService } from './common/base-rest-data.service';
 import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
+import { MoviesModule } from './movies/movies.module';
 
 @Module({
   imports: [
@@ -19,8 +21,9 @@ import { AuthModule } from './auth/auth.module';
       load: [baseConfiguration],
     }),
     AuthModule,
+    UserModule,
+    MoviesModule,
   ],
-  controllers: [MoviesController, UserController],
-  providers: [BaseRestDataService, MoviesService, PrismaService, UserService],
+  providers: [BaseRestDataService, PrismaService],
 })
 export class AppModule {}
