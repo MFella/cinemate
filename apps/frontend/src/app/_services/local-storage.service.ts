@@ -1,4 +1,11 @@
-import { inject, Injectable, OnDestroy, PLATFORM_ID } from '@angular/core';
+import {
+  inject,
+  Injectable,
+  NgZone,
+  OnDestroy,
+  OnInit,
+  PLATFORM_ID,
+} from '@angular/core';
 import { AppLang, AppTheme } from '../typings/common';
 import { UserJwtPayload } from './auth.service';
 import { SsrCookieService } from 'ngx-cookie-service-ssr';
@@ -20,10 +27,10 @@ export class LocalStorageService implements OnDestroy {
   accessTokenChange$: BehaviorSubject<UserJwtPayload | null> =
     new BehaviorSubject<UserJwtPayload | null>(null);
   accessTokenCheckInterval!: NodeJS.Timer;
+  platformId = inject(PLATFORM_ID);
 
   constructor() {
-    const isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
-    if (isBrowser) {
+    if (isPlatformBrowser(this.platformId)) {
       this.setAccessTokenCheckInterval();
     }
   }
@@ -64,9 +71,12 @@ export class LocalStorageService implements OnDestroy {
       return;
     }
 
+    // TODO: uncomment those lines, when matMenu will work as intent
+    // inject(NgZone).runOutsideAngular(() => {
     this.accessTokenCheckInterval = setInterval(() => {
       this.accessTokenChange$.next(this.getCookie('access_token'));
-    }, 300);
+      // });
+    });
   }
 
   getCookie(

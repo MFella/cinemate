@@ -14,7 +14,7 @@ type ImportedPreferencesFile =
   typeof import('./preferences/preferences.component');
 type ImportedFindFile = typeof import('./find/find.component');
 
-export const appRoutes: Route[] = [
+export const appRoutes = [
   {
     path: '',
     loadComponent: () =>
@@ -64,4 +64,7 @@ export const appRoutes: Route[] = [
       findData: findResolver,
     },
   },
-];
+] as const;
+
+const appPaths = typeof appRoutes.map(a => a.path);
+export type AppPaths = (typeof appPaths)[number];

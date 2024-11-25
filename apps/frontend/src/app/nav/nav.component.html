@@ -1,9 +1,8 @@
 <ng-template #navButtonContainer let-vertical="vertical">
   <button
     *ngIf="!isUserHasValidToken; else validTokenTemplateRef"
-    [routerLink]="['./']"
-    [routerLinkActive]="['active']"
-    [routerLinkActiveOptions]="{ exact: true }"
+    (click)="navigate('')"
+    [ngClass]="currentActivatedUrl === '/' ? 'active' : ''"
     class="mr-4 !rounded-3xl"
     mat-button>
     <mat-icon>home</mat-icon>
@@ -11,24 +10,24 @@
   </button>
   <ng-template #validTokenTemplateRef>
     <button
-      [routerLink]="['/match']"
-      [routerLinkActive]="['active']"
+      (click)="navigate('match')"
+      [ngClass]="currentActivatedUrl === '/match' ? 'active' : ''"
       class="mr-4 !rounded-3xl"
       mat-button>
       <mat-icon> compare_arrows </mat-icon>
       <span>Match</span>
     </button>
     <button
-      [routerLink]="['/preferences']"
-      [routerLinkActive]="['active']"
+      (click)="navigate('preferences')"
+      [ngClass]="currentActivatedUrl === '/preferences' ? 'active' : ''"
       class="mr-4 !rounded-3xl"
       mat-button>
       <mat-icon>settings</mat-icon>
       <span>Preferences</span>
     </button>
     <button
-      [routerLink]="['/find']"
-      [routerLinkActive]="['active']"
+      (click)="navigate('find')"
+      [ngClass]="currentActivatedUrl === '/find' ? 'active' : ''"
       class="!rounded-3xl"
       mat-button>
       <mat-icon>search</mat-icon>
@@ -67,11 +66,11 @@
       mat-icon-button
       [matMenuTriggerFor]="menu"
       class="rounded-full w-8 hover:cursor-pointer"
-      [ngSrc]="getUserAvatarUrl() ?? ''"
+      [ngSrc]="userAvatarUrl"
       width="30"
       height="30"
       alt="User logo" />
-    <mat-menu #menu="matMenu">
+    <mat-menu #menu="matMenu" [hasBackdrop]="true">
       <button mat-menu-item (click)="logoutUser()">
         <mat-icon>logout</mat-icon>
         <span>Logout</span>
@@ -88,7 +87,7 @@
     </button>
     } @else {
     <img
-      class="cinemate-logo max-h-14 mr-4 absolute left-0 rounded-r-full shadow-md"
+      class="cinemate-logo max-h-12 mr-4 absolute left-0 rounded-r-full shadow-md"
       alt="Cinemate logo"
       src="../../assets/cinemate-logo.png" />
     <div class="flex-auto"></div>

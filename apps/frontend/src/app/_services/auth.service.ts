@@ -1,4 +1,4 @@
-import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { Injectable, NgZone, PLATFORM_ID, inject } from '@angular/core';
 import { AuthSource } from '../typings/common';
 import { Observable, Subject, map } from 'rxjs';
 import { Router } from '@angular/router';
@@ -22,6 +22,7 @@ export class AuthService {
   #lsService = inject(LocalStorageService);
   #isPlatformBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   #authButtonClicked$: Subject<AuthSource> = new Subject<AuthSource>();
+  #ngZone = inject(NgZone);
 
   emitAuthButtonClicked(authSource: AuthSource): void {
     this.#authButtonClicked$.next(authSource);
@@ -31,9 +32,9 @@ export class AuthService {
     return this.#authButtonClicked$.asObservable();
   }
 
-  logout(reason?: string): void {
+  async logout(reason?: string): Promise<void> {
     this.#lsService.deleteCookie('access_token');
-    this.#router.navigate(['']);
+    await this.#ngZone.run(() => this.#router.navigate(['/']));
     this.#alertService.success(
       'You have been logged out successfully' + (reason ?? '')
     );

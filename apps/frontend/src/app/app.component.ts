@@ -27,8 +27,8 @@ import { NgToastModule } from 'ng-angular-popup';
 })
 export class AppComponent {
   private static readonly DEFAULT_APP_THEME: AppTheme = 'default';
-  private static readonly DEFAULT_APP_LANG: AppLang = 'pl-PL';
-  private static readonly TOKEN_EXPIRATION_DEBOUNCE_TIME = 150;
+  // private static readonly DEFAULT_APP_LANG: AppLang = 'pl-PL';
+  // private static readonly TOKEN_EXPIRATION_DEBOUNCE_TIME = 150;
 
   #destroyRef = inject(DestroyRef);
   #authService = inject(AuthService);

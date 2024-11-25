@@ -1,7 +1,10 @@
 import {
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   Input,
+  NgZone,
   OnDestroy,
   OnInit,
   Output,
@@ -13,14 +16,23 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import type { AppTheme } from '../typings/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { RouterModule } from '@angular/router';
+import {
+  ActivatedRoute,
+  ActivatedRouteSnapshot,
+  EventType,
+  NavigationEnd,
+  Router,
+  RouterModule,
+} from '@angular/router';
 import { AuthService } from '../_services/auth.service';
-import { Subject } from 'rxjs';
+import { filter, Subject } from 'rxjs';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { LocalStorageService } from '../_services/local-storage.service';
+import { AppPaths } from '../app.routes';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-nav',
@@ -40,11 +52,15 @@ import { LocalStorageService } from '../_services/local-storage.service';
   ],
   templateUrl: './nav.component.html',
   styleUrl: './nav.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NavComponent implements OnDestroy, OnInit {
   #authService = inject(AuthService);
   #changeDetectorRef = inject(ChangeDetectorRef);
   #lsService = inject(LocalStorageService);
+  router = inject(Router);
+  ngZone = inject(NgZone);
+  #destroyRef = inject(DestroyRef);
 
   @Input()
   selectedTheme!: AppTheme;
@@ -54,8 +70,9 @@ export class NavComponent implements OnDestroy, OnInit {
 
   mobileQuery: MediaQueryList;
   isUserHasValidToken = false;
-
+  userAvatarUrl = '';
   private _mobileQueryListener: () => void;
+  currentActivatedUrl = '';
 
   constructor() {
     const media = inject(MediaMatcher);
@@ -65,8 +82,22 @@ export class NavComponent implements OnDestroy, OnInit {
     this.mobileQuery.addListener(this._mobileQueryListener);
   }
 
+  async navigate(appPath: AppPaths): Promise<void> {
+    await this.ngZone.run(() => {
+      this.router.navigate([appPath]);
+    });
+  }
   ngOnInit(): void {
     this.observeHasUserValidToken();
+    this.router.events
+      .pipe(
+        takeUntilDestroyed(this.#destroyRef),
+        filter(action => action.type === EventType.NavigationEnd)
+      )
+      .subscribe((event: any) => {
+        this.currentActivatedUrl = event.url;
+        this.#changeDetectorRef.detectChanges();
+      });
   }
 
   ngOnDestroy(): void {
@@ -82,11 +113,6 @@ export class NavComponent implements OnDestroy, OnInit {
     return userPayload?.email;
   }
 
-  getUserAvatarUrl(): string | undefined {
-    const userPayload = this.#authService.getUserPayload();
-    return userPayload?.picture;
-  }
-
   logoutUser(): void {
     this.#lsService.deleteCookie('access_token');
     this.#changeDetectorRef.detectChanges();
@@ -100,13 +126,14 @@ export class NavComponent implements OnDestroy, OnInit {
   private observeHasUserValidToken(): void {
     this.#authService
       .observeHasUserValidToken()
-      // .pipe(debounceTime(200))
       .subscribe((isTokenValid: boolean) => {
         if (!isTokenValid && isTokenValid !== this.isUserHasValidToken) {
           this.#authService.logout();
         }
 
         this.isUserHasValidToken = isTokenValid;
+        this.userAvatarUrl = this.#authService.getUserPayload()?.picture ?? '';
+        this.#changeDetectorRef.detectChanges();
       });
   }
 }
