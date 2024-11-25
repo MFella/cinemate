@@ -3,7 +3,6 @@ import { provideRouter, withViewTransitions } from '@angular/router';
 import { appRoutes } from './app.routes';
 import { provideClientHydration } from '@angular/platform-browser';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideOAuthClient } from 'angular-oauth2-oidc';
 import {
   provideHttpClient,
   withFetch,
@@ -18,7 +17,6 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(),
     provideRouter(appRoutes, withViewTransitions()),
     provideAnimationsAsync(),
-    provideOAuthClient(),
     importProvidersFrom(NgToastModule),
   ],
 };
