@@ -1,4 +1,4 @@
-<img class="width: 100%;" src="https://raw.githubusercontent.com/MFella/cinemate/refs/heads/main/apps/frontend/src/assets/cinemate-logo.png" />
+<img style="width: 100%;" src="https://raw.githubusercontent.com/MFella/cinemate/refs/heads/main/apps/frontend/src/assets/cinemate-logo.png" />
 
 # 🎥 Overview
 
