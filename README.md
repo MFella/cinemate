@@ -1,4 +1,4 @@
-<img style="width: 100%; background-color: #4b5563;" src="https://raw.githubusercontent.com/MFella/cinemate/refs/heads/main/apps/frontend/src/assets/cinemate-logo.png" />
+<img style="width: 100%; background-color: #4b5563 !important;" src="https://raw.githubusercontent.com/MFella/cinemate/refs/heads/main/apps/frontend/src/assets/cinemate-logo.png" />
 
 # 🎥 Overview
 
