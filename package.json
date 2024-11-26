@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "build:front": "npx nx run frontend:build",
-    "build:back": "npx nx run backend:build",
+    "build:front": "npx nx build frontend:build",
+    "build:back": "npx nx build backend:build",
     "generate:prisma": "cd ./apps/backend && npx prisma generate",
     "dev:front": "npx nx run frontend:serve",
     "dev:back": "npx nx run backend:serve",
