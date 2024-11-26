@@ -1,4 +1,4 @@
-<img style="width: 100%" src="https://raw.githubusercontent.com/MFella/cinemate/refs/heads/main/apps/frontend/src/assets/cinemate-logo.png" />
+<img style="width: 100%; background-color: #4b5563;" src="https://raw.githubusercontent.com/MFella/cinemate/refs/heads/main/apps/frontend/src/assets/cinemate-logo.png" />
 
 # 🎥 Overview
 
@@ -31,23 +31,23 @@ Currently project only supports google authentication (thanks to oauth 2.0). Hen
 
 Several tests may be executed:
 
-<ul style="list-style-type: circle;">
-<li>E2E frontend tests with command: <br>
+👉 <b> E2E frontend </b> tests with command: <br>
+
 ```sh
 npm run e2e:front
 ```
-</li>
-<li>E2E backend tests with command: <br>
+
+👉 <b> E2E backend </b> tests with command: <br>
+
 ```sh
 npm run e2e:back
 ```
-</li>
-<li>Backend unit tests with command: <br>
+
+👉 <b> Backend unit </b> tests with command: <br>
+
 ```sh
 npm run units:back
 ```
-</li>
-</ul>
 
 # 🏠 Overall architecture
 
