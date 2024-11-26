@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Rate {
+  id  String @id @default(uuid())
+  userId  Decimal @db.Decimal(25, 0)
+  movieId Int
+  value RateValue
+}
+
+model PageOfMovie {
+  id  String @id @default(uuid())
+  pageNumber  Int
+  genreId Int
+  movieIds  Int[]
+  completedPageOfMovie CompletedPageOfMovie?
+
+  @@unique([pageNumber, genreId], name: "pageGenreIdentifier")
+}
+
+model MovieToRate {
+  id  String @id @default(uuid())
+  movieId Int @unique
+  imageUrl  String
+  releaseDate  String
+  title String
+  description String
+  rating  Float 
+  genreIds Int[]
+}
+
+model CompletedPageOfMovie {
+  id  String @id @default(uuid())
+  userId  Decimal @db.Decimal(25, 0)
+  pageOfMovieId String @unique
+  pageOfMovie PageOfMovie @relation(fields: [pageOfMovieId], references: [id])
+}
+
+model Genre {
+  id  Int @id @unique @default(autoincrement())
+  name String
+  user User[]
+}
+
+model User {
+  id  Decimal @id @unique @db.Decimal(25, 0)
+  email String
+  genre Genre @relation(fields: [genreId], references: [id])
+  genreId Int
+  picture String
+}
+
+model WatchedMovie {
+  id  String @id @unique @default(uuid())
+  movieId  Int
+  userId Decimal @db.Decimal(25, 0)
+
+  @@unique([userId, movieId], name: "watchedMovieIdentifier")
+}
+
+enum RateValue {
+  YES
+  IDK
+  NO
+}
