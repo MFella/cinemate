@@ -5,13 +5,16 @@
   "scripts": {
     "build:front": "npx nx run frontend:build",
     "build:back": "npx nx run backend:build",
+    "build": "npm run build:front && npm run build:back",
     "dev:front": "npx nx run frontend:serve",
     "dev:back": "npx nx run backend:serve",
     "units:back": "npx nx run backend:test",
     "e2e:front": "npx nx e2e frontend-e2e",
     "e2e:back": "npx nx e2e backend-e2e",
+    "tests": "npm run units:back && npm run e2e:back && npm run e2e:front",
     "lint:front": "npx nx run frontend:lint",
-    "lint:back": "npx nx run backend:lint"
+    "lint:back": "npx nx run backend:lint",
+    "lint": "npm run lint:front && npm run lint:back"
   },
   "private": true,
   "dependencies": {
@@ -89,6 +92,7 @@
     "@types/node": "18.16.9",
     "@typescript-eslint/eslint-plugin": "^7.3.0",
     "@typescript-eslint/parser": "^7.3.0",
+    "@vercel/remote-nx": "^2.0.0",
     "autoprefixer": "^10.4.0",
     "eslint": "~8.57.0",
     "eslint-config-prettier": "^9.0.0",

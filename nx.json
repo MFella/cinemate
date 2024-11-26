@@ -77,5 +77,15 @@
       "style": "scss"
     }
   },
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "@vercel/remote-nx",
+      "options": {
+        "cacheableOperations": ["build", "tests", "lint"],
+        "token": "token",
+        "teamId": "teamId"
+      }
+    }
+  },
   "nxCloudAccessToken": "ZjE5YTdmYWItNmNlZC00MTBlLTkxZGYtZmU1MjYyM2IwNmI0fHJlYWQtd3JpdGU="
 }
