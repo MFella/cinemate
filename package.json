@@ -6,6 +6,7 @@
     "build:front": "npx nx run frontend:build",
     "build:back": "npx nx run backend:build",
     "build": "npm run build:front && npm run build:back",
+    "generate:prisma": "cd .\\apps\\backend && npx prisma generate",
     "dev:front": "npx nx run frontend:serve",
     "dev:back": "npx nx run backend:serve",
     "units:back": "npx nx run backend:test",
