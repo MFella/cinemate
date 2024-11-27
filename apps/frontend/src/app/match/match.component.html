@@ -39,11 +39,11 @@
             </div>
           </mat-chip>
         </mat-chip-set>
-        @if (genresOnPage?.size) {
+        @if (genresOnPage.size) {
         <span class="genres-container">
           <mat-chip-set class="justify-end">
             <mat-chip *ngFor="let genreId of currentMovie.genreIds">
-              {{ genresOnPage?.get(genreId)?.name }}</mat-chip
+              {{ genresOnPage.get(genreId)?.name }}</mat-chip
             >
           </mat-chip-set>
         </span>
