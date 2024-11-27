@@ -1,8 +1,0 @@
-{
-  "rewrites": [
-    {
-      "source": "/backend",
-      "destination": "https://cinemate-jet.vercel.app"
-    }
-  ]
-}
