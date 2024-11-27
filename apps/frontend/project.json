@@ -10,9 +10,6 @@
       "executor": "@angular-devkit/build-angular:application",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "define": {
-          "BACKEND_API_URL": "'http://localhost:3000'"
-        },
         "outputPath": "dist/apps/frontend",
         "index": "apps/frontend/src/index.html",
         "browser": "apps/frontend/src/main.ts",
@@ -45,12 +42,18 @@
               "maximumError": "4kb"
             }
           ],
-          "outputHashing": "all"
+          "outputHashing": "all",
+          "define": {
+            "BACKEND_API_URL": "'http://cinemate-api.click:3000'"
+          }
         },
         "development": {
           "optimization": false,
           "extractLicenses": false,
-          "sourceMap": true
+          "sourceMap": true,
+          "define": {
+            "BACKEND_API_URL": "'http://localhost:3000'"
+          }
         }
       },
       "defaultConfiguration": "production"
