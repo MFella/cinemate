@@ -22,11 +22,11 @@ export const appRoutes = [
         (importedFile: ImportedAuthFile) => importedFile.AuthComponent
       ),
     canActivate: [
-      function isNotAuthorized(
+      async function isNotAuthorized(
         _route: ActivatedRouteSnapshot,
         _state: RouterStateSnapshot
       ) {
-        return !authGuard(_route, _state);
+        return !(await authGuard(_route, _state));
       },
     ],
   },
