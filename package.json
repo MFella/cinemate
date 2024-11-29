@@ -7,7 +7,7 @@
     "build:back": "npx nx build backend",
     "generate:prisma": "cd ./apps/backend && npx prisma generate",
     "dev:front": "npx nx run frontend:serve",
-    "dev:back": "npx nx run backend:serve",
+    "dev:back": "set NODE_ENV=dev && npx nx run backend:serve",
     "units:back": "npx nx run backend:test",
     "e2e:front": "npx nx e2e frontend-e2e",
     "e2e:back": "npx nx e2e backend-e2e",

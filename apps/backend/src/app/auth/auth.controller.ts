@@ -31,9 +31,11 @@ export class AuthController {
       request.user
     );
 
+    const isDevMode = await this.configService.get('isDevMode');
+
     response.cookie('access_token', accessToken, {
       maxAge: 3600 * 24 * 1000,
-      sameSite: true,
+      sameSite: isDevMode ? true : 'None',
       secure: false,
     });
     response
