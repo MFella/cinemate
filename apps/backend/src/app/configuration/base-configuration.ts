@@ -18,4 +18,5 @@ export default () => ({
   jwtConfig: {
     secret: process.env.AUTH_JWT_SECRET,
   },
+  isDevMode: process.env.NODE_ENV === 'dev',
 });
