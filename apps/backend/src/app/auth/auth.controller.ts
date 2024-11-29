@@ -36,7 +36,7 @@ export class AuthController {
     response.cookie('access_token', accessToken, {
       maxAge: 3600 * 24 * 1000,
       sameSite: isDevMode ? true : 'None',
-      secure: false,
+      secure: isDevMode ? false : true,
     });
     response
       .status(HttpStatus.OK)
