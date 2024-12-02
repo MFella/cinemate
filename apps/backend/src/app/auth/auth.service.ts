@@ -12,13 +12,8 @@ import {
   AuthSource,
   JwtAuthConfig,
   OauthGoogleUserInfo,
+  UserJwtPayload,
 } from '../typings/common';
-
-type UserJwtPayload = {
-  sub: string;
-  email: string;
-  picture: string;
-};
 
 @Injectable()
 export class AuthService {
@@ -72,5 +67,9 @@ export class AuthService {
         id: userId,
       },
     });
+  }
+
+  getUserInfoFromCookie(accessToken: string): UserJwtPayload {
+    return this.jwtService.decode(accessToken);
   }
 }

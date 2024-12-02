@@ -15,25 +15,34 @@ export abstract class BasicRestDataService {
 
   constructor(protected readonly httpClient: HttpClient) {}
 
-  protected get<T>(urlSuffix: string, options?: HttpGetOptions): Observable<T> {
-    return this.httpClient.get<T>(
-      `${BACKEND_API_URL}/${BasicRestDataService.API_URL_SUFFIX}/${urlSuffix}`,
-      options
-    );
+  protected get<T>(
+    urlSuffix: string,
+    options: HttpGetOptions = {}
+  ): Observable<T> {
+    return this.httpClient.get<T>(this.getFullEndpointUrl(urlSuffix), {
+      withCredentials: true,
+      ...options,
+    });
   }
 
   protected post<T>(urlSuffix: string, body: unknown | null): Observable<T> {
-    return this.httpClient.post<T>(
-      `${BACKEND_API_URL}/${BasicRestDataService.API_URL_SUFFIX}/${urlSuffix}`,
-      body
-    );
+    return this.httpClient.post<T>(this.getFullEndpointUrl(urlSuffix), body, {
+      withCredentials: true,
+    });
   }
 
   protected put<T>(urlSuffix: string, body: unknown | null): Observable<T> {
-    return this.httpClient.put<T>(
-      `${BACKEND_API_URL}/${BasicRestDataService.API_URL_SUFFIX}/${urlSuffix}`,
-      body
-    );
+    return this.httpClient.put<T>(this.getFullEndpointUrl(urlSuffix), body, {
+      withCredentials: true,
+    });
+  }
+
+  protected delete<T>(urlSuffix: string): Observable<T> {
+    return this.httpClient.delete<T>(this.getFullEndpointUrl(urlSuffix));
+  }
+
+  private getFullEndpointUrl(urlSuffix: string): string {
+    return `${BACKEND_API_URL}/${BasicRestDataService.API_URL_SUFFIX}/${urlSuffix}`;
   }
 }
 
