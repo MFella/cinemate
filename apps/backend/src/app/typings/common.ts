@@ -36,6 +36,15 @@ export type MatchedRate = {
 
 export type AuthSource = 'google' | 'facebook';
 
+export type UserJwtPayload = {
+  sub: string;
+  email: string;
+  picture: string;
+};
+
+const cookieNames = ['access_token'] as const;
+export type CookieNames = (typeof cookieNames)[number];
+
 export type JwtAuthConfig = {
   secret: string;
 };

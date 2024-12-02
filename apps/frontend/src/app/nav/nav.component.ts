@@ -109,12 +109,12 @@ export class NavComponent implements OnDestroy, OnInit {
   }
 
   getUserEmail(): string | undefined {
-    const userPayload = this.#authService.getUserPayload();
+    const userPayload = this.#authService.getUserInfo();
     return userPayload?.email;
   }
 
   logoutUser(): void {
-    this.#lsService.deleteCookie('access_token');
+    this.#authService.logout();
     this.#changeDetectorRef.detectChanges();
   }
 
@@ -132,7 +132,7 @@ export class NavComponent implements OnDestroy, OnInit {
         }
 
         this.isUserHasValidToken = isTokenValid;
-        this.userAvatarUrl = this.#authService.getUserPayload()?.picture ?? '';
+        this.userAvatarUrl = this.#authService.getUserInfo()?.picture ?? '';
         this.#changeDetectorRef.detectChanges();
       });
   }

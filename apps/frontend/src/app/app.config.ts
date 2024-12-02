@@ -8,12 +8,12 @@ import {
   withFetch,
   withInterceptors,
 } from '@angular/common/http';
-import { userIdInterceptor } from './_interceptors/user-id.interceptor';
 import { NgToastModule } from 'ng-angular-popup';
+import { errorHandlerInterceptor } from './_interceptors/error-handler.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideHttpClient(withInterceptors([userIdInterceptor]), withFetch()),
+    provideHttpClient(withInterceptors([errorHandlerInterceptor]), withFetch()),
     provideClientHydration(),
     provideRouter(appRoutes as unknown as Route[], withViewTransitions()),
     provideAnimationsAsync(),

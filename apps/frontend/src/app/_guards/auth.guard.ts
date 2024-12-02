@@ -7,7 +7,7 @@ export const authGuard: CanActivateFn = async (_route, state) => {
   const router = inject(Router);
   const ngZone = inject(NgZone);
   const hasUserValidToken = inject(AuthService).hasUserValidToken(
-    inject(LocalStorageService).getCookie('access_token')
+    inject(LocalStorageService).getItem('user_info')
   );
   if (hasUserValidToken && state.url === '/') {
     await ngZone.run(() => router.navigate(['/match']));

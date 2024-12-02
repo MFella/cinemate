@@ -27,6 +27,7 @@ async function bootstrap() {
   );
   app.enableCors({
     origin: [configService.get<string>('frontendUrl')],
+    credentials: true,
   });
   await app.listen(appPort);
   const moviesService = app.get<MoviesService>(MoviesService);

@@ -17,6 +17,8 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ProgressSpinnerComponent } from './progress-spinner/progress-spinner.component';
 import { RestDataService } from './_services/rest-data.service';
 import { NgToastModule } from 'ng-angular-popup';
+import { interval, startWith, switchMap } from 'rxjs';
+import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 
 @Component({
   standalone: true,
@@ -26,12 +28,14 @@ import { NgToastModule } from 'ng-angular-popup';
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
+  private static readonly COOKIE_REQUEST_INTERVAL_MS = 60 * 1000;
   private static readonly DEFAULT_APP_THEME: AppTheme = 'default';
   // private static readonly DEFAULT_APP_LANG: AppLang = 'pl-PL';
   // private static readonly TOKEN_EXPIRATION_DEBOUNCE_TIME = 150;
 
   #destroyRef = inject(DestroyRef);
   #authService = inject(AuthService);
+  #localStorageService = inject(LocalStorageService);
   #intercationService = inject(AlertInteractionService);
   #restDataService = inject(RestDataService);
   #matDialog = inject(MatDialog);
@@ -65,6 +69,7 @@ export class AppComponent {
 
     this.observeUserClickedLoginButton();
     this.observeLoadingSpinnerChanged();
+    this.observeValidUserCookie();
   }
 
   onToggleTheme(theme: AppTheme): void {
@@ -97,6 +102,30 @@ export class AppComponent {
           this.#matDialogRef?.close();
           this.#matDialogRef = null;
         }
+      });
+  }
+
+  private observeValidUserCookie(): void {
+    interval(AppComponent.COOKIE_REQUEST_INTERVAL_MS)
+      .pipe(
+        startWith(0),
+        switchMap(() => this.#restDataService.fetchUserInfo()),
+        takeUntilDestroyed(this.#destroyRef)
+      )
+      .subscribe({
+        next: userInfo => {
+          if (!userInfo) {
+            this.#authService.logout();
+            return;
+          }
+
+          this.#localStorageService.setItem('user_info', userInfo);
+        },
+        error: (errorResponse: HttpErrorResponse) => {
+          if (errorResponse.status === HttpStatusCode.Unauthorized) {
+            this.#authService.logout();
+          }
+        },
       });
   }
 }

@@ -2,6 +2,11 @@ export type AuthSource = 'google' | 'facebook';
 
 export type AppTheme = 'dark' | 'default';
 export type AppLang = 'pl-PL' | 'en-US';
+export type UserInfo = {
+  sub: string;
+  email: string;
+  picture: string;
+};
 
 export type MovieRate = 'YES' | 'NO' | 'IDK';
 

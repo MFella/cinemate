@@ -9,8 +9,9 @@ import {
   MovieToRate,
   UserMatchFilterOptions,
   AuthSource,
+  UserInfo,
 } from '../typings/common';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { BasicRestDataService } from './basic-rest-data.service';
 import { HttpParams } from '@angular/common/http';
 import { Memoize } from '../_decorators/memoize.decorator';
@@ -98,5 +99,13 @@ export class RestDataService extends BasicRestDataService {
 
   tryAuthenticateUser(authSource: AuthSource): void {
     window.location.replace(`${BACKEND_API_URL}/api/auth/${authSource}`);
+  }
+
+  fetchUserInfo(): Observable<UserInfo | undefined> {
+    return this.get<UserInfo | undefined>('auth/user-info');
+  }
+
+  revokeToken(): Observable<void> {
+    return this.delete<void>('auth/token');
   }
 }
