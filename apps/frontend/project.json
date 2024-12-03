@@ -44,7 +44,7 @@
           ],
           "outputHashing": "all",
           "define": {
-            "BACKEND_API_URL": "'http://cinemate-api.click:3000'"
+            "BACKEND_API_URL": "'https://cinemate-api.click:3000'"
           }
         },
         "development": {
