@@ -3,7 +3,6 @@
     class="movie-preview-img h-full w-full absolute"
     [ngSrc]="getMoviePosterUrl()"
     [ngStyle]="getMoviePosterStyles()"
-    width="20"
-    height="30"
+    [fill]="true"
     priority />
 </mat-card>

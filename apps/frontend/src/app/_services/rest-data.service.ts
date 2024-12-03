@@ -11,7 +11,14 @@ import {
   AuthSource,
   UserInfo,
 } from '../typings/common';
-import { Observable, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  catchError,
+  Observable,
+  Subject,
+  tap,
+  throwError,
+} from 'rxjs';
 import { BasicRestDataService } from './basic-rest-data.service';
 import { HttpParams } from '@angular/common/http';
 import { Memoize } from '../_decorators/memoize.decorator';
@@ -20,6 +27,9 @@ import { Memoize } from '../_decorators/memoize.decorator';
   providedIn: 'root',
 })
 export class RestDataService extends BasicRestDataService {
+  isFetchUserInfoPended$: BehaviorSubject<boolean> =
+    new BehaviorSubject<boolean>(false);
+
   voteMovie(
     vote: MovieRate,
     movieId: number,
@@ -102,7 +112,16 @@ export class RestDataService extends BasicRestDataService {
   }
 
   fetchUserInfo(): Observable<UserInfo | undefined> {
-    return this.get<UserInfo | undefined>('auth/user-info');
+    this.isFetchUserInfoPended$.next(true);
+    return this.get<UserInfo | undefined>('auth/user-info').pipe(
+      tap(() => {
+        this.isFetchUserInfoPended$.next(false);
+      }),
+      catchError(error => {
+        this.isFetchUserInfoPended$.next(false);
+        return throwError(() => error);
+      })
+    );
   }
 
   revokeToken(): Observable<void> {

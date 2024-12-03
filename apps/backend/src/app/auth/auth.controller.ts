@@ -13,15 +13,29 @@ import { AuthService } from './auth.service';
 import type { CookieNames, UserJwtPayload } from '../typings/common';
 import { ConfigService } from '@nestjs/config';
 
+type CookieOptions = 'maxAge' | 'sameSite' | 'secure' | 'httpOnly';
+
 @Controller('auth')
 export class AuthController {
   private static readonly ACCESS_TOKEN_COOKIE_NAME: CookieNames =
     'access_token';
+  private cookieSignOptions: Partial<
+    Record<CookieOptions, string | number | boolean | Date>
+  > = {};
+  private accessToken: string = '';
 
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService
-  ) {}
+  ) {
+    const isDevMode = configService.get('isDevMode');
+    this.cookieSignOptions = {
+      maxAge: 3600 * 1000 * 24,
+      sameSite: isDevMode ? true : 'None',
+      secure: isDevMode ? false : true,
+      httpOnly: true,
+    };
+  }
 
   @Get('google')
   @UseGuards(GoogleOauthGuard)
@@ -34,18 +48,15 @@ export class AuthController {
     @Request() request,
     @Response() response
   ): Promise<void> {
-    const accessToken = await this.authService.signInUser<'google'>(
+    this.accessToken = await this.authService.signInUser<'google'>(
       request.user
     );
 
-    const isDevMode = await this.configService.get('isDevMode');
-
-    response.cookie(AuthController.ACCESS_TOKEN_COOKIE_NAME, accessToken, {
-      maxAge: 3600 * 24 * 1000,
-      sameSite: isDevMode ? true : 'None',
-      secure: isDevMode ? false : true,
-      httpOnly: true,
-    });
+    response.cookie(
+      AuthController.ACCESS_TOKEN_COOKIE_NAME,
+      this.accessToken,
+      this.cookieSignOptions
+    );
 
     response
       .status(HttpStatus.OK)
@@ -65,7 +76,9 @@ export class AuthController {
 
   @Delete('token')
   async revokeToken(@Response() response): Promise<void> {
-    response.deleteCookie(AuthController.ACCESS_TOKEN_COOKIE_NAME);
-    // response.
+    response.clearCookie(AuthController.ACCESS_TOKEN_COOKIE_NAME);
+    response
+      .status(HttpStatus.OK)
+      .redirect(`${this.configService.get<string>('frontendUrl')}`);
   }
 }

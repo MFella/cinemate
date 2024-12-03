@@ -2,6 +2,7 @@ import {
   Component,
   DestroyRef,
   Inject,
+  NgZone,
   PLATFORM_ID,
   inject,
 } from '@angular/core';
@@ -40,6 +41,7 @@ export class AppComponent {
   #restDataService = inject(RestDataService);
   #matDialog = inject(MatDialog);
   #matDialogRef: MatDialogRef<unknown> | null = null;
+  #ngZone = inject(NgZone);
 
   title = 'frontend';
   selectedTheme: AppTheme = 'default';
@@ -106,26 +108,28 @@ export class AppComponent {
   }
 
   private observeValidUserCookie(): void {
-    interval(AppComponent.COOKIE_REQUEST_INTERVAL_MS)
-      .pipe(
-        startWith(0),
-        switchMap(() => this.#restDataService.fetchUserInfo()),
-        takeUntilDestroyed(this.#destroyRef)
-      )
-      .subscribe({
-        next: userInfo => {
-          if (!userInfo) {
-            this.#authService.logout();
-            return;
-          }
+    this.#ngZone.runOutsideAngular(() => {
+      interval(AppComponent.COOKIE_REQUEST_INTERVAL_MS)
+        .pipe(
+          startWith(0),
+          switchMap(() => this.#restDataService.fetchUserInfo()),
+          takeUntilDestroyed(this.#destroyRef)
+        )
+        .subscribe({
+          next: userInfo => {
+            if (!userInfo) {
+              this.#authService.logout();
+              return;
+            }
 
-          this.#localStorageService.setItem('user_info', userInfo);
-        },
-        error: (errorResponse: HttpErrorResponse) => {
-          if (errorResponse.status === HttpStatusCode.Unauthorized) {
-            this.#authService.logout();
-          }
-        },
-      });
+            this.#localStorageService.setItem('user_info', userInfo);
+          },
+          error: (errorResponse: HttpErrorResponse) => {
+            if (errorResponse.status === HttpStatusCode.Unauthorized) {
+              this.#authService.logout();
+            }
+          },
+        });
+    });
   }
 }

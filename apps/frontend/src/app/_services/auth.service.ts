@@ -40,17 +40,19 @@ export class AuthService {
       this.#alertService.success(
         'You have been logged out successfully' + (reason ?? '')
       );
-      this.#restService.revokeToken();
+      await firstValueFrom(this.#restService.revokeToken());
     }
     await this.#ngZone.run(() => this.#router.navigate(['/']));
   }
 
-  hasUserValidToken(userInfo: UserInfo | null): boolean {
+  hasUserValidToken(): boolean {
+    const userInfo = this.#lsService.getItem('user_info');
+
     if (!this.#isPlatformBrowser || !userInfo) {
       return false;
     }
 
-    return true;
+    return 'sub' in userInfo && 'email' in userInfo && 'picture' in userInfo;
   }
 
   observeHasUserValidToken(): Observable<boolean> {

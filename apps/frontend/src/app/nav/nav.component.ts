@@ -8,29 +8,27 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  ViewChild,
   inject,
 } from '@angular/core';
 import { MediaMatcher } from '@angular/cdk/layout';
-import { CommonModule, NgIf, NgOptimizedImage } from '@angular/common';
+import {
+  CommonModule,
+  DOCUMENT,
+  NgIf,
+  NgOptimizedImage,
+} from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import type { AppTheme } from '../typings/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import {
-  ActivatedRoute,
-  ActivatedRouteSnapshot,
-  EventType,
-  NavigationEnd,
-  Router,
-  RouterModule,
-} from '@angular/router';
+import { EventType, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../_services/auth.service';
-import { filter, Subject } from 'rxjs';
+import { filter, fromEvent, Subject } from 'rxjs';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatMenuModule } from '@angular/material/menu';
+import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
-import { LocalStorageService } from '../_services/local-storage.service';
 import { AppPaths } from '../app.routes';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -55,12 +53,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NavComponent implements OnDestroy, OnInit {
-  #authService = inject(AuthService);
-  #changeDetectorRef = inject(ChangeDetectorRef);
-  #lsService = inject(LocalStorageService);
-  router = inject(Router);
-  ngZone = inject(NgZone);
-  #destroyRef = inject(DestroyRef);
+  @ViewChild('userMenu')
+  userMenuTrigger!: MatMenuTrigger;
 
   @Input()
   selectedTheme!: AppTheme;
@@ -68,10 +62,18 @@ export class NavComponent implements OnDestroy, OnInit {
   @Output()
   readonly toggleTheme$: Subject<AppTheme> = new Subject<AppTheme>();
 
+  #authService = inject(AuthService);
+  #changeDetectorRef = inject(ChangeDetectorRef);
+  router = inject(Router);
+  ngZone = inject(NgZone);
+  #destroyRef = inject(DestroyRef);
+  #document = inject(DOCUMENT);
+
+  private _mobileQueryListener: () => void;
+
   mobileQuery: MediaQueryList;
   isUserHasValidToken = false;
   userAvatarUrl = '';
-  private _mobileQueryListener: () => void;
   currentActivatedUrl = '';
 
   constructor() {
@@ -87,17 +89,11 @@ export class NavComponent implements OnDestroy, OnInit {
       this.router.navigate([appPath]);
     });
   }
+
   ngOnInit(): void {
     this.observeHasUserValidToken();
-    this.router.events
-      .pipe(
-        takeUntilDestroyed(this.#destroyRef),
-        filter(action => action.type === EventType.NavigationEnd)
-      )
-      .subscribe((event: any) => {
-        this.currentActivatedUrl = event.url;
-        this.#changeDetectorRef.detectChanges();
-      });
+    this.observeDocumentClicked();
+    this.observeRouterNavigationEvents();
   }
 
   ngOnDestroy(): void {
@@ -133,6 +129,30 @@ export class NavComponent implements OnDestroy, OnInit {
 
         this.isUserHasValidToken = isTokenValid;
         this.userAvatarUrl = this.#authService.getUserInfo()?.picture ?? '';
+        this.#changeDetectorRef.detectChanges();
+      });
+  }
+
+  private observeDocumentClicked(): void {
+    fromEvent(this.#document, 'click')
+      .pipe(
+        filter(() => this.userMenuTrigger?.menuOpen),
+        takeUntilDestroyed(this.#destroyRef)
+      )
+      .subscribe(() => {
+        this.userMenuTrigger?.closeMenu();
+        this.#changeDetectorRef.detectChanges();
+      });
+  }
+
+  private observeRouterNavigationEvents(): void {
+    this.router.events
+      .pipe(
+        takeUntilDestroyed(this.#destroyRef),
+        filter(action => action.type === EventType.NavigationEnd)
+      )
+      .subscribe((event: any) => {
+        this.currentActivatedUrl = event.url;
         this.#changeDetectorRef.detectChanges();
       });
   }
