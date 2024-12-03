@@ -1,8 +1,19 @@
-import { inject, Injectable, OnDestroy, PLATFORM_ID } from '@angular/core';
+import {
+  inject,
+  Injectable,
+  NgZone,
+  OnDestroy,
+  PLATFORM_ID,
+} from '@angular/core';
 import { AppLang, AppTheme, UserInfo } from '../typings/common';
-import { UserJwtPayload } from './auth.service';
 import { SsrCookieService } from 'ngx-cookie-service-ssr';
-import { BehaviorSubject, distinctUntilChanged, Observable } from 'rxjs';
+import {
+  BehaviorSubject,
+  distinctUntilChanged,
+  interval,
+  Observable,
+  Subscription,
+} from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 
 type LocalStorageMappings = {
@@ -17,11 +28,11 @@ type AllowedCookieKeys = 'access_token';
   providedIn: 'root',
 })
 export class LocalStorageService implements OnDestroy {
-  private static readonly ACCESS_TOKEN_CHECK_INTERVAL_MS = 1000;
+  private static readonly ACCESS_TOKEN_CHECK_INTERVAL_MS = 5000;
   #cookieService = inject(SsrCookieService);
-  userInfoChanged$: BehaviorSubject<UserInfo | null> =
+  private userInfoChanged$: BehaviorSubject<UserInfo | null> =
     new BehaviorSubject<UserInfo | null>(null);
-  userInfoCheckInterval!: NodeJS.Timer;
+  userInfoCheckIntervalSub!: Subscription;
   platformId = inject(PLATFORM_ID);
 
   constructor() {
@@ -93,46 +104,21 @@ export class LocalStorageService implements OnDestroy {
     );
   }
 
-  // getCookie(
-  //   key: keyof CookieMapping,
-  //   plain?: boolean
-  // ): CookieMapping[typeof key] | null {
-  //   const cookieValue = this.#cookieService.get(key);
-
-  //   if (!cookieValue) {
-  //     return null;
-  //   }
-
-  //   switch (key) {
-  //     case 'access_token':
-  //       return plain
-  //         ? cookieValue
-  //         : JSON.parse(atob(cookieValue.split('.')[1]));
-  //     default:
-  //       return null;
-  //   }
-  // }
-
-  // deleteCookie(key: AllowedCookieKeys): void {
-  //   if (this.#cookieService.check(key)) {
-  //     this.#cookieService.delete(key);
-  //   }
-  // }
-
   ngOnDestroy(): void {
-    clearInterval(this.userInfoCheckInterval);
+    this.userInfoCheckIntervalSub?.unsubscribe();
   }
 
   private setUserInfoCheckInterval(): void {
-    if (this.userInfoCheckInterval) {
+    if (this.userInfoCheckIntervalSub) {
       return;
     }
 
-    // TODO: uncomment those lines, when matMenu will work as intent
-    // inject(NgZone).runOutsideAngular(() => {
-    this.userInfoCheckInterval = setInterval(() => {
-      this.userInfoChanged$.next(this.getItem('user_info'));
-      // });
-    }, LocalStorageService.ACCESS_TOKEN_CHECK_INTERVAL_MS);
+    inject(NgZone).runOutsideAngular(() => {
+      this.userInfoCheckIntervalSub = interval(
+        LocalStorageService.ACCESS_TOKEN_CHECK_INTERVAL_MS
+      ).subscribe(() => {
+        this.userInfoChanged$.next(this.getItem('user_info'));
+      });
+    });
   }
 }

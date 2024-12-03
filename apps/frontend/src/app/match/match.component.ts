@@ -66,7 +66,7 @@ export class MatchComponent implements OnInit {
   fetchedMovies: Array<MovieToRate> = [];
   currentMovie!: MovieToRate;
   isLoadingMovies = false;
-  genresOnPage!: Map<number, GenEntity>;
+  genresOnPage: Map<number, GenEntity> = new Map<number, GenEntity>();
   pageNumber: number | null = 1;
   lastRateResult!: RateResultDto;
 
@@ -207,8 +207,8 @@ export class MatchComponent implements OnInit {
       )
       .subscribe((movieInitData: MovieInitData) => {
         this.alertInteractionService.isLoadingSpinnerActive$.next(false);
-        this.genresOnPage = new Map<number, GenEntity>(
-          movieInitData.pageGenres.map(pageGenre => [pageGenre.id, pageGenre])
+        movieInitData.pageGenres.forEach(pageGenre =>
+          this.genresOnPage.set(pageGenre.id, pageGenre)
         );
         this.pageNumber = movieInitData.pageNumber;
 

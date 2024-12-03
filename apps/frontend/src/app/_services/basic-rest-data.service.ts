@@ -38,7 +38,9 @@ export abstract class BasicRestDataService {
   }
 
   protected delete<T>(urlSuffix: string): Observable<T> {
-    return this.httpClient.delete<T>(this.getFullEndpointUrl(urlSuffix));
+    return this.httpClient.delete<T>(this.getFullEndpointUrl(urlSuffix), {
+      withCredentials: true,
+    });
   }
 
   private getFullEndpointUrl(urlSuffix: string): string {

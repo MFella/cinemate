@@ -64,13 +64,13 @@
     <span class="text-sm mr-4">Logged as</span>
     <img
       mat-icon-button
-      [matMenuTriggerFor]="menu"
+      [matMenuTriggerFor]="userMenu"
       class="rounded-full w-8 hover:cursor-pointer"
       [ngSrc]="userAvatarUrl"
       width="30"
       height="30"
       alt="User logo" />
-    <mat-menu #menu="matMenu" [hasBackdrop]="true">
+    <mat-menu #userMenu="matMenu">
       <button mat-menu-item (click)="logoutUser()">
         <mat-icon>logout</mat-icon>
         <span>Logout</span>
