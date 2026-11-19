@@ -5,7 +5,8 @@ import {
   NgZone,
   PLATFORM_ID,
   inject,
-  DOCUMENT
+  DOCUMENT,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NavComponent } from './nav/nav.component';
@@ -26,6 +27,7 @@ import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
     imports: [NavComponent, RouterModule, NgToastModule],
     selector: 'app-root',
     templateUrl: './app.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './app.component.scss'
 })
 export class AppComponent {

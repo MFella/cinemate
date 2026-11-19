@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
@@ -17,6 +17,7 @@ import { AuthSource } from '../typings/common';
 ],
     templateUrl: './auth.component.html',
     styleUrl: './auth.component.scss',
+    changeDetection: ChangeDetectionStrategy.Eager,
     providers: []
 })
 export class AuthComponent {

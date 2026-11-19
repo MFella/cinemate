@@ -7,6 +7,7 @@ import {
   OnInit,
   signal,
   ViewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -88,6 +89,7 @@ import { MoviePreviewComponent } from '../movie-preview/movie-preview.component'
         },
     ],
     templateUrl: './find.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './find.component.scss'
 })
 export class FindComponent implements OnInit {

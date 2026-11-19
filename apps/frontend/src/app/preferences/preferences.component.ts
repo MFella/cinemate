@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
@@ -42,6 +42,7 @@ import { AlertInteractionService } from '../_services/alert-interaction.service'
         },
     ],
     templateUrl: './preferences.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './preferences.component.scss'
 })
 export class PreferencesComponent implements OnInit {

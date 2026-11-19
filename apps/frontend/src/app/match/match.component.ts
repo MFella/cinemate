@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
@@ -43,6 +43,7 @@ import {
     ],
     providers: [],
     templateUrl: './match.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './match.component.scss'
 })
 export class MatchComponent implements OnInit {

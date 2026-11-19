@@ -1,4 +1,4 @@
-import { Component, inject, Output, ViewEncapsulation } from '@angular/core';
+import { Component, inject, Output, ViewEncapsulation, ChangeDetectionStrategy } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
@@ -56,6 +56,7 @@ type MovieDetailDialogData = {
 ],
     templateUrl: './movie-detail.component.html',
     styleUrl: './movie-detail.component.scss',
+    changeDetection: ChangeDetectionStrategy.Eager,
     encapsulation: ViewEncapsulation.Emulated
 })
 export class MovieDetailComponent {
