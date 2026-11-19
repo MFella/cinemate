@@ -43,22 +43,21 @@ type MovieDetailDialogData = {
 };
 
 @Component({
-  selector: 'app-movie-detail',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatDividerModule,
-    MatExpansionModule,
-    MatChipsModule,
-    MatDialogActions,
-    MatButtonModule,
-    MatIconModule,
-    NgOptimizedImage,
-  ],
-  templateUrl: './movie-detail.component.html',
-  styleUrl: './movie-detail.component.scss',
-  encapsulation: ViewEncapsulation.Emulated,
+    selector: 'app-movie-detail',
+    imports: [
+        CommonModule,
+        MatCardModule,
+        MatDividerModule,
+        MatExpansionModule,
+        MatChipsModule,
+        MatDialogActions,
+        MatButtonModule,
+        MatIconModule,
+        NgOptimizedImage,
+    ],
+    templateUrl: './movie-detail.component.html',
+    styleUrl: './movie-detail.component.scss',
+    encapsulation: ViewEncapsulation.Emulated
 })
 export class MovieDetailComponent {
   private static readonly POSTER_URL_PREFIX =

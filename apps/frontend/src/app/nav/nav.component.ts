@@ -33,24 +33,23 @@ import { AppPaths } from '../app.routes';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'app-nav',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    NgIf,
-    MatToolbarModule,
-    RouterModule,
-    MatDividerModule,
-    MatTooltipModule,
-    MatMenuModule,
-    MatSidenavModule,
-    NgOptimizedImage,
-  ],
-  templateUrl: './nav.component.html',
-  styleUrl: './nav.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-nav',
+    imports: [
+        CommonModule,
+        MatButtonModule,
+        MatIconModule,
+        NgIf,
+        MatToolbarModule,
+        RouterModule,
+        MatDividerModule,
+        MatTooltipModule,
+        MatMenuModule,
+        MatSidenavModule,
+        NgOptimizedImage,
+    ],
+    templateUrl: './nav.component.html',
+    styleUrl: './nav.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NavComponent implements OnDestroy, OnInit {
   @ViewChild('userMenu')

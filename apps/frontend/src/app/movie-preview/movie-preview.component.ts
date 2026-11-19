@@ -3,11 +3,10 @@ import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 
 @Component({
-  selector: 'app-movie-preview',
-  standalone: true,
-  imports: [CommonModule, MatCardModule, NgOptimizedImage],
-  templateUrl: './movie-preview.component.html',
-  styleUrl: './movie-preview.component.scss',
+    selector: 'app-movie-preview',
+    imports: [CommonModule, MatCardModule, NgOptimizedImage],
+    templateUrl: './movie-preview.component.html',
+    styleUrl: './movie-preview.component.scss'
 })
 export class MoviePreviewComponent {
   private static readonly POSTER_URL_PREFIX =

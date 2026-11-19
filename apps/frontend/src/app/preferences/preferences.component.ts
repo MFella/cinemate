@@ -24,27 +24,26 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AlertInteractionService } from '../_services/alert-interaction.service';
 
 @Component({
-  selector: 'app-preferences',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatDividerModule,
-    MatProgressBarModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    ReactiveFormsModule,
-  ],
-  providers: [
-    {
-      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
-      useValue: { appearance: 'outline' },
-    },
-  ],
-  templateUrl: './preferences.component.html',
-  styleUrl: './preferences.component.scss',
+    selector: 'app-preferences',
+    imports: [
+        CommonModule,
+        MatCardModule,
+        MatDividerModule,
+        MatProgressBarModule,
+        MatButtonModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        ReactiveFormsModule,
+    ],
+    providers: [
+        {
+            provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+            useValue: { appearance: 'outline' },
+        },
+    ],
+    templateUrl: './preferences.component.html',
+    styleUrl: './preferences.component.scss'
 })
 export class PreferencesComponent implements OnInit {
   #activatedRoute: ActivatedRoute = inject(ActivatedRoute);

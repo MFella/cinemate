@@ -22,11 +22,10 @@ import { interval, startWith, switchMap } from 'rxjs';
 import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 
 @Component({
-  standalone: true,
-  imports: [NavComponent, RouterModule, NgToastModule],
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss',
+    imports: [NavComponent, RouterModule, NgToastModule],
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrl: './app.component.scss'
 })
 export class AppComponent {
   private static readonly COOKIE_REQUEST_INTERVAL_MS = 60 * 1000;
