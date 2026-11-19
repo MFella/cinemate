@@ -5,12 +5,13 @@ import {
   NgZone,
   PLATFORM_ID,
   inject,
+  DOCUMENT
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NavComponent } from './nav/nav.component';
 import { AppLang, AppTheme, AuthSource } from './typings/common';
 import { LocalStorageService } from './_services/local-storage.service';
-import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { AuthService } from './_services/auth.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AlertInteractionService } from './_services/alert-interaction.service';

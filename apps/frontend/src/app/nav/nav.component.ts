@@ -10,14 +10,10 @@ import {
   Output,
   ViewChild,
   inject,
+  DOCUMENT
 } from '@angular/core';
 import { MediaMatcher } from '@angular/cdk/layout';
-import {
-  CommonModule,
-  DOCUMENT,
-  NgIf,
-  NgOptimizedImage,
-} from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import type { AppTheme } from '../typings/common';
@@ -35,18 +31,17 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 @Component({
     selector: 'app-nav',
     imports: [
-        CommonModule,
-        MatButtonModule,
-        MatIconModule,
-        NgIf,
-        MatToolbarModule,
-        RouterModule,
-        MatDividerModule,
-        MatTooltipModule,
-        MatMenuModule,
-        MatSidenavModule,
-        NgOptimizedImage,
-    ],
+    CommonModule,
+    MatButtonModule,
+    MatIconModule,
+    MatToolbarModule,
+    RouterModule,
+    MatDividerModule,
+    MatTooltipModule,
+    MatMenuModule,
+    MatSidenavModule,
+    NgOptimizedImage
+],
     templateUrl: './nav.component.html',
     styleUrl: './nav.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush

@@ -1,5 +1,5 @@
 import { Component, inject, Output, ViewEncapsulation } from '@angular/core';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { NgOptimizedImage } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -45,16 +45,15 @@ type MovieDetailDialogData = {
 @Component({
     selector: 'app-movie-detail',
     imports: [
-        CommonModule,
-        MatCardModule,
-        MatDividerModule,
-        MatExpansionModule,
-        MatChipsModule,
-        MatDialogActions,
-        MatButtonModule,
-        MatIconModule,
-        NgOptimizedImage,
-    ],
+    MatCardModule,
+    MatDividerModule,
+    MatExpansionModule,
+    MatChipsModule,
+    MatDialogActions,
+    MatButtonModule,
+    MatIconModule,
+    NgOptimizedImage
+],
     templateUrl: './movie-detail.component.html',
     styleUrl: './movie-detail.component.scss',
     encapsulation: ViewEncapsulation.Emulated

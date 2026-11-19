@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -10,12 +10,11 @@ import { AuthSource } from '../typings/common';
 @Component({
     selector: 'app-auth',
     imports: [
-        CommonModule,
-        MatCardModule,
-        MatDividerModule,
-        MatProgressBarModule,
-        MatButtonModule,
-    ],
+    MatCardModule,
+    MatDividerModule,
+    MatProgressBarModule,
+    MatButtonModule
+],
     templateUrl: './auth.component.html',
     styleUrl: './auth.component.scss',
     providers: []

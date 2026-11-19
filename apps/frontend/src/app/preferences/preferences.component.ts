@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -26,16 +26,15 @@ import { AlertInteractionService } from '../_services/alert-interaction.service'
 @Component({
     selector: 'app-preferences',
     imports: [
-        CommonModule,
-        MatCardModule,
-        MatDividerModule,
-        MatProgressBarModule,
-        MatButtonModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        ReactiveFormsModule,
-    ],
+    MatCardModule,
+    MatDividerModule,
+    MatProgressBarModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    ReactiveFormsModule
+],
     providers: [
         {
             provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
