@@ -6,16 +6,16 @@
 
 @include mat.core();
 
-$default-typography: mat.define-typography-config(
+$default-typography: mat.m2-define-typography-config(
   $font-family: '"Montserrat", sans-serif',
 );
 @include mat.typography-hierarchy($default-typography);
 
-$default-primary: mat.define-palette(mat.$indigo-palette, 100);
-$default-accent: mat.define-palette(mat.$indigo-palette, A200, 400, A400);
-$default-warn: mat.define-palette(mat.$indigo-palette, 500, 100, A200);
+$default-primary: mat.m2-define-palette(mat.$m2-indigo-palette, 100);
+$default-accent: mat.m2-define-palette(mat.$m2-indigo-palette, A200, 400, A400);
+$default-warn: mat.m2-define-palette(mat.$m2-indigo-palette, 500, 100, A200);
 
-$default-theme: mat.define-light-theme(
+$default-theme: mat.m2-define-light-theme(
   (
     color: (
       primary: $default-primary,
@@ -27,11 +27,11 @@ $default-theme: mat.define-light-theme(
   )
 );
 
-$dark-primary: mat.define-palette(mat.$grey-palette, 700);
-$dark-accent: mat.define-palette(mat.$grey-palette, A200, 400, A400);
-$dark-warn: mat.define-palette(mat.$grey-palette, 500, 100, A200);
+$dark-primary: mat.m2-define-palette(mat.$m2-grey-palette, 700);
+$dark-accent: mat.m2-define-palette(mat.$m2-grey-palette, A200, 400, A400);
+$dark-warn: mat.m2-define-palette(mat.$m2-grey-palette, 500, 100, A200);
 
-$dark-theme: mat.define-dark-theme(
+$dark-theme: mat.m2-define-dark-theme(
   (
     color: (
       primary: $dark-primary,
@@ -79,9 +79,9 @@ body {
   background-color: var(--mat-app-background-color);
 }
 
-$theme-success: mat.define-palette(mat.$teal-palette, 400);
-$theme-info: mat.define-palette(mat.$cyan-palette, 400);
-$theme-danger: mat.define-palette(mat.$pink-palette, 600);
+$theme-success: mat.m2-define-palette(mat.$m2-teal-palette, 400);
+$theme-info: mat.m2-define-palette(mat.$m2-cyan-palette, 400);
+$theme-danger: mat.m2-define-palette(mat.$m2-pink-palette, 600);
 
 $variants-theme: (
   success: $theme-success,
