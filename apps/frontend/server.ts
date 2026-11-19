@@ -20,15 +20,16 @@ export function app(): express.Express {
   // Example Express Rest API endpoints
   // server.get('/api/**', (req, res) => { });
   // Serve static files from /browser
-  server.get(
-    '*.*',
+  // Express 5 no longer accepts bare '*' patterns; static middleware falls through when no file matches
+  server.use(
     express.static(browserDistFolder, {
       maxAge: '1y',
+      index: false,
     })
   );
 
   // All regular routes use the Angular engine
-  server.get('*', (req, res, next) => {
+  server.get('/{*splat}', (req, res, next) => {
     const { protocol, originalUrl, baseUrl, headers } = req;
 
     commonEngine
