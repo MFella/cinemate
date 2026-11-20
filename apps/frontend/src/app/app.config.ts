@@ -1,9 +1,16 @@
 import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { provideRouter, Route, withViewTransitions } from '@angular/router';
 import { appRoutes } from './app.routes';
-import { provideClientHydration, withNoIncrementalHydration } from '@angular/platform-browser';
+import {
+  provideClientHydration,
+  withNoIncrementalHydration,
+} from '@angular/platform-browser';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withFetch,
+  withInterceptors,
+} from '@angular/common/http';
 import { NgToastModule } from 'ng-angular-popup';
 import { errorHandlerInterceptor } from './_interceptors/error-handler.interceptor';
 

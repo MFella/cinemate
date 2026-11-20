@@ -10,6 +10,11 @@ permissions:
   actions: read
   contents: read
 
+# a newer push to the same branch makes the older run pointless
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   main:
     runs-on: ubuntu-latest
@@ -18,20 +23,22 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Connect your workspace on nx.app and uncomment this to enable task distribution.
-      # The "--stop-agents-after" is optional, but allows idle agents to shut down once the "e2e-ci" targets have been requested
-      # - run: npx nx-cloud start-ci-run --distribute-on="5 linux-medium-js" --stop-agents-after="e2e-ci"
-
-      # Cache node_modules
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: 'npm'
       - run: npm ci
+
+      # the Prisma client is generated code; build and tests need it
+      - run: npx prisma generate --schema apps/backend/prisma/schema.prisma
+
       - uses: nrwl/nx-set-shas@v4
 
       - run: git branch --track main origin/main
         if: ${{ github.event_name == 'pull_request' }}
 
-      - run: npx nx-cloud record -- nx format:check
-      - run: npx nx affected -t lint:front lint:back units:back build:front build:back e2e:front e2e:back
+      - run: npx nx format:check
+
+      # frontend + backend only: the *-e2e projects need a running server and a
+      # database (and their lint is not clean yet), see docs/aws-plan.md
+      - run: npx nx affected -t lint test build --exclude=frontend-e2e,backend-e2e

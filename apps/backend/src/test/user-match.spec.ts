@@ -89,8 +89,9 @@ const createPrismaMock = (data: {
 
   return {
     user: {
-      findFirst: jest.fn(async ({ where }) =>
-        data.users.find(user => String(user.id) === String(where.id)) ?? null
+      findFirst: jest.fn(
+        async ({ where }) =>
+          data.users.find(user => String(user.id) === String(where.id)) ?? null
       ),
     },
     friendship: {

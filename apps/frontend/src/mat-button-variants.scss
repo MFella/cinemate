@@ -69,6 +69,11 @@ $_ripple-opacity: 0.1;
   .mat-mdc-mini-fab:not(:disabled) {
     @include _theme-property($config, 'color', darker-contrast, $variants);
     @include _theme-property($config, 'background-color', $hue, $variants);
-    @include _ripple-color($config, default-contrast, $_ripple-opacity, $variants);
+    @include _ripple-color(
+      $config,
+      default-contrast,
+      $_ripple-opacity,
+      $variants
+    );
   }
 }

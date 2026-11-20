@@ -10,7 +10,7 @@ import {
   Output,
   ViewChild,
   inject,
-  DOCUMENT
+  DOCUMENT,
 } from '@angular/core';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
@@ -29,8 +29,8 @@ import { AppPaths } from '../app.routes';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-    selector: 'app-nav',
-    imports: [
+  selector: 'app-nav',
+  imports: [
     CommonModule,
     MatButtonModule,
     MatIconModule,
@@ -40,11 +40,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     MatTooltipModule,
     MatMenuModule,
     MatSidenavModule,
-    NgOptimizedImage
-],
-    templateUrl: './nav.component.html',
-    styleUrl: './nav.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    NgOptimizedImage,
+  ],
+  templateUrl: './nav.component.html',
+  styleUrl: './nav.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NavComponent implements OnDestroy, OnInit {
   @ViewChild('userMenu')

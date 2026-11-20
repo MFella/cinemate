@@ -21,14 +21,19 @@ describe('MoviesService', () => {
   const USER_ID = '1001';
   const OTHER_USER_ID = '2002';
   const GENRE_ID = 4;
-  const PAGE = { id: 'page-1', pageNumber: 1, genreId: GENRE_ID, movieIds: [1, 2, 3] };
+  const PAGE = {
+    id: 'page-1',
+    pageNumber: 1,
+    genreId: GENRE_ID,
+    movieIds: [1, 2, 3],
+  };
 
   // Rates the user already has in the database (after the rate being saved).
   const mockUserState = (ratedMovieIds: Array<number>) => {
     prisma.userGenre.findMany.mockResolvedValue([
       { userId: USER_ID, genreId: GENRE_ID },
     ]);
-    prisma.pageOfMovie.findFirst.mockResolvedValue(PAGE );
+    prisma.pageOfMovie.findFirst.mockResolvedValue(PAGE);
     prisma.rate.findMany.mockResolvedValue(
       ratedMovieIds.map(movieId => ({
         id: `rate-${movieId}`,
@@ -37,8 +42,8 @@ describe('MoviesService', () => {
         value: RateValue.YES,
       }))
     );
-    prisma.rate.upsert.mockResolvedValue({} );
-    prisma.completedPageOfMovie.upsert.mockResolvedValue({} );
+    prisma.rate.upsert.mockResolvedValue({});
+    prisma.completedPageOfMovie.upsert.mockResolvedValue({});
   };
 
   beforeEach(() => {
@@ -120,7 +125,7 @@ describe('MoviesService', () => {
 
     it('does not report the rate as saved when the database returns nothing', async () => {
       mockUserState([1]);
-      prisma.rate.upsert.mockResolvedValue(null );
+      prisma.rate.upsert.mockResolvedValue(null);
 
       const result = await moviesService.rateMovie(1, Rate.YES, USER_ID);
 
@@ -174,7 +179,7 @@ describe('MoviesService', () => {
       jest
         .spyOn(moviesService as never, 'getTmdbMovieRequestOptions')
         .mockResolvedValue({ pageNumber: 1, genreId: GENRE_ID } as never);
-      prisma.pageOfMovie.findFirst.mockResolvedValue(PAGE );
+      prisma.pageOfMovie.findFirst.mockResolvedValue(PAGE);
       jest
         .spyOn(moviesService, 'retrieveMovieListDtoFromDb')
         .mockResolvedValue(cachedList as never);

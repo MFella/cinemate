@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { MoviesController } from './movies.controller';
 import { MoviesService } from './movies.service';
 import { BaseRestDataService } from '../common/base-rest-data.service';
-import { PrismaService } from 'backend/database/prisma.service';
+import { PrismaService } from '../database/prisma.service';
 import { HttpModule } from '@nestjs/axios';
 
 @Module({

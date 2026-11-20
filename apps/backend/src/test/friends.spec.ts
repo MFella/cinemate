@@ -145,9 +145,9 @@ describe('FriendsService', () => {
     it('rejects a request to yourself', async () => {
       const { service } = build();
 
-      await expect(service.sendRequest(ME.id, 'ME@example.com')).rejects.toThrow(
-        BadRequestException
-      );
+      await expect(
+        service.sendRequest(ME.id, 'ME@example.com')
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('does not duplicate an already sent request', async () => {

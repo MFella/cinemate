@@ -1,4 +1,9 @@
-import { HttpClient, HttpContext, HttpHeaders, HttpParams } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpContext,
+  HttpHeaders,
+  HttpParams,
+} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -55,10 +60,7 @@ type HttpGetOptions = {
     | HttpParams
     | {
         [param: string]:
-          | string
-          | number
-          | boolean
-          | ReadonlyArray<string | number | boolean>;
+          string | number | boolean | ReadonlyArray<string | number | boolean>;
       };
   reportProgress?: boolean;
   responseType?: 'json';

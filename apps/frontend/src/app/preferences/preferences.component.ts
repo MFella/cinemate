@@ -1,4 +1,9 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
@@ -29,8 +34,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AlertInteractionService } from '../_services/alert-interaction.service';
 
 @Component({
-    selector: 'app-preferences',
-    imports: [
+  selector: 'app-preferences',
+  imports: [
     MatCardModule,
     MatDividerModule,
     MatProgressBarModule,
@@ -38,17 +43,17 @@ import { AlertInteractionService } from '../_services/alert-interaction.service'
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    ReactiveFormsModule
-],
-    providers: [
-        {
-            provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
-            useValue: { appearance: 'outline' },
-        },
-    ],
-    templateUrl: './preferences.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
-    styleUrl: './preferences.component.scss'
+    ReactiveFormsModule,
+  ],
+  providers: [
+    {
+      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+      useValue: { appearance: 'outline' },
+    },
+  ],
+  templateUrl: './preferences.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './preferences.component.scss',
 })
 export class PreferencesComponent implements OnInit {
   #activatedRoute: ActivatedRoute = inject(ActivatedRoute);
