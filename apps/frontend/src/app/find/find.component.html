@@ -46,6 +46,13 @@
             </mat-autocomplete>
           </mat-form-field>
           <mat-form-field class="w-full mt-4" appearance="outline">
+            <mat-label>Match mode</mat-label>
+            <mat-select formControlName="matchMode">
+              <mat-option value="all">Everyone liked it</mat-option>
+              <mat-option value="any">At least one friend liked it</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field class="w-full mt-4" appearance="outline">
             <mat-label>Select genre</mat-label>
             <mat-select formControlName="genre">
               @for (genreOption of genreOptions; track genreOption) {
@@ -126,6 +133,11 @@
           <mat-icon>search</mat-icon>
         </button>
       </div>
+      @if (findMatchResult?.unknownEmails?.length) {
+        <p class="unknown-emails text-center p-2">
+          No account found for: {{ findMatchResult?.unknownEmails?.join(', ') }}
+        </p>
+      }
       @if (matchedMovies$.getValue().length) {
         <div
           class="found-movies__container grid lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-2 gap-4 p-8">

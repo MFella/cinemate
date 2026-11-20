@@ -45,6 +45,7 @@ export type UserMatchFilterOptions = {
   onlyWatched?: true;
   onlyUnwatched?: true;
   searchedMovieTitle?: string;
+  matchMode?: 'all' | 'any';
 };
 
 export const genres = [

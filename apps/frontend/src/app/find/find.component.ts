@@ -115,6 +115,7 @@ export class FindComponent implements OnInit {
   readonly searchUserForm = new FormGroup({
     mailOfUsers: new FormControl(),
     genre: new FormControl(),
+    matchMode: new FormControl<'all' | 'any'>('all'),
   });
 
   readonly filterMatchResultForm = new FormGroup({
@@ -220,7 +221,8 @@ export class FindComponent implements OnInit {
     this.#restDataService
       .fetchUserMatch(
         this.searchUserForm.value.genre,
-        this.searchUserForm.value.mailOfUsers
+        this.searchUserForm.value.mailOfUsers,
+        { pageNumber: 0, matchMode: this.searchUserForm.value.matchMode ?? 'all' }
       )
       .pipe(take(1), takeUntilDestroyed(this.#destroyRef))
       .subscribe(
@@ -282,6 +284,7 @@ export class FindComponent implements OnInit {
         this.searchUserForm.value.mailOfUsers,
         {
           pageNumber: 0,
+          matchMode: this.searchUserForm.value.matchMode ?? 'all',
           onlyWatched: moreFiltersObject['onlyWatched'],
           onlyUnwatched: moreFiltersObject['onlyUnwatched'],
           searchedMovieTitle: movieTitle ?? '',
@@ -305,6 +308,7 @@ export class FindComponent implements OnInit {
             this.searchUserForm.value.mailOfUsers,
             {
               pageNumber: this.pageNumber + 1,
+              matchMode: this.searchUserForm.value.matchMode ?? 'all',
             }
           )
         )
