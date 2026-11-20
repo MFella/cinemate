@@ -5,8 +5,8 @@ Goal: show real AWS skills (after DVA-C02) on this project. Only list on the por
 ## Stage 0 – finish the dependency migration
 - [x] Dependencies migrated (Nx 24, Angular 22.2, Nest 11, Express 5, Prisma 6, Node 24)
 - [x] Database moved from Supabase to Neon
-- [ ] Vercel: Node 24 and new `DATABASE_URL` / `DIRECT_URL` (Neon)
-- [ ] Click through the app locally with login (Google/Facebook), then push `main`
+- [x] `main` pushed
+- [ ] Click through the app locally with login (Google/Facebook)
 - [ ] Fix CI: use real Nx targets (`lint`, `test`, `build`) instead of the npm script names; decide what to do with lint errors that existed before
 - [ ] Re-enable the demo button in the portfolio (`technical-info.tsx`) once the demo works
 
