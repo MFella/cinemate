@@ -8,7 +8,14 @@ import {
   DOCUMENT,
   ChangeDetectionStrategy
 } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import {
+  NavigationCancel,
+  NavigationEnd,
+  NavigationError,
+  NavigationStart,
+  Router,
+  RouterModule,
+} from '@angular/router';
 import { NavComponent } from './nav/nav.component';
 import { AppLang, AppTheme, AuthSource } from './typings/common';
 import { LocalStorageService } from './_services/local-storage.service';
@@ -20,7 +27,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ProgressSpinnerComponent } from './progress-spinner/progress-spinner.component';
 import { RestDataService } from './_services/rest-data.service';
 import { NgToastModule } from 'ng-angular-popup';
-import { interval, startWith, switchMap } from 'rxjs';
+import { filter, interval, map, startWith, switchMap } from 'rxjs';
 import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 
 @Component({
@@ -44,6 +51,7 @@ export class AppComponent {
   #matDialog = inject(MatDialog);
   #matDialogRef: MatDialogRef<unknown> | null = null;
   #ngZone = inject(NgZone);
+  #router = inject(Router);
 
   title = 'frontend';
   selectedTheme: AppTheme = 'default';
@@ -73,6 +81,7 @@ export class AppComponent {
 
     this.observeUserClickedLoginButton();
     this.observeLoadingSpinnerChanged();
+    this.showSpinnerDuringNavigation();
     this.observeValidUserCookie();
   }
 
@@ -98,6 +107,10 @@ export class AppComponent {
       .pipe(takeUntilDestroyed(this.#destroyRef))
       .subscribe((isVisible: boolean) => {
         if (isVisible) {
+          // one spinner at a time (navigation and page requests can both ask for it)
+          if (this.#matDialogRef) {
+            return;
+          }
           this.#matDialogRef = this.#matDialog.open(ProgressSpinnerComponent, {
             panelClass: 'transparent-loading-spinner',
             width: '250px',
@@ -107,6 +120,25 @@ export class AppComponent {
           this.#matDialogRef = null;
         }
       });
+  }
+
+  // every page shows the spinner while its route is guarded/resolved, not only /match
+  private showSpinnerDuringNavigation(): void {
+    this.#router.events
+      .pipe(
+        filter(
+          event =>
+            event instanceof NavigationStart ||
+            event instanceof NavigationEnd ||
+            event instanceof NavigationCancel ||
+            event instanceof NavigationError
+        ),
+        map(event => event instanceof NavigationStart),
+        takeUntilDestroyed(this.#destroyRef)
+      )
+      .subscribe(isNavigating =>
+        this.#intercationService.isLoadingSpinnerActive$.next(isNavigating)
+      );
   }
 
   private observeValidUserCookie(): void {
