@@ -27,7 +27,9 @@
           <mat-icon>star_rate</mat-icon>
           {{ currentMovie.voteAverage.toFixed(1) }}
         </span>
-        <span class="pill">{{ currentMovie.releaseDate.split('-').at(0) }}</span>
+        <span class="pill">{{
+          currentMovie.releaseDate.split('-').at(0)
+        }}</span>
         @if (genresOnPage.size) {
           @for (genreId of currentMovie.genreIds; track genreId) {
             <span class="pill pill-genre">{{

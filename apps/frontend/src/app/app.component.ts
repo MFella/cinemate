@@ -6,7 +6,7 @@ import {
   PLATFORM_ID,
   inject,
   DOCUMENT,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import {
   NavigationCancel,
@@ -31,11 +31,11 @@ import { filter, interval, map, startWith, switchMap } from 'rxjs';
 import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 
 @Component({
-    imports: [NavComponent, RouterModule, NgToastModule],
-    selector: 'app-root',
-    templateUrl: './app.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
-    styleUrl: './app.component.scss'
+  imports: [NavComponent, RouterModule, NgToastModule],
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './app.component.scss',
 })
 export class AppComponent {
   private static readonly COOKIE_REQUEST_INTERVAL_MS = 60 * 1000;

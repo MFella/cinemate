@@ -44,9 +44,7 @@ const createPrismaMock = (initialUserGenres: Array<[number, number]> = []) => {
         return {};
       }),
       createMany: jest.fn(
-        async (args: {
-          data: Array<{ userId: number; genreId: number }>;
-        }) => {
+        async (args: { data: Array<{ userId: number; genreId: number }> }) => {
           userGenres.push(...args.data);
           return { count: args.data.length };
         }
@@ -81,7 +79,11 @@ describe('UserService preferences (many genres)', () => {
 
       expect(await service.saveUserPreferences(USER, [4, 9])).toBe(true);
 
-      expect(getUserGenres().map(g => g.genreId).sort()).toEqual([4, 9]);
+      expect(
+        getUserGenres()
+          .map(g => g.genreId)
+          .sort()
+      ).toEqual([4, 9]);
     });
 
     it('replaces the previous selection instead of adding to it', async () => {

@@ -22,7 +22,9 @@ const tmdbMovie = (id: number, genreIds: Array<number>) => ({
 });
 
 // In-memory database with just the tables and queries the feed uses.
-const createDatabase = (userGenres: Array<{ userId: string; genreId: number }>) => {
+const createDatabase = (
+  userGenres: Array<{ userId: string; genreId: number }>
+) => {
   const pages: Array<Row> = [];
   const completed: Array<Row> = [];
   const rates: Array<Row> = [];
@@ -55,8 +57,9 @@ const createDatabase = (userGenres: Array<{ userId: string; genreId: number }>) 
       findMany: jest.fn(async (args?: { where?: Json; select?: Json }) =>
         genres.filter(g => pageMatches(g, args?.where))
       ),
-      findFirst: jest.fn(async ({ where }: { where: Json }) =>
-        genres.find(g => pageMatches(g, where)) ?? null
+      findFirst: jest.fn(
+        async ({ where }: { where: Json }) =>
+          genres.find(g => pageMatches(g, where)) ?? null
       ),
       createMany: jest.fn(async ({ data }: { data: Array<Row> }) => {
         genres = [...genres, ...data];
@@ -81,17 +84,18 @@ const createDatabase = (userGenres: Array<{ userId: string; genreId: number }>) 
       }),
     },
     completedPageOfMovie: {
-      count: jest.fn(async ({ where }: { where: Row }) =>
-        completed
-          .map(completedWithPage)
-          .filter(
-            c =>
-              c.userId === where['userId'] &&
-              (where['pageOfMovieId'] === undefined ||
-                c.pageOfMovieId === where['pageOfMovieId']) &&
-              (where['pageOfMovie'] === undefined ||
-                pageMatches(c.pageOfMovie, where['pageOfMovie']))
-          ).length
+      count: jest.fn(
+        async ({ where }: { where: Row }) =>
+          completed
+            .map(completedWithPage)
+            .filter(
+              c =>
+                c.userId === where['userId'] &&
+                (where['pageOfMovieId'] === undefined ||
+                  c.pageOfMovieId === where['pageOfMovieId']) &&
+                (where['pageOfMovie'] === undefined ||
+                  pageMatches(c.pageOfMovie, where['pageOfMovie']))
+            ).length
       ),
       findMany: jest.fn(async ({ where }: { where: Row }) =>
         completed
@@ -104,7 +108,11 @@ const createDatabase = (userGenres: Array<{ userId: string; genreId: number }>) 
           )
       ),
       upsert: jest.fn(
-        async ({ create }: { create: { userId: string; pageOfMovieId: string } }) => {
+        async ({
+          create,
+        }: {
+          create: { userId: string; pageOfMovieId: string };
+        }) => {
           if (
             !completed.some(
               c =>
@@ -214,7 +222,10 @@ describe('MoviesService feed (getMoviesData)', () => {
     const result = await service.getMoviesData(USER, 0);
 
     expect(tmdbGet).toHaveBeenCalledTimes(1);
-    expect(tmdbGet).toHaveBeenCalledWith('movies', { genreId: 4, pageNumber: 1 });
+    expect(tmdbGet).toHaveBeenCalledWith('movies', {
+      genreId: 4,
+      pageNumber: 1,
+    });
     expect(idsOf(result)).toEqual([1, 2, 3]);
     expect(result.selectedGenreId).toBe(4);
     expect(result.pageNumber).toBe(1);
@@ -226,7 +237,11 @@ describe('MoviesService feed (getMoviesData)', () => {
     await service.getMoviesData(USER, 0);
 
     expect(pages).toEqual([
-      expect.objectContaining({ genreId: 4, pageNumber: 1, movieIds: [1, 2, 3] }),
+      expect.objectContaining({
+        genreId: 4,
+        pageNumber: 1,
+        movieIds: [1, 2, 3],
+      }),
     ]);
     expect(movies.map(m => m.movieId)).toEqual([1, 2, 3]);
   });
@@ -293,7 +308,10 @@ describe('MoviesService feed (getMoviesData)', () => {
 
     const result = await service.getMoviesData(USER, 1);
 
-    expect(tmdbGet).toHaveBeenCalledWith('movies', { genreId: 4, pageNumber: 2 });
+    expect(tmdbGet).toHaveBeenCalledWith('movies', {
+      genreId: 4,
+      pageNumber: 2,
+    });
     expect(idsOf(result)).toEqual([11, 12]);
   });
 
@@ -332,10 +350,15 @@ describe('MoviesService feed (getMoviesData)', () => {
 
     const result = await service.getMoviesData(OTHER_USER, 0);
 
-    expect(tmdbGet).toHaveBeenCalledWith('movies', { genreId: 4, pageNumber: 2 });
+    expect(tmdbGet).toHaveBeenCalledWith('movies', {
+      genreId: 4,
+      pageNumber: 2,
+    });
     expect(idsOf(result)).toEqual([11, 12]);
     expect(result.pageNumber).toBe(2);
-    expect(completed).toEqual([expect.objectContaining({ userId: OTHER_USER })]);
+    expect(completed).toEqual([
+      expect.objectContaining({ userId: OTHER_USER }),
+    ]);
   });
 
   it('returns an empty answer when TMDB has no results for the page', async () => {

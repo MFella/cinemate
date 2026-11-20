@@ -1,9 +1,9 @@
 import { IsEmail, IsNumber } from 'class-validator';
 
 export class RegisterUserDto {
-    @IsNumber()
-    id: number;
+  @IsNumber()
+  id: number;
 
-    @IsEmail()
-    email: string;
+  @IsEmail()
+  email: string;
 }

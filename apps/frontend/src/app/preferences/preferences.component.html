@@ -3,7 +3,8 @@
     <mat-card-header class="page-header">
       <mat-card-title class="page-title">Your favourite genres</mat-card-title>
       <mat-card-subtitle class="page-subtitle"
-        >We mix them to pick the movies you rate on the Match page.</mat-card-subtitle
+        >We mix them to pick the movies you rate on the Match
+        page.</mat-card-subtitle
       >
     </mat-card-header>
     <mat-card-content class="!mt-6" [formGroup]="preferencesFormGroup">
@@ -15,24 +16,24 @@
               [value]="genreOption.value"
               [disabled]="genreOption.disabled"
               >{{ genreOption.label }}</mat-option
-              >
-            }
-          </mat-select>
-        </mat-form-field>
-      </mat-card-content>
-      <mat-card-actions class="app-card-footer">
-        <button
+            >
+          }
+        </mat-select>
+      </mat-form-field>
+    </mat-card-content>
+    <mat-card-actions class="app-card-footer">
+      <button
         [disabled]="
           preferencesFormGroup.invalid ||
           isFetchingData ||
           !hasSelectionChanged()
         "
-          mat-flat-button
-          color="primary"
-          class="w-full primary-action"
-          (click)="savePreference()">
-          Save
-        </button>
-      </mat-card-actions>
-    </mat-card>
-  </div>
+        mat-flat-button
+        color="primary"
+        class="w-full primary-action"
+        (click)="savePreference()">
+        Save
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

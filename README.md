@@ -60,21 +60,23 @@ The whole project is a fullstack application - it includes a frontend, and a bac
 Project built thanks to <b>nx version @18.3.4</b>
 
 Used **frontend** main technologies:
-| Dependency | Version |
-| :---: | :---: |
-| Angular | ^17.3.0 |
+
+|    Dependency    | Version |
+| :--------------: | :-----: |
+|     Angular      | ^17.3.0 |
 | Angular Material | ^17.3.7 |
-| RxJS | ~7.8.0 |
-| TailwindCSS | ^3.0.2 |
-| Playwright | ^1.36.0 |
+|       RxJS       | ~7.8.0  |
+|   TailwindCSS    | ^3.0.2  |
+|    Playwright    | ^1.36.0 |
 
 Used **backend** main technologies:
-| Dependency | Version |
-| :---: | :---: |
-| NestJS | ^10.0.2 |
-| Prisma | ^5.18.1 |
-| passport-google-oauth20 | ^2.0.0 |
-| Supertest | ^7.0.0 |
-| Jest | ^29.4.1 |
+
+|       Dependency        | Version |
+| :---------------------: | :-----: |
+|         NestJS          | ^10.0.2 |
+|         Prisma          | ^5.18.1 |
+| passport-google-oauth20 | ^2.0.0  |
+|        Supertest        | ^7.0.0  |
+|          Jest           | ^29.4.1 |
 
 and rest can be found within the repo.

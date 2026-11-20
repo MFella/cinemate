@@ -4,13 +4,13 @@ import { RestDataService } from '../_services/rest-data.service';
 import { GenEntity, UserPreferences } from '../typings/common';
 import { forkJoin } from 'rxjs';
 
-export const findResolver: ResolveFn<[UserPreferences, Array<GenEntity>, Array<string>]> = () => {
+export const findResolver: ResolveFn<
+  [UserPreferences, Array<GenEntity>, Array<string>]
+> = () => {
   const restDataService = inject(RestDataService);
-  return forkJoin(
-    [
-      restDataService.fetchUserGenrePreference(),
-      restDataService.fetchAllGenres(),
-      restDataService.fetchUsersEmails()
-    ]
-  );
+  return forkJoin([
+    restDataService.fetchUserGenrePreference(),
+    restDataService.fetchAllGenres(),
+    restDataService.fetchUsersEmails(),
+  ]);
 };

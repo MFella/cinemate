@@ -87,8 +87,7 @@ export class RestDataService extends BasicRestDataService {
         httpParams = httpParams.append(
           key,
           userMatchFilterOptions[key as keyof UserMatchFilterOptions] as
-            | true
-            | string
+            true | string
         );
       }
     }

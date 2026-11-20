@@ -188,7 +188,8 @@ export class UserService {
     const friendEmails = new Set(myFriends.map(f => f.email.toLowerCase()));
     const unknownEmails = requestedEmails.filter(
       email =>
-        email.toLowerCase() !== myEmail && !friendEmails.has(email.toLowerCase())
+        email.toLowerCase() !== myEmail &&
+        !friendEmails.has(email.toLowerCase())
     );
     const requestedLower = new Set(requestedEmails.map(e => e.toLowerCase()));
     const friends = myFriends.filter(f =>
@@ -273,7 +274,8 @@ export class UserService {
       return [
         {
           id: movieToRate.movieId,
-          movie: MoviesUtil.convertMovieToRateToTransformedTmdbMovie(movieToRate),
+          movie:
+            MoviesUtil.convertMovieToRateToTransformedTmdbMovie(movieToRate),
           users: friendsWhoLiked.map(friend => ({
             id: friend.id.toString(),
             email: friend.email,

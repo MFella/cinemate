@@ -8,17 +8,17 @@ import { AuthService } from '../_services/auth.service';
 import { AuthSource } from '../typings/common';
 
 @Component({
-    selector: 'app-auth',
-    imports: [
+  selector: 'app-auth',
+  imports: [
     MatCardModule,
     MatDividerModule,
     MatProgressBarModule,
-    MatButtonModule
-],
-    templateUrl: './auth.component.html',
-    styleUrl: './auth.component.scss',
-    changeDetection: ChangeDetectionStrategy.Eager,
-    providers: []
+    MatButtonModule,
+  ],
+  templateUrl: './auth.component.html',
+  styleUrl: './auth.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  providers: [],
 })
 export class AuthComponent {
   username = '';

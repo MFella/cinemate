@@ -147,7 +147,9 @@ export class FriendsService {
     return overview;
   }
 
-  async getAcceptedFriends(userId: string | number): Promise<Array<FriendUser>> {
+  async getAcceptedFriends(
+    userId: string | number
+  ): Promise<Array<FriendUser>> {
     return (await this.list(userId)).friends;
   }
 

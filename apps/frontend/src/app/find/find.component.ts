@@ -7,7 +7,7 @@ import {
   OnInit,
   signal,
   ViewChild,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -62,36 +62,36 @@ import { MatchComponent } from '../match/match.component';
 import { MoviePreviewComponent } from '../movie-preview/movie-preview.component';
 
 @Component({
-    selector: 'app-find',
-    imports: [
-        CommonModule,
-        FormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatButtonModule,
-        MatDividerModule,
-        MatSelectModule,
-        ReactiveFormsModule,
-        MatChipsModule,
-        MatAutocompleteModule,
-        MatIconModule,
-        MatCardModule,
-        MatTableModule,
-        MatSlideToggleModule,
-        MatTooltipModule,
-        MoviePreviewComponent,
-    ],
-    providers: [
-        {
-            provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
-            useValue: {
-                subscriptSizing: 'dynamic',
-            },
-        },
-    ],
-    templateUrl: './find.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
-    styleUrl: './find.component.scss'
+  selector: 'app-find',
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatDividerModule,
+    MatSelectModule,
+    ReactiveFormsModule,
+    MatChipsModule,
+    MatAutocompleteModule,
+    MatIconModule,
+    MatCardModule,
+    MatTableModule,
+    MatSlideToggleModule,
+    MatTooltipModule,
+    MoviePreviewComponent,
+  ],
+  providers: [
+    {
+      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+      useValue: {
+        subscriptSizing: 'dynamic',
+      },
+    },
+  ],
+  templateUrl: './find.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './find.component.scss',
 })
 export class FindComponent implements OnInit {
   @ViewChild('filterSelect')
@@ -227,7 +227,10 @@ export class FindComponent implements OnInit {
       .fetchUserMatch(
         this.searchUserForm.value.genre,
         this.searchUserForm.value.mailOfUsers,
-        { pageNumber: 0, matchMode: this.searchUserForm.value.matchMode ?? 'all' }
+        {
+          pageNumber: 0,
+          matchMode: this.searchUserForm.value.matchMode ?? 'all',
+        }
       )
       .pipe(take(1), takeUntilDestroyed(this.#destroyRef))
       .subscribe(

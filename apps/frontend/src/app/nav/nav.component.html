@@ -47,7 +47,7 @@
     class="user-app-preferences-container"
     [ngClass]="{
       'border-r-[1px] pr-4': isUserHasValidToken,
-      'is-vertical': vertical
+      'is-vertical': vertical,
     }">
     <button
       mat-icon-button
@@ -55,78 +55,93 @@
       aria-label="Toggle theme button"
       (click)="toggleTheme()">
       @if (selectedTheme === 'dark') {
-        <mat-icon
-          >brightness_3</mat-icon
-          >
-        } @else {
-          <mat-icon>wb_sunny</mat-icon>
-        }
-      </button>
-    </div>
-    @if (isUserHasValidToken) {
-      <div
-        class="flex items-center justify-center"
-    [ngClass]="{
-      'ml-4': !vertical,
-      'p-4 rounded-xl shadow-lg': vertical
-    }">
-        <span class="text-sm mr-4">Logged as</span>
-        <img
-          mat-icon-button
-          [matMenuTriggerFor]="userMenu"
-          class="rounded-full w-8 hover:cursor-pointer"
-          [ngSrc]="userAvatarUrl"
-          width="30"
-          height="30"
-          alt="User logo" />
-          <mat-menu #userMenu="matMenu">
-            <button mat-menu-item (click)="logoutUser()">
-              <mat-icon>logout</mat-icon>
-              <span>Logout</span>
-            </button>
-          </mat-menu>
-        </div>
+        <mat-icon>brightness_3</mat-icon>
+      } @else {
+        <mat-icon>wb_sunny</mat-icon>
       }
-    </ng-template>
+    </button>
+  </div>
+  @if (isUserHasValidToken) {
+    <div
+      class="flex items-center justify-center"
+      [ngClass]="{
+        'ml-4': !vertical,
+        'p-4 rounded-xl shadow-lg': vertical,
+      }">
+      <span class="text-sm mr-4">Logged as</span>
+      <img
+        mat-icon-button
+        [matMenuTriggerFor]="userMenu"
+        class="rounded-full w-8 hover:cursor-pointer"
+        [ngSrc]="userAvatarUrl"
+        width="30"
+        height="30"
+        alt="User logo" />
+      <mat-menu #userMenu="matMenu">
+        <button mat-menu-item (click)="logoutUser()">
+          <mat-icon>logout</mat-icon>
+          <span>Logout</span>
+        </button>
+      </mat-menu>
+    </div>
+  }
+</ng-template>
 
-    <mat-toolbar color="primary">
-      <mat-toolbar-row>
-        @if (mobileQuery.matches) {
-          <button mat-icon-button (click)="toggleSidenav(snav)">
-            <mat-icon>menu</mat-icon>
-          </button>
-          <a class="brand" href="/" (click)="$event.preventDefault(); navigate('')" aria-label="Cinemate home">
-            <img class="brand-mark" src="assets/cinemate-mark.svg" alt="" width="32" height="32" />
-            <span class="brand-word">Cine<b>Mate</b></span>
-          </a>
-        } @else {
-          <a class="brand mr-4" href="/" (click)="$event.preventDefault(); navigate('')" aria-label="Cinemate home">
-            <img class="brand-mark" src="assets/cinemate-mark.svg" alt="" width="36" height="36" />
-            <span class="brand-word">Cine<b>Mate</b></span>
-          </a>
-            <div class="flex-auto"></div>
-            <ng-container
-              [ngTemplateOutlet]="navButtonContainer"
+<mat-toolbar color="primary">
+  <mat-toolbar-row>
+    @if (mobileQuery.matches) {
+      <button mat-icon-button (click)="toggleSidenav(snav)">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <a
+        class="brand"
+        href="/"
+        (click)="$event.preventDefault(); navigate('')"
+        aria-label="Cinemate home">
+        <img
+          class="brand-mark"
+          src="assets/cinemate-mark.svg"
+          alt=""
+          width="32"
+          height="32" />
+        <span class="brand-word">Cine<b>Mate</b></span>
+      </a>
+    } @else {
+      <a
+        class="brand mr-4"
+        href="/"
+        (click)="$event.preventDefault(); navigate('')"
+        aria-label="Cinemate home">
+        <img
+          class="brand-mark"
+          src="assets/cinemate-mark.svg"
+          alt=""
+          width="36"
+          height="36" />
+        <span class="brand-word">Cine<b>Mate</b></span>
+      </a>
+      <div class="flex-auto"></div>
+      <ng-container
+        [ngTemplateOutlet]="navButtonContainer"
+        [ngTemplateOutletContext]="{
+          vertical: false,
+        }"></ng-container>
+    }
+  </mat-toolbar-row>
+</mat-toolbar>
+
+<mat-sidenav-container
+  class="example-sidenav-container"
+  [style.marginTop.px]="mobileQuery.matches ? 56 : 0">
+  <mat-sidenav
+    #snav
+    [mode]="mobileQuery.matches ? 'over' : 'side'"
+    [fixedInViewport]="mobileQuery.matches"
+    fixedTopGap="56">
+    <ng-container
+      [ngTemplateOutlet]="navButtonContainer"
       [ngTemplateOutletContext]="{
-        vertical: false
+        vertical: true,
       }"></ng-container>
-
-          }
-        </mat-toolbar-row>
-      </mat-toolbar>
-
-      <mat-sidenav-container
-        class="example-sidenav-container"
-        [style.marginTop.px]="mobileQuery.matches ? 56 : 0">
-        <mat-sidenav
-          #snav
-          [mode]="mobileQuery.matches ? 'over' : 'side'"
-          [fixedInViewport]="mobileQuery.matches"
-          fixedTopGap="56">
-          <ng-container
-            [ngTemplateOutlet]="navButtonContainer"
-      [ngTemplateOutletContext]="{
-        vertical: true
-      }"></ng-container>
-        </mat-sidenav>
-      </mat-sidenav-container>
+  </mat-sidenav>
+</mat-sidenav-container>

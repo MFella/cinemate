@@ -1,4 +1,10 @@
-import { Component, inject, Output, ViewEncapsulation, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  inject,
+  Output,
+  ViewEncapsulation,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
@@ -16,12 +22,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 export type MatDialogAction = 'Close';
 export type CustomThemePalette =
-  | 'primary'
-  | 'accent'
-  | 'danger'
-  | 'success'
-  | 'info'
-  | 'warn';
+  'primary' | 'accent' | 'danger' | 'success' | 'info' | 'warn';
 
 export type MovieDetailConfig = {
   shouldDisplayContent?: boolean;
@@ -43,8 +44,8 @@ type MovieDetailDialogData = {
 };
 
 @Component({
-    selector: 'app-movie-detail',
-    imports: [
+  selector: 'app-movie-detail',
+  imports: [
     MatCardModule,
     MatDividerModule,
     MatExpansionModule,
@@ -52,12 +53,12 @@ type MovieDetailDialogData = {
     MatDialogActions,
     MatButtonModule,
     MatIconModule,
-    NgOptimizedImage
-],
-    templateUrl: './movie-detail.component.html',
-    styleUrl: './movie-detail.component.scss',
-    changeDetection: ChangeDetectionStrategy.Eager,
-    encapsulation: ViewEncapsulation.Emulated
+    NgOptimizedImage,
+  ],
+  templateUrl: './movie-detail.component.html',
+  styleUrl: './movie-detail.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  encapsulation: ViewEncapsulation.Emulated,
 })
 export class MovieDetailComponent {
   private static readonly POSTER_URL_PREFIX =
