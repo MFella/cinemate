@@ -9,6 +9,7 @@ import {
   MovieToRate,
   UserMatchFilterOptions,
   UserPreferences,
+  FriendsOverview,
   AuthSource,
   UserInfo,
 } from '../typings/common';
@@ -95,6 +96,25 @@ export class RestDataService extends BasicRestDataService {
     return this.get<FindMatchResult>('user/match', {
       params: httpParams,
     });
+  }
+
+  fetchFriends(): Observable<FriendsOverview> {
+    return this.get<FriendsOverview>('friends');
+  }
+
+  sendFriendRequest(email: string): Observable<boolean> {
+    return this.post<boolean>('friends/request', { email });
+  }
+
+  respondToFriendRequest(
+    friendshipId: string,
+    accept: boolean
+  ): Observable<boolean> {
+    return this.post<boolean>(`friends/${friendshipId}/respond`, { accept });
+  }
+
+  removeFriend(userId: string): Observable<boolean> {
+    return this.delete<boolean>(`friends/${userId}`);
   }
 
   saveUserPreferences(genreIds: Array<number>): Observable<boolean> {

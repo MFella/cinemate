@@ -1,0 +1,99 @@
+<div class="flex flex-col gap-6 items-center">
+  <mat-card class="w-full app-card">
+    <mat-card-header class="page-header">
+      <mat-card-title class="page-title">Friends</mat-card-title>
+      <mat-card-subtitle class="page-subtitle"
+        >Only accepted friends can see which movies you both like on the Find
+        page.</mat-card-subtitle
+      >
+    </mat-card-header>
+    <mat-card-content class="!mt-6" [formGroup]="addFriendForm">
+      <mat-form-field class="w-full" appearance="outline">
+        <mat-label>Friend's e-mail</mat-label>
+        <input
+          matInput
+          type="email"
+          formControlName="email"
+          placeholder="friend@example.com"
+          (keydown.enter)="sendRequest()" />
+      </mat-form-field>
+    </mat-card-content>
+    <mat-card-actions class="app-card-footer">
+      <button
+        mat-flat-button
+        color="primary"
+        class="w-full primary-action"
+        [disabled]="addFriendForm.invalid || isBusy()"
+        (click)="sendRequest()">
+        <mat-icon>person_add</mat-icon>
+        <span>Send request</span>
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  @if (overview().incoming.length) {
+    <mat-card class="w-full app-card friends-incoming">
+      <mat-card-header class="page-header">
+        <mat-card-title class="page-title">Requests for you</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="!mt-4">
+        @for (request of overview().incoming; track request.id) {
+          <div class="friend-row">
+            <span class="friend-email">{{ request.email }}</span>
+            <span class="flex-auto"></span>
+            <button
+              mat-flat-button
+              color="primary"
+              [disabled]="isBusy()"
+              (click)="respond(request.id, true)">
+              Accept
+            </button>
+            <button
+              mat-button
+              [disabled]="isBusy()"
+              (click)="respond(request.id, false)">
+              Decline
+            </button>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <mat-card class="w-full app-card friends-list">
+    <mat-card-header class="page-header">
+      <mat-card-title class="page-title">Your friends</mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="!mt-4">
+      @for (friend of overview().friends; track friend.id) {
+        <div class="friend-row">
+          <span class="friend-email">{{ friend.email }}</span>
+          <span class="flex-auto"></span>
+          <button
+            mat-icon-button
+            aria-label="Remove friend"
+            [disabled]="isBusy()"
+            (click)="remove(friend.id)">
+            <mat-icon>person_remove</mat-icon>
+          </button>
+        </div>
+      } @empty {
+        <p class="empty-state">No friends yet. Send a request above.</p>
+      }
+      @for (pending of overview().outgoing; track pending.id) {
+        <div class="friend-row friend-row--pending">
+          <span class="friend-email">{{ pending.email }}</span>
+          <span class="flex-auto"></span>
+          <span class="pending-label">Waiting for answer</span>
+          <button
+            mat-icon-button
+            aria-label="Cancel request"
+            [disabled]="isBusy()"
+            (click)="remove(pending.id)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

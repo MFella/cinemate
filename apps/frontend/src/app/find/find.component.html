@@ -6,8 +6,8 @@
       <mat-card-header class="page-header">
         <mat-card-title class="page-title">Find a movie match</mat-card-title>
         <mat-card-subtitle class="page-subtitle"
-          >Add your friends' e-mails and pick a genre to see the movies you
-          both rated.</mat-card-subtitle
+          >Pick your friends and a genre to see the movies you all like. Add
+          friends on the Friends page.</mat-card-subtitle
         >
       </mat-card-header>
       <mat-card-content class="!flex !flex-col m-4">
@@ -135,7 +135,7 @@
       </div>
       @if (findMatchResult?.unknownEmails?.length) {
         <p class="unknown-emails text-center p-2">
-          No account found for: {{ findMatchResult?.unknownEmails?.join(', ') }}
+          Not on your friends list: {{ findMatchResult?.unknownEmails?.join(', ') }}
         </p>
       }
       @if (matchedMovies$.getValue().length) {
