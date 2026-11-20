@@ -59,7 +59,8 @@ export class UserController {
       parseInt(userMatchQuery.pageNumber),
       userMatchQuery.onlyUnwatched,
       userMatchQuery.onlyWatched,
-      userMatchQuery.searchedMovieTitle
+      userMatchQuery.searchedMovieTitle,
+      userMatchQuery.matchMode ?? 'all'
     );
   }
 }

@@ -106,11 +106,14 @@ export type FindMatchResult = {
   matchedRateValue: MovieRate;
   matchedRates: Array<MatchedMovie>;
   isLastPage: boolean;
+  // E-mails from the request that do not belong to any registered user.
+  unknownEmails: Array<string>;
 };
 
 export type MatchedMovie = {
   id: number;
   movie: MovieToRate;
-  user: Record<'id' | 'email', string>;
+  // Selected users (not the current one) who liked the movie.
+  users: Array<Record<'id' | 'email', string>>;
   isWatched: boolean;
 };

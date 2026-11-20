@@ -5,13 +5,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
-import { genres, Genres } from '../typings/common';
+import { genres, Genres, MatchMode } from '../typings/common';
 import { UserPreferenceDto } from '../dtos/user-preference.dto';
 import { Genre, RateValue, User } from '@prisma/client';
 import { FindMatchResultDto } from '../dtos/user/find-match-result.dto';
 import { Rate } from '../dtos/rate-of-movie';
 import { MoviesUtil } from '../movies/movies.util';
-import { TransformedTmdbMovie } from '../dtos/movies-list.dto';
 
 @Injectable()
 export class UserService {
@@ -185,93 +184,142 @@ export class UserService {
     pageNumber = 0,
     onlyUnwatched?: boolean,
     onlyWatched?: boolean,
-    searchedMovieTitle?: string
+    searchedMovieTitle?: string,
+    matchMode: MatchMode = 'all'
   ): Promise<FindMatchResultDto> {
-    const usersFromDb = new Map<any, User>(
-      (
-        await this.prismaService.user.findMany({
-          where: {
-            email: {
-              in: mailOfUsers,
-            },
-          },
-        })
-      ).map(userFromDb => [userFromDb.id.toString(), userFromDb])
+    const myId = userId.toString();
+
+    // The frontend sends an empty first element; ignore blanks and repeated e-mails.
+    const requestedEmails = Array.from(
+      new Map(
+        (mailOfUsers ?? [])
+          .map(email => email?.trim())
+          .filter(email => !!email)
+          .map(email => [email.toLowerCase(), email] as const)
+      ).values()
     );
+
+    const emptyResult = (unknownEmails: Array<string>): FindMatchResultDto => ({
+      matchedRateValue: Rate.YES,
+      matchedRates: [],
+      isLastPage: true,
+      unknownEmails,
+    });
+
+    if (!requestedEmails.length) {
+      return emptyResult([]);
+    }
+
+    const usersFromDb = await this.prismaService.user.findMany({
+      where: {
+        OR: requestedEmails.map(email => ({
+          email: { equals: email, mode: 'insensitive' as const },
+        })),
+      },
+    });
+
+    const foundEmails = new Set(usersFromDb.map(u => u.email.toLowerCase()));
+    const unknownEmails = requestedEmails.filter(
+      email => !foundEmails.has(email.toLowerCase())
+    );
+    const friends = usersFromDb.filter(u => u.id.toString() !== myId);
+
+    // With "all" an unknown e-mail can never be satisfied, so there is nothing in common.
+    if (!friends.length || (matchMode === 'all' && unknownEmails.length)) {
+      return emptyResult(unknownEmails);
+    }
+
+    // Start from the movies I liked: only those can match.
+    const myLikedMovieIds = (
+      await this.prismaService.rate.findMany({
+        where: { userId: myId, value: RateValue.YES },
+        select: { movieId: true },
+      })
+    ).map(rate => rate.movieId);
 
     const watchedUserMovies = (
       await this.prismaService.watchedMovie.findMany({
-        where: {
-          userId,
-        },
-        select: {
-          movieId: true,
-        },
+        where: { userId: myId },
+        select: { movieId: true },
       })
     ).map(watchedUserMovie => watchedUserMovie.movieId);
 
-    let movieFilterQuery = {};
-
-    if (onlyWatched === true) {
-      movieFilterQuery['in'] = watchedUserMovies;
+    let candidateMovieIds = myLikedMovieIds;
+    let excludedMovieIds: Array<number> = [];
+    const filterByWatched = onlyWatched !== onlyUnwatched;
+    if (filterByWatched && onlyWatched === true) {
+      candidateMovieIds = candidateMovieIds.filter(id =>
+        watchedUserMovies.includes(id)
+      );
+    } else if (filterByWatched && onlyUnwatched === true) {
+      excludedMovieIds = watchedUserMovies;
     }
 
-    if (onlyUnwatched === true) {
-      movieFilterQuery['notIn'] = watchedUserMovies;
+    const candidateMovies = (
+      await this.prismaService.movieToRate.findMany({
+        where: {
+          genreIds: { has: genreId },
+          movieId: { in: candidateMovieIds, notIn: excludedMovieIds },
+          title: { contains: searchedMovieTitle ?? '', mode: 'insensitive' },
+        },
+      })
+    ).sort((a, b) => a.movieId - b.movieId);
+
+    if (!candidateMovies.length) {
+      return emptyResult(unknownEmails);
     }
 
-    if (onlyUnwatched === onlyWatched && onlyUnwatched !== undefined) {
-      movieFilterQuery = null;
-    }
-
-    const moviesFromDb = new Map<number, TransformedTmdbMovie>(
-      (
-        await this.prismaService.movieToRate.findMany({
-          where: {
-            genreIds: {
-              has: genreId,
-            },
-            movieId: movieFilterQuery ?? {},
-            title: {
-              contains: searchedMovieTitle ?? '',
-            },
-          },
-        })
-      ).map(movieToRate => [
-        movieToRate.movieId,
-        MoviesUtil.convertMovieToRateToTransformedTmdbMovie(movieToRate),
-      ])
-    );
-
-    const ratesFromDb = await this.prismaService.rate.findMany({
+    const friendRates = await this.prismaService.rate.findMany({
       where: {
-        userId: {
-          in: Array.from(usersFromDb.keys()),
-        },
-        movieId: {
-          in: Array.from(moviesFromDb.keys()),
-        },
+        userId: { in: friends.map(friend => friend.id.toString()) },
+        movieId: { in: candidateMovies.map(movie => movie.movieId) },
         value: RateValue.YES,
       },
-      skip: pageNumber * UserService.MOVIE_SEARCH_RESULT_PER_PAGE,
-      take: UserService.MOVIE_SEARCH_RESULT_PER_PAGE,
+      select: { userId: true, movieId: true },
     });
 
-    const populatedRates = ratesFromDb.map(rate => {
-      const movieFromDb = moviesFromDb.get(rate.movieId);
-      return {
-        id: rate.id,
-        movie: movieFromDb,
-        user: usersFromDb.get(rate.userId.toString()),
-        isWatched: watchedUserMovies.includes(movieFromDb.id),
-      };
+    const likedByFriends = new Map<number, Set<string>>();
+    friendRates.forEach(friendRate => {
+      const likers = likedByFriends.get(friendRate.movieId) ?? new Set();
+      likers.add(friendRate.userId.toString());
+      likedByFriends.set(friendRate.movieId, likers);
     });
+
+    const matchedRates = candidateMovies.flatMap(movieToRate => {
+      const likers = likedByFriends.get(movieToRate.movieId) ?? new Set();
+      const friendsWhoLiked = friends.filter(friend =>
+        likers.has(friend.id.toString())
+      );
+      const isMatch =
+        matchMode === 'all'
+          ? friendsWhoLiked.length === friends.length
+          : friendsWhoLiked.length > 0;
+
+      if (!isMatch) {
+        return [];
+      }
+
+      return [
+        {
+          id: movieToRate.movieId,
+          movie: MoviesUtil.convertMovieToRateToTransformedTmdbMovie(movieToRate),
+          users: friendsWhoLiked.map(friend => ({
+            id: friend.id.toString(),
+            email: friend.email,
+          })),
+          isWatched: watchedUserMovies.includes(movieToRate.movieId),
+        },
+      ];
+    });
+
+    const pageSize = UserService.MOVIE_SEARCH_RESULT_PER_PAGE;
+    const pageStart = pageNumber * pageSize;
 
     return {
       matchedRateValue: Rate.YES,
-      matchedRates: populatedRates,
-      isLastPage:
-        ratesFromDb?.length < UserService.MOVIE_SEARCH_RESULT_PER_PAGE,
+      matchedRates: matchedRates.slice(pageStart, pageStart + pageSize),
+      isLastPage: pageStart + pageSize >= matchedRates.length,
+      unknownEmails,
     };
   }
 
