@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PrismaService } from '../database/prisma.service';
 import { UserService } from '../user/user.service';
+import { FriendsService } from '../friends/friends.service';
 import { AuthGuard } from '../_guards/auth.guard';
 import { ConfigModule } from '@nestjs/config';
 
@@ -24,6 +25,7 @@ import { ConfigModule } from '@nestjs/config';
     GoogleOauthGuard,
     PrismaService,
     UserService,
+    FriendsService,
     AuthGuard,
   ],
   exports: [PassportModule, AuthService],

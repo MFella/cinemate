@@ -6,6 +6,7 @@ import baseConfiguration from './configuration/base-configuration';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { MoviesModule } from './movies/movies.module';
+import { FriendsModule } from './friends/friends.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { MoviesModule } from './movies/movies.module';
     AuthModule,
     UserModule,
     MoviesModule,
+    FriendsModule,
   ],
 })
 export class AppModule {}

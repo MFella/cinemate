@@ -40,6 +40,15 @@ export type SelectOption = {
   disabled: boolean;
 };
 
+export type FriendUser = { id: string; email: string; picture: string };
+
+export type FriendsOverview = {
+  friends: Array<FriendUser>;
+  // for `incoming` the id is the friendship id to respond to
+  incoming: Array<FriendUser>;
+  outgoing: Array<FriendUser>;
+};
+
 export type UserPreferences = {
   preferences: Array<GenEntity>;
 };

@@ -1,6 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 import { UserService } from '../app/user/user.service';
 import { PrismaService } from '../app/database/prisma.service';
+import { FriendsService } from '../app/friends/friends.service';
 
 const GENRES = [
   { id: 4, name: 'Adventure' },
@@ -67,7 +68,10 @@ describe('UserService preferences (many genres)', () => {
     const mock = createPrismaMock(initial);
     return {
       ...mock,
-      service: new UserService(mock.prisma as unknown as PrismaService),
+      service: new UserService(
+        mock.prisma as unknown as PrismaService,
+        {} as FriendsService
+      ),
     };
   };
 

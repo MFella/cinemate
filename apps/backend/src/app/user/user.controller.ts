@@ -42,9 +42,10 @@ export class UserController {
 
   @Get('emails')
   async getUsersEmails(
+    @UserId() userId: number,
     @Query() usersFilterQuery: UsersFilterQuery
   ): Promise<Array<string>> {
-    return this.userService.getUsersEmails(usersFilterQuery.startsWith);
+    return this.userService.getUsersEmails(userId, usersFilterQuery.startsWith);
   }
 
   @Get('match')

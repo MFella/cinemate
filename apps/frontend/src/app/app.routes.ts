@@ -13,6 +13,7 @@ type ImportedAuthFile = typeof import('./auth/auth.component');
 type ImportedPreferencesFile =
   typeof import('./preferences/preferences.component');
 type ImportedFindFile = typeof import('./find/find.component');
+type ImportedFriendsFile = typeof import('./friends/friends.component');
 
 export const appRoutes = [
   {
@@ -63,6 +64,14 @@ export const appRoutes = [
     resolve: {
       findData: findResolver,
     },
+  },
+  {
+    path: 'friends',
+    loadComponent: () =>
+      import('./friends/friends.component').then(
+        (importedFile: ImportedFriendsFile) => importedFile.FriendsComponent
+      ),
+    canActivate: [authGuard],
   },
 ] as const;
 

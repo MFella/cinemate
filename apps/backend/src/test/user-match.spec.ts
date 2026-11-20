@@ -1,5 +1,6 @@
 import { UserService } from '../app/user/user.service';
 import { PrismaService } from '../app/database/prisma.service';
+import { FriendsService } from '../app/friends/friends.service';
 
 type DbUser = { id: number; email: string; genreId: number; picture: string };
 type DbRate = { id: string; userId: number; movieId: number; value: string };
@@ -34,7 +35,6 @@ const yes = (userId: number, movieId: number): DbRate =>
   rate(userId, movieId, 'YES');
 
 type InFilter = { in?: Array<unknown>; notIn?: Array<unknown> };
-type EmailCondition = { email: { equals: string; mode?: string } };
 
 // In-memory stand-in for the parts of Prisma used by getUserMatch. It applies the
 // `where` filters, so the tests check what the service really asks the database for.
@@ -43,6 +43,10 @@ const createPrismaMock = (data: {
   movies: Array<DbMovie>;
   rates: Array<DbRate>;
   watched?: Array<number>;
+  // accepted friendships as [userId, userId]; by default everybody is a friend of everybody
+  friendships?: Array<[number, number]>;
+  // pending requests as [requesterId, addresseeId]
+  pending?: Array<[number, number]>;
 }) => {
   const matchesIn = (value: unknown, filter?: InFilter | unknown): boolean => {
     if (filter === undefined) return true;
@@ -63,15 +67,48 @@ const createPrismaMock = (data: {
     return true;
   };
 
+  const friendships = [
+    ...(
+      data.friendships ??
+      data.users.flatMap(a =>
+        data.users.filter(b => a.id < b.id).map(b => [a.id, b.id] as const)
+      )
+    ).map(([requesterId, addresseeId]) => ({
+      id: `f-${requesterId}-${addresseeId}`,
+      requesterId,
+      addresseeId,
+      status: 'ACCEPTED',
+    })),
+    ...(data.pending ?? []).map(([requesterId, addresseeId]) => ({
+      id: `p-${requesterId}-${addresseeId}`,
+      requesterId,
+      addresseeId,
+      status: 'PENDING',
+    })),
+  ];
+
   return {
     user: {
+      findFirst: jest.fn(async ({ where }) =>
+        data.users.find(user => String(user.id) === String(where.id)) ?? null
+      ),
+    },
+    friendship: {
       findMany: jest.fn(async ({ where }) =>
-        data.users.filter(user =>
-          (where.OR as Array<EmailCondition>).some(
-            condition =>
-              user.email.toLowerCase() === condition.email.equals.toLowerCase()
+        friendships
+          .filter(f =>
+            (where.OR as Array<Record<string, unknown>>).some(condition =>
+              Object.entries(condition).every(
+                ([key, value]) =>
+                  String((f as Record<string, unknown>)[key]) === String(value)
+              )
+            )
           )
-        )
+          .map(f => ({
+            ...f,
+            requester: data.users.find(u => u.id === f.requesterId),
+            addressee: data.users.find(u => u.id === f.addresseeId),
+          }))
       ),
     },
     watchedMovie: {
@@ -108,7 +145,11 @@ const createPrismaMock = (data: {
 describe('UserService.getUserMatch (common likes)', () => {
   const build = (data: Parameters<typeof createPrismaMock>[0]) => {
     const prisma = createPrismaMock(data);
-    const service = new UserService(prisma as unknown as PrismaService);
+    const prismaService = prisma as unknown as PrismaService;
+    const service = new UserService(
+      prismaService,
+      new FriendsService(prismaService)
+    );
     return { prisma, service };
   };
 
@@ -434,6 +475,108 @@ describe('UserService.getUserMatch (common likes)', () => {
 
       expect(result.matchedRates).toEqual([]);
       expect(result.unknownEmails).toEqual(['ghost@example.com']);
+    });
+  });
+
+  describe('only friends can be compared', () => {
+    const likedByAll = [yes(ME.id, 10), yes(ANNA.id, 10), yes(BOB.id, 10)];
+
+    it('does not return likes of a user who is not my friend', async () => {
+      const { service } = build({
+        users: [ME, ANNA],
+        movies,
+        rates: [yes(ME.id, 10), yes(ANNA.id, 10)],
+        friendships: [],
+      });
+
+      const result = await service.getUserMatch(
+        ME.id,
+        GENRE_ACTION,
+        [ANNA.email],
+        0
+      );
+
+      expect(result.matchedRates).toEqual([]);
+    });
+
+    it('reports a non-friend like an unknown e-mail (no hint that the account exists)', async () => {
+      const { service } = build({
+        users: [ME, ANNA],
+        movies,
+        rates: [yes(ME.id, 10), yes(ANNA.id, 10)],
+        friendships: [],
+      });
+
+      const result = await service.getUserMatch(
+        ME.id,
+        GENRE_ACTION,
+        [ANNA.email, 'ghost@example.com'],
+        0
+      );
+
+      expect(result.unknownEmails).toEqual([ANNA.email, 'ghost@example.com']);
+    });
+
+    it('does not count a pending friend request as a friendship', async () => {
+      const { service } = build({
+        users: [ME, ANNA],
+        movies,
+        rates: [yes(ME.id, 10), yes(ANNA.id, 10)],
+        friendships: [],
+        pending: [[ME.id, ANNA.id]],
+      });
+
+      const result = await service.getUserMatch(
+        ME.id,
+        GENRE_ACTION,
+        [ANNA.email],
+        0
+      );
+
+      expect(result.matchedRates).toEqual([]);
+    });
+
+    it('mode "any": only friends count, non-friends are reported', async () => {
+      const { service } = build({
+        users: [ME, ANNA, BOB],
+        movies,
+        rates: likedByAll,
+        friendships: [[ME.id, ANNA.id]],
+      });
+
+      const result = await service.getUserMatch(
+        ME.id,
+        GENRE_ACTION,
+        [ANNA.email, BOB.email],
+        0,
+        undefined,
+        undefined,
+        undefined,
+        'any'
+      );
+
+      expect(result.matchedRates[0].users.map(u => u.email)).toEqual([
+        ANNA.email,
+      ]);
+      expect(result.unknownEmails).toEqual([BOB.email]);
+    });
+
+    it('a friendship works in both directions', async () => {
+      const { service } = build({
+        users: [ME, ANNA],
+        movies,
+        rates: [yes(ME.id, 10), yes(ANNA.id, 10)],
+        friendships: [[ANNA.id, ME.id]],
+      });
+
+      const result = await service.getUserMatch(
+        ME.id,
+        GENRE_ACTION,
+        [ANNA.email],
+        0
+      );
+
+      expect(titlesOf(result)).toEqual(['Alpha']);
     });
   });
 

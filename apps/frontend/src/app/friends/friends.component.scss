@@ -1,0 +1,20 @@
+:host {
+  @apply w-full px-4 lg:max-w-[960px] md:max-w-[600px];
+}
+
+.friend-row {
+  @apply flex items-center gap-2 py-2;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid rgba(127, 127, 127, 0.2);
+  }
+}
+
+.friend-row--pending {
+  @apply opacity-70;
+}
+
+.pending-label,
+.empty-state {
+  @apply text-sm opacity-70;
+}

@@ -64,6 +64,8 @@ model User {
   email String
   picture String
   genres UserGenre[]
+  sentFriendRequests Friendship[] @relation("FriendshipRequester")
+  receivedFriendRequests Friendship[] @relation("FriendshipAddressee")
 }
 
 model UserGenre {
@@ -87,4 +89,22 @@ enum RateValue {
   YES
   IDK
   NO
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+}
+
+model Friendship {
+  id          String           @id @default(uuid())
+  requesterId Decimal          @db.Decimal(25, 0)
+  addresseeId Decimal          @db.Decimal(25, 0)
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  requester   User             @relation("FriendshipRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee   User             @relation("FriendshipAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, addresseeId], name: "friendshipPair")
+  @@index([addresseeId])
 }

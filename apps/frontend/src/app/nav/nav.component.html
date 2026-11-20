@@ -26,6 +26,14 @@
       <span>Preferences</span>
     </button>
     <button
+      (click)="navigate('friends')"
+      [ngClass]="currentActivatedUrl === '/friends' ? 'active' : ''"
+      class="mr-4 !rounded-3xl"
+      mat-button>
+      <mat-icon>group</mat-icon>
+      <span>Friends</span>
+    </button>
+    <button
       (click)="navigate('find')"
       [ngClass]="currentActivatedUrl === '/find' ? 'active' : ''"
       class="!rounded-3xl"

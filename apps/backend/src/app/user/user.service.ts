@@ -12,6 +12,7 @@ import { Genre, RateValue, User } from '@prisma/client';
 import { FindMatchResultDto } from '../dtos/user/find-match-result.dto';
 import { Rate } from '../dtos/rate-of-movie';
 import { MoviesUtil } from '../movies/movies.util';
+import { FriendsService } from '../friends/friends.service';
 
 @Injectable()
 export class UserService {
@@ -19,7 +20,10 @@ export class UserService {
   private static readonly DEFAULT_GENRE_ID = 4;
   private static readonly MOVIE_SEARCH_RESULT_PER_PAGE = 15;
 
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly friendsService: FriendsService
+  ) {}
 
   async saveUserPreferences(
     userId: number,
@@ -131,19 +135,15 @@ export class UserService {
     }
   }
 
-  async getUsersEmails(startsWith: string): Promise<Array<string>> {
-    return (
-      await this.prismaService.user.findMany({
-        where: {
-          email: {
-            startsWith,
-          },
-        },
-        select: {
-          email: true,
-        },
-      })
-    ).map(emailFromDb => emailFromDb.email);
+  // only friends can be looked up (so e-mails of other users cannot be listed)
+  async getUsersEmails(
+    userId: number | string,
+    startsWith: string
+  ): Promise<Array<string>> {
+    const prefix = (startsWith ?? '').toLowerCase();
+    return (await this.friendsService.getAcceptedFriends(userId))
+      .map(friend => friend.email)
+      .filter(email => email.toLowerCase().startsWith(prefix));
   }
 
   async getUserMatch(
@@ -179,19 +179,21 @@ export class UserService {
       return emptyResult([]);
     }
 
-    const usersFromDb = await this.prismaService.user.findMany({
-      where: {
-        OR: requestedEmails.map(email => ({
-          email: { equals: email, mode: 'insensitive' as const },
-        })),
-      },
-    });
-
-    const foundEmails = new Set(usersFromDb.map(u => u.email.toLowerCase()));
+    // Only friends can be compared. Anyone else (missing account, pending request,
+    // not a friend) is reported the same way, so no one learns who has an account.
+    const myEmail = (
+      await this.prismaService.user.findFirst({ where: { id: myId } })
+    )?.email?.toLowerCase();
+    const myFriends = await this.friendsService.getAcceptedFriends(myId);
+    const friendEmails = new Set(myFriends.map(f => f.email.toLowerCase()));
     const unknownEmails = requestedEmails.filter(
-      email => !foundEmails.has(email.toLowerCase())
+      email =>
+        email.toLowerCase() !== myEmail && !friendEmails.has(email.toLowerCase())
     );
-    const friends = usersFromDb.filter(u => u.id.toString() !== myId);
+    const requestedLower = new Set(requestedEmails.map(e => e.toLowerCase()));
+    const friends = myFriends.filter(f =>
+      requestedLower.has(f.email.toLowerCase())
+    );
 
     // With "all" an unknown e-mail can never be satisfied, so there is nothing in common.
     if (!friends.length || (matchMode === 'all' && unknownEmails.length)) {
