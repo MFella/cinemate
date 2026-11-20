@@ -9,7 +9,7 @@ import { UserMatchQuery } from '../dtos/user/user-match.query';
 import { AuthGuard } from '../_guards/auth.guard';
 
 type UserPreferenceBody = {
-  genreId: number;
+  genreIds: Array<number>;
 };
 
 @Controller('user')
@@ -22,9 +22,9 @@ export class UserController {
     @UserId() userId: number,
     @Body() preferenceBody: UserPreferenceBody
   ): Promise<boolean> {
-    return await this.userService.saveUserPreference(
+    return await this.userService.saveUserPreferences(
       userId,
-      preferenceBody.genreId
+      preferenceBody.genreIds
     );
   }
 
@@ -32,7 +32,7 @@ export class UserController {
   async getUserPreference(
     @UserId() userId: number
   ): Promise<UserPreferenceDto> {
-    return this.userService.getUserPreference(userId);
+    return this.userService.getUserPreferences(userId);
   }
 
   @Get('preferences')

@@ -8,7 +8,7 @@ import { Rate } from '../app/dtos/rate-of-movie';
 // Only the Prisma methods MoviesService uses here. A deep mock of PrismaClient hits
 // TypeScript's circular-type limits, so a small hand-written mock is used instead.
 const createPrismaMock = () => ({
-  user: { findFirst: jest.fn() },
+  userGenre: { findMany: jest.fn() },
   pageOfMovie: { findFirst: jest.fn() },
   rate: { findMany: jest.fn(), upsert: jest.fn(), create: jest.fn() },
   completedPageOfMovie: { count: jest.fn(), upsert: jest.fn() },
@@ -25,12 +25,9 @@ describe('MoviesService', () => {
 
   // Rates the user already has in the database (after the rate being saved).
   const mockUserState = (ratedMovieIds: Array<number>) => {
-    prisma.user.findFirst.mockResolvedValue({
-      id: USER_ID,
-      email: 'a@example.com',
-      genreId: GENRE_ID,
-      picture: '',
-    } );
+    prisma.userGenre.findMany.mockResolvedValue([
+      { userId: USER_ID, genreId: GENRE_ID },
+    ]);
     prisma.pageOfMovie.findFirst.mockResolvedValue(PAGE );
     prisma.rate.findMany.mockResolvedValue(
       ratedMovieIds.map(movieId => ({
