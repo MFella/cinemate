@@ -1,22 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Genre, PageOfMovie } from '@prisma/client';
 import { MoviesListDTO, TransformedTmdbMovie } from '../dtos/movies-list.dto';
 import { MoviesUtil } from './movies.util';
 import {
   GenEntity,
   TmdbDiscoverResult,
-  TmdbMovie,
   TmdbMovieGetListRequestOptions,
 } from '../dtos/tmdb-movie';
-import { Genres } from '../typings/common';
 import { PrismaService } from '../database/prisma.service';
 import { Rate } from '../dtos/rate-of-movie';
-import {
-  CompletedPageOfMovie,
-  Genre,
-  MovieToRate,
-  PageOfMovie,
-  Genre as PrismaGenre,
-} from '@prisma/client';
 import { RateResultDto } from '../dtos/rate-result.dto';
 import { PrismaUtil } from '../util/prisma-util';
 import { BaseRestDataService } from '../common/base-rest-data.service';
@@ -24,7 +16,6 @@ import { BaseRestDataService } from '../common/base-rest-data.service';
 @Injectable()
 export class MoviesService {
   private static readonly DEFAULT_PAGE_NUMBER = 1;
-  private static readonly DEFAULT_GENRE: Genres = 'Adventure';
   private static readonly DEFAULT_GENRE_ID = 4;
 
   constructor(
@@ -43,156 +34,54 @@ export class MoviesService {
     >('genres', {});
 
     await this.prismaService.genre.createMany({
-      data: fetchedGenres.data.genres.map(genreEntity => {
-        return {
-          id: genreEntity.id,
-          name: genreEntity.name,
-        };
-      }),
+      data: fetchedGenres.data.genres.map(({ id, name }) => ({ id, name })),
     });
   }
 
+  /**
+   * Movies the user should rate now. The feed works in pages (of one genre each):
+   * 1. the page the user is on, if it still has unrated movies;
+   * 2. otherwise the next page, from the database when somebody already fetched it,
+   *    from TMDB when nobody did.
+   * `shouldLoadNextPage` skips the cached page and asks for the one after it.
+   */
   async getMoviesData(
     userId: string,
     shouldLoadNextPage: 0 | 1
   ): Promise<MoviesListDTO> {
     if (shouldLoadNextPage !== 1) {
-      const moviesListDtoFromCache = await this.retrieveMovieListDtoFromDb(
-        userId
-      );
-
-      if (
-        moviesListDtoFromCache?.movies?.length &&
-        moviesListDtoFromCache?.selectedGenreId !== null &&
-        moviesListDtoFromCache?.selectedGenreId !== undefined
-      ) {
-        return moviesListDtoFromCache;
+      const currentPageMovies = await this.retrieveMovieListDtoFromDb(userId);
+      if (MoviesService.hasMovies(currentPageMovies)) {
+        return currentPageMovies;
       }
     }
 
-    // const nonVotedMovieIds = Array.from(
-    //   new Set(await this.getNonVotedUserMovieIds(userId))
-    // );
-
-    // if (nonVotedMovieIds?.length) {
-    //   const moviesFromDb = await this.prismaService.movieToRate.findMany({
-    //     where: {
-    //       movieId: {
-    //         in: nonVotedMovieIds,
-    //       },
-    //     },
-    //   });
-    //   const genresOnPage = await this.extractGenresOnPageFromMovies(
-    //     moviesFromDb
-    //   );
-
-    //   return MoviesUtil.convertMoviesToRateToMoviesListDto(
-    //     moviesFromDb,
-    //     genresOnPage,
-    //     userId,
-    //     null
-    //   );
-    // }
-
-    const tmdbRequestOptions = await this.getTmdbMovieRequestOptions(
+    const { genreId, pageNumber } = await this.getTmdbMovieRequestOptions(
       userId,
       shouldLoadNextPage
     );
 
-    const pageOfMovie = await this.prismaService.pageOfMovie.findFirst({
-      where: {
-        genreId: tmdbRequestOptions.genreId,
-        pageNumber: tmdbRequestOptions.pageNumber,
-      },
-    });
-
-    if (pageOfMovie && Object.keys(pageOfMovie).length) {
-      const isPageAlreadyCompleted = await this.isPageCompletedByUser(
-        userId,
-        pageOfMovie.id
-      );
-
-      if (isPageAlreadyCompleted) {
-        tmdbRequestOptions.pageNumber++;
-      } else {
-        const moviesListDtoFromCache = await this.retrieveMovieListDtoFromDb(
-          userId,
-          pageOfMovie
-        );
-
-        if (
-          moviesListDtoFromCache?.movies?.length &&
-          moviesListDtoFromCache?.selectedGenreId !== null &&
-          moviesListDtoFromCache?.selectedGenreId !== undefined
-        ) {
-          return moviesListDtoFromCache;
-        } else {
-          // mark page as completed
-          await this.markPageAsCompletedByUser(userId, pageOfMovie.id);
-
-          tmdbRequestOptions.pageNumber++;
-        }
-      }
-    }
-
-    const response = await this.baseRestDataService.get<TmdbDiscoverResult>(
-      'movies',
-      {
-        genreId: tmdbRequestOptions.genreId,
-        pageNumber: tmdbRequestOptions.pageNumber,
-      }
-    );
-
-    if (response.data && !pageOfMovie) {
-      const pageGenre = await this.extractGenreById(tmdbRequestOptions.genreId);
-      const genresOnPage = await this.extractGenresOnPageFromMovies(
-        response.data.results
-      );
-      const moviesListDto = MoviesUtil.convertTmdbMoviesToMoviesListDto(
-        response.data.results,
-        genresOnPage,
-        pageGenre.id,
-        tmdbRequestOptions.pageNumber
-      );
-      await this.saveMovieListDto(
-        moviesListDto,
-        tmdbRequestOptions.genreId,
-        tmdbRequestOptions.pageNumber
-      );
-      return moviesListDto;
-    } else if (pageOfMovie) {
-      const moviesOnPage = await this.prismaService.movieToRate.findMany({
-        where: {
-          movieId: {
-            in: pageOfMovie.movieIds,
-          },
-        },
+    // Walk forward over pages that are saved but finished (or empty) for this user
+    // until one still has movies for them, or a page nobody has fetched yet.
+    for (let page = pageNumber; ; page++) {
+      const savedPage = await this.prismaService.pageOfMovie.findFirst({
+        where: { genreId, pageNumber: page },
       });
-      const genresOnPage = await this.extractGenresOnPageFromMovies(
-        moviesOnPage
-      );
-      return MoviesUtil.convertMoviesToRateToMoviesListDto(
-        moviesOnPage,
-        genresOnPage,
-        tmdbRequestOptions.genreId,
-        tmdbRequestOptions.pageNumber
-      );
-    } else {
-      console.error('Received data is undefined');
-      return {
-        pageGenres: [],
-        movies: [],
-        selectedGenreId: null,
-        pageNumber: -1,
-      };
+
+      if (!savedPage) {
+        return this.fetchAndSavePage(genreId, page);
+      }
+
+      const pageMovies = await this.getUnfinishedSavedPage(userId, savedPage);
+      if (pageMovies) {
+        return pageMovies;
+      }
     }
   }
 
   async getSingleMovieData(movieId: number): Promise<TransformedTmdbMovie> {
     const movieToRateFromDb = await this.prismaService.movieToRate.findFirst({
-      where: {
-        movieId,
-      },
+      where: { movieId },
     });
 
     if (!movieToRateFromDb) {
@@ -204,6 +93,7 @@ export class MoviesService {
     );
   }
 
+  /** Unrated movies of the user's current page (or of `pageOfMovie` when given). */
   async retrieveMovieListDtoFromDb(
     userId: string,
     pageOfMovie?: PageOfMovie
@@ -211,167 +101,39 @@ export class MoviesService {
     // a page of a known genre is read from that genre; otherwise the feed decides
     const feedGenreId =
       pageOfMovie?.genreId ?? (await this.getFeedGenreId(userId));
-
-    const completedPageOfMovies =
-      await this.prismaService.completedPageOfMovie.findMany({
-        include: {
-          pageOfMovie: true,
-        },
-        where: {
-          userId,
-          pageOfMovie: {
-            genreId: feedGenreId,
-          },
-        },
-      });
-
-    const maxCompletedPageNumber = completedPageOfMovies?.length
-      ? Math.max(...completedPageOfMovies.map(c => c.pageOfMovie.pageNumber))
-      : 0;
-    const currentPageNumber = maxCompletedPageNumber + 1;
+    const currentPageNumber = await this.getCurrentPageNumber(
+      userId,
+      feedGenreId
+    );
 
     if (!pageOfMovie) {
       pageOfMovie = await this.prismaService.pageOfMovie.findFirst({
-        where: {
-          genreId: feedGenreId,
-          pageNumber: currentPageNumber,
-        },
+        where: { genreId: feedGenreId, pageNumber: currentPageNumber },
       });
       if (!pageOfMovie) {
-        return {
-          movies: [],
-          selectedGenreId: null,
-          pageGenres: [],
-          pageNumber: -1,
-        };
+        return MoviesService.emptyMoviesList();
       }
     }
 
-    const ratedUserMovies = await this.prismaService.rate.findMany({
-      where: {
-        userId,
-      },
-      select: {
-        movieId: true,
-      },
-    });
-
-    const ratedUserMovieIds = ratedUserMovies.map(
-      ratedUserMovie => ratedUserMovie.movieId
-    );
-    const nonVotedMovieIds = pageOfMovie.movieIds.filter(
-      (movieId: number) => !ratedUserMovieIds.includes(movieId)
+    const ratedMovieIds = await this.getRatedMovieIds(userId);
+    const unratedMovieIds = pageOfMovie.movieIds.filter(
+      movieId => !ratedMovieIds.includes(movieId)
     );
 
     const cachedMovies = await this.prismaService.movieToRate.findMany({
-      where: {
-        movieId: {
-          in: nonVotedMovieIds,
-        },
-      },
+      where: { movieId: { in: unratedMovieIds } },
     });
 
     if (!cachedMovies?.length) {
       return;
     }
 
-    const genresOnPage = await this.extractGenresOnPageFromMovies(cachedMovies);
     return MoviesUtil.convertMoviesToRateToMoviesListDto(
       cachedMovies,
-      genresOnPage,
+      await this.getGenres(cachedMovies.flatMap(movie => movie.genreIds)),
       feedGenreId,
       currentPageNumber
     );
-  }
-
-  private async saveMovieListDto(
-    moviesListDto: MoviesListDTO,
-    genreId: number,
-    currentPageNumber: number
-  ): Promise<void> {
-
-    const movieIds = moviesListDto.movies.map(
-      movieInListDto => movieInListDto.id
-    );
-
-    const areMoviesInDbQuery = [];
-    for (const movieId of movieIds) {
-      areMoviesInDbQuery.push(
-        await this.prismaService.movieToRate.count({
-          where: {
-            movieId,
-          },
-        })
-      );
-    }
-
-    const movieIdToIsExistMap = new Map<number, number>(
-      areMoviesInDbQuery.map((isExist, index) => [movieIds[index], isExist])
-    );
-
-    const groupedGenreIds = moviesListDto.movies
-      .map(movie => movie.genreIds)
-      .filter(Boolean)
-      .reduce((acc, gen) => acc.concat(gen), []);
-    const genresFromDb = await this.prismaService.genre.findMany({
-      where: {
-        id: {
-          in: groupedGenreIds,
-        },
-      },
-    });
-    const resultGenres = [
-      ...new Map<number, PrismaGenre>(
-        genresFromDb.map(g => [g.id, g])
-      ).values(),
-    ];
-    await this.prismaService.pageOfMovie.create({
-      data: {
-        pageNumber: currentPageNumber,
-        genreId,
-        movieIds,
-      },
-    });
-
-    // change schema.prisma
-    const movieToRateCreateData = moviesListDto.movies
-      .map(movieInListDto => {
-        return {
-          movieId: movieInListDto.id,
-          imageUrl: movieInListDto?.posterPath ?? '',
-          releaseDate: movieInListDto.releaseDate,
-          title: movieInListDto.title,
-          description: movieInListDto.overview,
-          rating: movieInListDto.voteAverage,
-          genreIds: movieInListDto.genreIds,
-        };
-      })
-      .filter(
-        movieInListDto => movieIdToIsExistMap.get(movieInListDto.movieId) === 0
-      );
-
-    try {
-      await this.prismaService.movieToRate.createMany({
-        data: movieToRateCreateData,
-      });
-
-      const genresFromDb = await this.prismaService.genre.findMany({
-        select: {
-          id: true,
-        },
-      });
-      const genresFromDbIds = genresFromDb.map(genreFromDb => genreFromDb.id);
-      const newGenres = resultGenres.filter(
-        resultGenre => genresFromDbIds.indexOf(resultGenre.id) === -1
-      );
-      if (newGenres?.length) {
-        await this.prismaService.genre.createMany({
-          data: newGenres,
-        });
-      }
-    } catch (err) {
-      console.log(err);
-    }
   }
 
   async rateMovie(
@@ -397,15 +159,11 @@ export class MoviesService {
       };
     }
 
-    const preferredGenreIds = await this.getPreferredGenreIds(userId);
-
     // the page this movie was shown on (one of the user's genres)
     const pageOfMovie = await this.prismaService.pageOfMovie.findFirst({
       where: {
-        movieIds: {
-          has: movieId,
-        },
-        genreId: { in: preferredGenreIds },
+        movieIds: { has: movieId },
+        genreId: { in: await this.getPreferredGenreIds(userId) },
       },
     });
 
@@ -414,231 +172,43 @@ export class MoviesService {
       return { moviesCountLeftOnPage: null, isRateSaved: true };
     }
 
-    const userRates = await this.prismaService.rate.findMany({
-      where: {
-        userId,
-      },
-    });
-
-    const userRatesMovieIds = userRates.map(userRate => userRate.movieId);
-
+    const ratedMovieIds = await this.getRatedMovieIds(userId);
     const moviesCountLeftOnPage = pageOfMovie.movieIds.filter(
-      (movieId: number) => !userRatesMovieIds.includes(movieId)
-    )?.length;
+      id => !ratedMovieIds.includes(id)
+    ).length;
+
     if (moviesCountLeftOnPage === 0) {
-      // mark page as completed for this user (idempotent)
       await this.markPageAsCompletedByUser(userId, pageOfMovie.id);
     }
 
-    // finally - save rate
-    return {
-      moviesCountLeftOnPage,
-      isRateSaved: true,
-    };
+    return { moviesCountLeftOnPage, isRateSaved: true };
   }
 
+  /** Returns false when the movie was already in the requested state. */
   async markMovieToWatch(
     userId: string,
     movieId: number,
     isWatched: boolean
   ): Promise<boolean> {
-    const isMovieWatchedFromDb =
-      await this.prismaService.watchedMovie.findFirst({
-        where: {
-          movieId,
-          userId,
-        },
-      });
+    const watchedMovie = await this.prismaService.watchedMovie.findFirst({
+      where: { movieId, userId },
+    });
 
-    if (isMovieWatchedFromDb && !isWatched) {
+    if (watchedMovie && !isWatched) {
       await this.prismaService.watchedMovie.delete({
-        where: {
-          id: isMovieWatchedFromDb.id,
-        },
+        where: { id: watchedMovie.id },
       });
       return true;
-    } else if (!isMovieWatchedFromDb && isWatched) {
+    }
+
+    if (!watchedMovie && isWatched) {
       await this.prismaService.watchedMovie.create({
-        data: {
-          movieId,
-          userId,
-        },
+        data: { movieId, userId },
       });
       return true;
     }
 
-    // shouldnt be reachable
     return false;
-  }
-
-  private async isPageCompletedByUser(
-    userId: string,
-    pageOfMovieId: string
-  ): Promise<boolean> {
-    return (
-      (await this.prismaService.completedPageOfMovie.count({
-        where: { userId, pageOfMovieId },
-      })) !== 0
-    );
-  }
-
-  private async markPageAsCompletedByUser(
-    userId: string,
-    pageOfMovieId: string
-  ): Promise<void> {
-    await this.prismaService.completedPageOfMovie.upsert({
-      where: { userCompletedPage: { userId, pageOfMovieId } },
-      create: { userId, pageOfMovieId },
-      update: {},
-    });
-  }
-
-  private async extractCachedMovies(
-    userId: string,
-    genreId: number
-  ): Promise<MoviesListDTO> {
-    const genreFromDb = await this.prismaService.genre.findFirst({
-      where: {
-        id: genreId,
-      },
-    });
-
-    if (!genreFromDb) {
-      console.error(`Cannot find genre with id ${genreId}`);
-      return;
-    }
-
-    const completedPageOfMovies =
-      await this.prismaService.completedPageOfMovie.findMany({
-        where: {
-          userId,
-        },
-        include: {
-          pageOfMovie: true,
-        },
-      });
-
-    const pageNumber =
-      this.getHighestCompletedPageNumber(completedPageOfMovies) + 1;
-    const pageOfMovies = await this.prismaService.pageOfMovie.findFirst({
-      where: {
-        pageNumber,
-        genreId,
-      },
-    });
-
-    if (!pageOfMovies || !pageOfMovies?.movieIds?.length) {
-      return {
-        movies: [],
-        selectedGenreId: genreFromDb.id,
-        pageGenres: [],
-        pageNumber: -1,
-      };
-    }
-
-    const cachedMovies: Array<MovieToRate> =
-      await this.prismaService.movieToRate.findMany({
-        where: {
-          movieId: {
-            in: pageOfMovies.movieIds,
-          },
-        },
-      });
-
-    if (!cachedMovies?.length) {
-      return {
-        movies: [],
-        selectedGenreId: genreFromDb.id,
-        pageGenres: [],
-        pageNumber: -1,
-      };
-    }
-
-    const genresOnPage = await this.extractGenresOnPageFromMovies(cachedMovies);
-    return MoviesUtil.convertMoviesToRateToMoviesListDto(
-      cachedMovies,
-      genresOnPage,
-      genreFromDb.id,
-      pageNumber
-    );
-  }
-
-  private getHighestCompletedPageNumber(
-    completedPageOfMovies: Array<
-      CompletedPageOfMovie & { pageOfMovie: PageOfMovie }
-    >
-  ): number {
-    const mappedFilledPageOfMovies = completedPageOfMovies
-      .map(completedPageOfMovie => completedPageOfMovie.pageOfMovie)
-      .filter(Boolean);
-
-    if (!completedPageOfMovies?.length || !mappedFilledPageOfMovies?.length) {
-      return MoviesService.DEFAULT_PAGE_NUMBER;
-    }
-
-    return completedPageOfMovies
-      .sort(
-        (previousPageOfMovies, currentPageOfMovies) =>
-          currentPageOfMovies?.pageOfMovie?.pageNumber -
-          previousPageOfMovies?.pageOfMovie?.pageNumber
-      )
-      .at(0).pageOfMovie.pageNumber;
-  }
-
-  private async extractGenreById(userGenreId: number): Promise<Genre> {
-    return await this.prismaService.genre.findFirst({
-      where: {
-        id: userGenreId,
-      },
-    });
-  }
-
-  private async extractGenresOnPageFromMovies(
-    movies: Array<TmdbMovie> | Array<MovieToRate>
-  ): Promise<Array<Genre>> {
-    const pageGenreIds = Array.from(
-      new Set(
-        movies.reduce(
-          (acc: Array<number>, curr: TmdbMovie | MovieToRate) =>
-            acc.concat(
-              MoviesService.isMovieToRate(curr) ? curr.genreIds : curr.genre_ids
-            ),
-          []
-        )
-      )
-    );
-    return await this.prismaService.genre.findMany({
-      where: {
-        id: {
-          in: pageGenreIds,
-        },
-      },
-    });
-  }
-
-  private static isMovieToRate(
-    obj: TmdbMovie | MovieToRate
-  ): obj is MovieToRate {
-    return (
-      'id' in obj &&
-      'movieId' in obj &&
-      'imageUrl' in obj &&
-      'releaseDate' in obj &&
-      'title' in obj &&
-      'description' in obj &&
-      'rating' in obj &&
-      'genreIds' in obj
-    );
-  }
-
-  private async getPreferredGenreIds(userId: string): Promise<Array<number>> {
-    const userGenres = await this.prismaService.userGenre.findMany({
-      where: { userId },
-    });
-
-    return userGenres.length
-      ? userGenres.map(userGenre => userGenre.genreId).sort((a, b) => a - b)
-      : [MoviesService.DEFAULT_GENRE_ID];
   }
 
   /**
@@ -665,40 +235,182 @@ export class MoviesService {
     return feedGenreId;
   }
 
+  private static emptyMoviesList(): MoviesListDTO {
+    return {
+      movies: [],
+      selectedGenreId: null,
+      pageGenres: [],
+      pageNumber: -1,
+    };
+  }
+
+  private static hasMovies(moviesList?: MoviesListDTO): boolean {
+    return (
+      !!moviesList?.movies?.length &&
+      moviesList.selectedGenreId !== null &&
+      moviesList.selectedGenreId !== undefined
+    );
+  }
+
+  /**
+   * A page already saved in the database: its unrated movies for this user, or
+   * nothing when the user has no movie left on it (the page is then marked completed).
+   */
+  private async getUnfinishedSavedPage(
+    userId: string,
+    savedPage: PageOfMovie
+  ): Promise<MoviesListDTO | null> {
+    if (await this.isPageCompletedByUser(userId, savedPage.id)) {
+      return null;
+    }
+
+    const pageMovies = await this.retrieveMovieListDtoFromDb(userId, savedPage);
+    if (MoviesService.hasMovies(pageMovies)) {
+      return pageMovies;
+    }
+
+    await this.markPageAsCompletedByUser(userId, savedPage.id);
+    return null;
+  }
+
+  /** Fetches a page nobody has seen yet from TMDB and saves it for everyone. */
+  private async fetchAndSavePage(
+    genreId: number,
+    pageNumber: number
+  ): Promise<MoviesListDTO> {
+    const response = await this.baseRestDataService.get<TmdbDiscoverResult>(
+      'movies',
+      { genreId, pageNumber }
+    );
+
+    if (!response.data) {
+      Logger.error('Received data from TMDB is undefined', MoviesService.name);
+      return MoviesService.emptyMoviesList();
+    }
+
+    const tmdbMovies = response.data.results;
+    const moviesList = MoviesUtil.convertTmdbMoviesToMoviesListDto(
+      tmdbMovies,
+      await this.getGenres(tmdbMovies.flatMap(movie => movie.genre_ids ?? [])),
+      genreId,
+      pageNumber
+    );
+    await this.savePage(moviesList, genreId, pageNumber);
+    return moviesList;
+  }
+
+  /** Saves a page and the movies on it (movies already known are kept as they are). */
+  private async savePage(
+    moviesList: MoviesListDTO,
+    genreId: number,
+    pageNumber: number
+  ): Promise<void> {
+    const movieIds = moviesList.movies.map(movie => movie.id);
+
+    await this.prismaService.pageOfMovie.create({
+      data: { pageNumber, genreId, movieIds },
+    });
+
+    const knownMovieIds = new Set(
+      (
+        await this.prismaService.movieToRate.findMany({
+          where: { movieId: { in: movieIds } },
+        })
+      ).map(knownMovie => knownMovie.movieId)
+    );
+
+    try {
+      await this.prismaService.movieToRate.createMany({
+        data: moviesList.movies
+          .filter(movie => !knownMovieIds.has(movie.id))
+          .map(movie => ({
+            movieId: movie.id,
+            imageUrl: movie.posterPath ?? '',
+            releaseDate: movie.releaseDate,
+            title: movie.title,
+            description: movie.overview,
+            rating: movie.voteAverage,
+            genreIds: movie.genreIds,
+          })),
+      });
+    } catch (error) {
+      Logger.error(error, MoviesService.name);
+    }
+  }
+
+  private async isPageCompletedByUser(
+    userId: string,
+    pageOfMovieId: string
+  ): Promise<boolean> {
+    return (
+      (await this.prismaService.completedPageOfMovie.count({
+        where: { userId, pageOfMovieId },
+      })) !== 0
+    );
+  }
+
+  private async markPageAsCompletedByUser(
+    userId: string,
+    pageOfMovieId: string
+  ): Promise<void> {
+    await this.prismaService.completedPageOfMovie.upsert({
+      where: { userCompletedPage: { userId, pageOfMovieId } },
+      create: { userId, pageOfMovieId },
+      update: {},
+    });
+  }
+
+  private async getRatedMovieIds(userId: string): Promise<Array<number>> {
+    const rates = await this.prismaService.rate.findMany({
+      where: { userId },
+      select: { movieId: true },
+    });
+    return rates.map(rate => rate.movieId);
+  }
+
+  private async getGenres(genreIds: Array<number>): Promise<Array<Genre>> {
+    return this.prismaService.genre.findMany({
+      where: { id: { in: Array.from(new Set(genreIds)) } },
+    });
+  }
+
+  private async getPreferredGenreIds(userId: string): Promise<Array<number>> {
+    const userGenres = await this.prismaService.userGenre.findMany({
+      where: { userId },
+    });
+
+    return userGenres.length
+      ? userGenres.map(userGenre => userGenre.genreId).sort((a, b) => a - b)
+      : [MoviesService.DEFAULT_GENRE_ID];
+  }
+
+  /** Page the user is on in a genre: the one after the last page they completed. */
+  private async getCurrentPageNumber(
+    userId: string,
+    genreId: number
+  ): Promise<number> {
+    const completedPages =
+      await this.prismaService.completedPageOfMovie.findMany({
+        where: { userId, pageOfMovie: { genreId } },
+        include: { pageOfMovie: true },
+      });
+
+    return completedPages.length
+      ? Math.max(...completedPages.map(c => c.pageOfMovie.pageNumber)) + 1
+      : MoviesService.DEFAULT_PAGE_NUMBER;
+  }
+
   private async getTmdbMovieRequestOptions(
     userId: string,
     shouldLoadNextPage?: 0 | 1
   ): Promise<TmdbMovieGetListRequestOptions> {
-    const userGenreId = await this.getFeedGenreId(userId);
-
-    const userCompletedPages =
-      await this.prismaService.completedPageOfMovie.findMany({
-        where: {
-          userId,
-          pageOfMovie: {
-            genreId: userGenreId,
-          },
-        },
-        include: {
-          pageOfMovie: true,
-        },
-      });
-
-    let currentPageNumber = MoviesService.DEFAULT_PAGE_NUMBER;
-    if (userCompletedPages?.length > 0) {
-      currentPageNumber =
-        Math.max(
-          ...userCompletedPages.map(
-            userCompletedPage => userCompletedPage.pageOfMovie.pageNumber
-          )
-        ) + 1;
-    }
-
-    currentPageNumber += shouldLoadNextPage;
+    const genreId = await this.getFeedGenreId(userId);
 
     return {
-      pageNumber: currentPageNumber,
-      genreId: userGenreId,
+      pageNumber:
+        (await this.getCurrentPageNumber(userId, genreId)) +
+        (shouldLoadNextPage ?? 0),
+      genreId,
     };
   }
 }
