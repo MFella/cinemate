@@ -19,6 +19,8 @@ model Rate {
   userId  Decimal @db.Decimal(25, 0)
   movieId Int
   value RateValue
+
+  @@unique([userId, movieId], name: "userMovieRate")
 }
 
 model PageOfMovie {
@@ -26,7 +28,7 @@ model PageOfMovie {
   pageNumber  Int
   genreId Int
   movieIds  Int[]
-  completedPageOfMovie CompletedPageOfMovie?
+  completedPageOfMovies CompletedPageOfMovie[]
 
   @@unique([pageNumber, genreId], name: "pageGenreIdentifier")
 }
@@ -45,8 +47,10 @@ model MovieToRate {
 model CompletedPageOfMovie {
   id  String @id @default(uuid())
   userId  Decimal @db.Decimal(25, 0)
-  pageOfMovieId String @unique
+  pageOfMovieId String
   pageOfMovie PageOfMovie @relation(fields: [pageOfMovieId], references: [id])
+
+  @@unique([userId, pageOfMovieId], name: "userCompletedPage")
 }
 
 model Genre {

@@ -107,12 +107,10 @@ export class MoviesService {
     });
 
     if (pageOfMovie && Object.keys(pageOfMovie).length) {
-      const isPageAlreadyCompleted =
-        (await this.prismaService.completedPageOfMovie.count({
-          where: {
-            pageOfMovieId: pageOfMovie.id,
-          },
-        })) !== 0;
+      const isPageAlreadyCompleted = await this.isPageCompletedByUser(
+        userId,
+        pageOfMovie.id
+      );
 
       if (isPageAlreadyCompleted) {
         tmdbRequestOptions.pageNumber++;
@@ -130,12 +128,7 @@ export class MoviesService {
           return moviesListDtoFromCache;
         } else {
           // mark page as completed
-          await this.prismaService.completedPageOfMovie.create({
-            data: {
-              userId,
-              pageOfMovieId: pageOfMovie.id,
-            },
-          });
+          await this.markPageAsCompletedByUser(userId, pageOfMovie.id);
 
           tmdbRequestOptions.pageNumber++;
         }
@@ -405,29 +398,22 @@ export class MoviesService {
     rate: Rate,
     userId: string
   ): Promise<RateResultDto> {
-    const rateFromDb = await this.prismaService.rate.findFirst({
+    // One rate per user and movie: voting again changes the vote instead of adding a duplicate.
+    const rateValue = PrismaUtil.convertRateToRateValue(rate);
+    const saveRateResult = await this.prismaService.rate.upsert({
       where: {
-        userId,
-        movieId,
+        userMovieRate: { userId, movieId },
       },
+      create: { userId, movieId, value: rateValue },
+      update: { value: rateValue },
     });
 
-    if (!rateFromDb) {
-      const saveRateResult = await this.prismaService.rate.create({
-        data: {
-          userId,
-          movieId,
-          value: PrismaUtil.convertRateToRateValue(rate),
-        },
-      });
-
-      if (!saveRateResult) {
-        return {
-          moviesCountLeftOnPage: null,
-          isRateSaved: false,
-          reason: 'Failed saving rate into database',
-        };
-      }
+    if (!saveRateResult) {
+      return {
+        moviesCountLeftOnPage: null,
+        isRateSaved: false,
+        reason: 'Failed saving rate into database',
+      };
     }
 
     const userGenre = await this.prismaService.user.findFirst({
@@ -481,21 +467,9 @@ export class MoviesService {
     const moviesCountLeftOnPage = pageOfMovie.movieIds.filter(
       (movieId: number) => !userRatesMovieIds.includes(movieId)
     )?.length;
-    const pageIsNotMarkedAsCompleted =
-      (await this.prismaService.completedPageOfMovie.count({
-        where: {
-          pageOfMovieId: pageOfMovie.id,
-        },
-      })) === 0;
-
-    if (moviesCountLeftOnPage === 0 && pageIsNotMarkedAsCompleted) {
-      // mark page as completed
-      await this.prismaService.completedPageOfMovie.create({
-        data: {
-          pageOfMovieId: pageOfMovie.id,
-          userId,
-        },
-      });
+    if (moviesCountLeftOnPage === 0) {
+      // mark page as completed for this user (idempotent)
+      await this.markPageAsCompletedByUser(userId, pageOfMovie.id);
     }
 
     // finally - save rate
@@ -537,6 +511,28 @@ export class MoviesService {
 
     // shouldnt be reachable
     return false;
+  }
+
+  private async isPageCompletedByUser(
+    userId: string,
+    pageOfMovieId: string
+  ): Promise<boolean> {
+    return (
+      (await this.prismaService.completedPageOfMovie.count({
+        where: { userId, pageOfMovieId },
+      })) !== 0
+    );
+  }
+
+  private async markPageAsCompletedByUser(
+    userId: string,
+    pageOfMovieId: string
+  ): Promise<void> {
+    await this.prismaService.completedPageOfMovie.upsert({
+      where: { userCompletedPage: { userId, pageOfMovieId } },
+      create: { userId, pageOfMovieId },
+      update: {},
+    });
   }
 
   private async extractCachedMovies(
