@@ -189,9 +189,13 @@ export class FindComponent implements OnInit {
 
   addUser($event: MatChipInputEvent): void {
     const value = ($event.value || '').trim();
-    if (value) {
-      this.selectedEmails.update(fruits => [...fruits, value]);
+    if (value && !this.selectedEmails().includes(value)) {
+      this.selectedEmails.update(emails => [...emails, value]);
+      this.searchUserForm.controls['mailOfUsers'].setValue(
+        this.selectedEmails()
+      );
     }
+    $event.chipInput?.clear();
 
     this.currentUser.set('');
   }
