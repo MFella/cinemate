@@ -100,6 +100,9 @@ $variants-theme: (
   --mat-toolbar-container-background-color: #3f2a82;
   --mat-toolbar-container-text-color: #fff;
   --brand-wordmark: #fff;
+  --app-surface: #ffffff;
+  --app-border: rgba(63, 42, 130, 0.14);
+  --app-shadow: 0 10px 30px rgba(63, 42, 130, 0.12);
   background-image:
     radial-gradient(60rem 30rem at 10% -10%, rgba(124, 77, 255, 0.14), transparent 60%),
     radial-gradient(50rem 28rem at 100% 0%, rgba(255, 179, 0, 0.12), transparent 60%);
@@ -115,6 +118,9 @@ $variants-theme: (
   --mat-toolbar-container-background-color: #17142a;
   --mat-toolbar-container-text-color: #f1ecff;
   --brand-wordmark: #f1ecff;
+  --app-surface: #1a1730;
+  --app-border: rgba(255, 255, 255, 0.1);
+  --app-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
   background-image:
     radial-gradient(60rem 30rem at 10% -10%, rgba(124, 77, 255, 0.28), transparent 60%),
     radial-gradient(50rem 28rem at 100% 0%, rgba(255, 179, 0, 0.14), transparent 60%);
@@ -131,4 +137,68 @@ $variants-theme: (
   --mat-toolbar-container-background-color: #17142a;
   --mat-toolbar-container-text-color: #f1ecff;
   border-bottom: 1px solid rgba(124, 77, 255, 0.25);
+}
+
+// Shared page building blocks (Find, Preferences).
+.app-card {
+  border-radius: 1.5rem !important;
+  background: var(--app-surface) !important;
+  border: 1px solid var(--app-border);
+  box-shadow: var(--app-shadow) !important;
+  overflow: hidden;
+}
+
+.app-card .page-header {
+  padding: 1.5rem 1.5rem 0.5rem;
+}
+
+.app-card .page-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.app-card .page-subtitle {
+  margin-top: 0.4rem;
+  opacity: 0.7;
+  line-height: 1.5;
+}
+
+.app-card-footer {
+  padding: 0 1.5rem 1.5rem !important;
+  margin: 0 !important;
+}
+
+.primary-action.mat-mdc-unelevated-button {
+  height: 3rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.default .mat-mdc-form-field,
+.dark .mat-mdc-form-field {
+  --mat-form-field-container-text-size: 15px;
+}
+
+.filter-bar {
+  padding: 0.75rem 1rem;
+  border-radius: 9999px;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  box-shadow: var(--app-shadow);
+}
+
+.movie-tile {
+  display: block;
+  border-radius: 1.1rem;
+  overflow: hidden;
+  box-shadow: var(--app-shadow);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 16px 36px rgba(124, 77, 255, 0.35);
+  }
 }

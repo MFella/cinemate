@@ -17,7 +17,6 @@ import { RestDataService } from '../_services/rest-data.service';
 import { AlertInteractionService } from '../_services/alert-interaction.service';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { MatChipsModule } from '@angular/material/chips';
 import { MarkButtonData } from '../components/movie-detail/movie-detail.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -36,7 +35,6 @@ import {
         MatButtonModule,
         MatBadgeModule,
         MatExpansionModule,
-        MatChipsModule,
         NgOptimizedImage,
         MatIconModule,
         MatSlideToggleModule,

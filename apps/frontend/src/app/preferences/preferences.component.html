@@ -1,13 +1,13 @@
 <div class="flex justify-center items-center">
-  <mat-card class="md:min-w-[600px] sm:min-w-[400px] w-full">
-    <mat-card-header>
-      <mat-card-title class="!mb-4">
-        <span>Select your preference</span>
-      </mat-card-title>
+  <mat-card class="md:min-w-[600px] sm:min-w-[400px] w-full app-card">
+    <mat-card-header class="page-header">
+      <mat-card-title class="page-title">Your favourite genre</mat-card-title>
+      <mat-card-subtitle class="page-subtitle"
+        >We use it to pick the movies you rate on the Match page.</mat-card-subtitle
+      >
     </mat-card-header>
-    <mat-divider></mat-divider>
     <mat-card-content class="!mt-6" [formGroup]="preferencesFormGroup">
-      <mat-form-field class="w-full">
+      <mat-form-field class="w-full" appearance="outline">
         <mat-label>Select genres</mat-label>
         <mat-select formControlName="genre">
           @for (genreOption of genreOptions; track genreOption) {
@@ -20,16 +20,16 @@
           </mat-select>
         </mat-form-field>
       </mat-card-content>
-      <mat-card-actions>
+      <mat-card-actions class="app-card-footer">
         <button
         [disabled]="
           preferencesFormGroup.invalid ||
           isFetchingData ||
           preferencesFormGroup.get('genre')?.value === originGenreId
         "
-          mat-button
-          color="accent"
-          class="w-full"
+          mat-flat-button
+          color="primary"
+          class="w-full primary-action"
           (click)="savePreference()">
           Save
         </button>
