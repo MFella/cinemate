@@ -45,12 +45,12 @@ describe('authGuard', () => {
   });
 
   describe('on the server', () => {
-    it('does not redirect a protected URL (keeps /find)', async () => {
-      expect(await run('/find', 'server')).toBe(true);
+    it('does not redirect or activate a protected URL (keeps /find, no resolvers run)', async () => {
+      expect(await run('/find', 'server')).toBe(false);
       expect(navigate).not.toHaveBeenCalled();
     });
 
-    it('does not treat the login page as authorized', async () => {
+    it('lets the login page render (its guard negates this result)', async () => {
       expect(await run('/', 'server')).toBe(false);
       expect(navigate).not.toHaveBeenCalled();
     });
