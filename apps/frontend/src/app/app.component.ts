@@ -5,12 +5,14 @@ import {
   NgZone,
   PLATFORM_ID,
   inject,
+  DOCUMENT,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NavComponent } from './nav/nav.component';
 import { AppLang, AppTheme, AuthSource } from './typings/common';
 import { LocalStorageService } from './_services/local-storage.service';
-import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { AuthService } from './_services/auth.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AlertInteractionService } from './_services/alert-interaction.service';
@@ -22,11 +24,11 @@ import { interval, startWith, switchMap } from 'rxjs';
 import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 
 @Component({
-  standalone: true,
-  imports: [NavComponent, RouterModule, NgToastModule],
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss',
+    imports: [NavComponent, RouterModule, NgToastModule],
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './app.component.scss'
 })
 export class AppComponent {
   private static readonly COOKIE_REQUEST_INTERVAL_MS = 60 * 1000;

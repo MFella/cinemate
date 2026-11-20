@@ -6,16 +6,16 @@ $_ripple-opacity: 0.1;
 
 // Applies a focus style to an mat-button element for each of the supported palettes.
 @mixin _focus-overlay-color($config-or-theme, $variants) {
-  $config: mat.get-color-config($config-or-theme);
+  $config: mat.m2-get-color-config($config-or-theme);
   @each $variant, $variant-palette in $variants {
     &.mat-#{$variant} .mat-button-focus-overlay {
-      background-color: mat.get-color-from-palette($variant-palette);
+      background-color: mat.m2-get-color-from-palette($variant-palette);
     }
   }
 }
 
 @mixin _ripple-background($palette, $hue, $opacity) {
-  $background-color: mat.get-color-from-palette($palette, $hue, $opacity);
+  $background-color: mat.m2-get-color-from-palette($palette, $hue, $opacity);
   background-color: $background-color;
   @if (meta.type-of($background-color) != color) {
     opacity: $opacity;
@@ -37,20 +37,20 @@ $_ripple-opacity: 0.1;
 
   @each $variant, $variant-palette in $variants {
     &.mat-#{$variant} {
-      #{$property}: mat.get-color-from-palette($variant-palette, $hue);
+      #{$property}: mat.m2-get-color-from-palette($variant-palette, $hue);
     }
 
     &.mat-#{$variant} {
       &.mat-button-disabled {
         $palette: if($property == 'color', $foreground, $background);
-        #{$property}: mat.get-color-from-palette($palette, disabled-button);
+        #{$property}: mat.m2-get-color-from-palette($palette, disabled-button);
       }
     }
   }
 }
 
 @mixin color($config-or-theme, $variants, $hue) {
-  $config: mat.get-color-config($config-or-theme);
+  $config: mat.m2-get-color-config($config-or-theme);
   $foreground: map.get($config, foreground);
   $background: map.get($config, background);
 

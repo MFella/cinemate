@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
@@ -27,24 +27,24 @@ import {
 } from '@angular/material/slide-toggle';
 
 @Component({
-  selector: 'app-match',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatDividerModule,
-    MatProgressBarModule,
-    MatButtonModule,
-    MatBadgeModule,
-    MatExpansionModule,
-    MatChipsModule,
-    NgOptimizedImage,
-    MatIconModule,
-    MatSlideToggleModule,
-  ],
-  providers: [],
-  templateUrl: './match.component.html',
-  styleUrl: './match.component.scss',
+    selector: 'app-match',
+    imports: [
+        CommonModule,
+        MatCardModule,
+        MatDividerModule,
+        MatProgressBarModule,
+        MatButtonModule,
+        MatBadgeModule,
+        MatExpansionModule,
+        MatChipsModule,
+        NgOptimizedImage,
+        MatIconModule,
+        MatSlideToggleModule,
+    ],
+    providers: [],
+    templateUrl: './match.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './match.component.scss'
 })
 export class MatchComponent implements OnInit {
   private static readonly MOVIES_REMAINS_FETCH_THRESHOLD = 4;

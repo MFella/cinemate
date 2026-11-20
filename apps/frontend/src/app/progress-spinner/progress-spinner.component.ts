@@ -1,12 +1,12 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @Component({
-  selector: 'app-progress-spinner',
-  standalone: true,
-  imports: [CommonModule, MatProgressSpinnerModule],
-  templateUrl: './progress-spinner.component.html',
-  styleUrl: './progress-spinner.component.scss',
+    selector: 'app-progress-spinner',
+    imports: [MatProgressSpinnerModule],
+    templateUrl: './progress-spinner.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './progress-spinner.component.scss'
 })
 export class ProgressSpinnerComponent {}

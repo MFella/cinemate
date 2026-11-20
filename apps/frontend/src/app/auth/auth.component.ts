@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -8,18 +8,17 @@ import { AuthService } from '../_services/auth.service';
 import { AuthSource } from '../typings/common';
 
 @Component({
-  selector: 'app-auth',
-  standalone: true,
-  imports: [
-    CommonModule,
+    selector: 'app-auth',
+    imports: [
     MatCardModule,
     MatDividerModule,
     MatProgressBarModule,
-    MatButtonModule,
-  ],
-  templateUrl: './auth.component.html',
-  styleUrl: './auth.component.scss',
-  providers: [],
+    MatButtonModule
+],
+    templateUrl: './auth.component.html',
+    styleUrl: './auth.component.scss',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    providers: []
 })
 export class AuthComponent {
   username = '';

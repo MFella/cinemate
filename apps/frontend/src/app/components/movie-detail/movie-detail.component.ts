@@ -1,5 +1,5 @@
-import { Component, inject, Output, ViewEncapsulation } from '@angular/core';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { Component, inject, Output, ViewEncapsulation, ChangeDetectionStrategy } from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -43,10 +43,8 @@ type MovieDetailDialogData = {
 };
 
 @Component({
-  selector: 'app-movie-detail',
-  standalone: true,
-  imports: [
-    CommonModule,
+    selector: 'app-movie-detail',
+    imports: [
     MatCardModule,
     MatDividerModule,
     MatExpansionModule,
@@ -54,11 +52,12 @@ type MovieDetailDialogData = {
     MatDialogActions,
     MatButtonModule,
     MatIconModule,
-    NgOptimizedImage,
-  ],
-  templateUrl: './movie-detail.component.html',
-  styleUrl: './movie-detail.component.scss',
-  encapsulation: ViewEncapsulation.Emulated,
+    NgOptimizedImage
+],
+    templateUrl: './movie-detail.component.html',
+    styleUrl: './movie-detail.component.scss',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    encapsulation: ViewEncapsulation.Emulated
 })
 export class MovieDetailComponent {
   private static readonly POSTER_URL_PREFIX =

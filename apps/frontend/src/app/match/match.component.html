@@ -1,12 +1,12 @@
 <div class="flex justify-center items-center">
   @if (matDialogData) {
-  <button
-    class="close-dialog-button !absolute top-2 right-2 z-[2] !w-8 !h-8 overflow-hidden"
-    mat-mini-fab
-    aria-label="Close dialog button"
-    (click)="closeDialog()">
-    <mat-icon>close</mat-icon>
-  </button>
+    <button
+      class="close-dialog-button !absolute top-2 right-2 z-[2] !w-8 !h-8 overflow-hidden"
+      mat-mini-fab
+      aria-label="Close dialog button"
+      (click)="closeDialog()">
+      <mat-icon>close</mat-icon>
+    </button>
   }
   <mat-card class="match-card overflow-hidden !rounded-xl">
     <img
@@ -16,51 +16,53 @@
       priority
       [ngStyle]="getMoviePosterStyles(currentMovie.posterPath)" />
 
-    <mat-card-header>
-      <mat-card-title class="!flex !justify-center"
-        ><h1 class="text-center !z-1 relative px-4 py-2">
+      <mat-card-header>
+        <mat-card-title class="!flex !justify-center"
+          ><h1 class="text-center !z-1 relative px-4 py-2">
           {{ currentMovie.title }}
         </h1></mat-card-title
-      >
-      <mat-card-subtitle class="!flex !justify-between !pt-4">
-        <mat-chip-set class="flex-col max-w-20">
-          <mat-chip class="year-container"
-            >{{ currentMovie.releaseDate.split('-').at(0) }}
-          </mat-chip>
-          <mat-chip class="">
-            <div class="vote-container flex justify-center !items-center">
-              <mat-icon class="mb-1 scale-75 text-yellow-400"
-                >star_rate</mat-icon
-              >
-              <strong class="ml-1">{{
-                currentMovie.voteAverage.toFixed(1)
-              }}</strong>
-            </div>
-          </mat-chip>
-        </mat-chip-set>
-        @if (genresOnPage.size) {
-        <span class="genres-container">
-          <mat-chip-set class="justify-end">
-            <mat-chip *ngFor="let genreId of currentMovie.genreIds">
-              {{ genresOnPage.get(genreId)?.name }}</mat-chip
-            >
-          </mat-chip-set>
-        </span>
-        }
-      </mat-card-subtitle>
-    </mat-card-header>
-    <div class="current-movie-img-container"></div>
-    <mat-card-content class="z-[1] h-40 overflow-y-scroll">
-      <p>{{ currentMovie.overview }}</p>
-    </mat-card-content>
-    <mat-divider></mat-divider>
-    @if (matDialogData) {
-    <div class="is-movie-watched-slide-toggle__container">
-      <div class="slide-toggle__background-container"></div>
-      <mat-slide-toggle
-        class="is-movie-watched-slide-toggle"
-        #slideToggleRef
-        [checked]="matDialogData.matchedMovie.isWatched"
+        >
+        <mat-card-subtitle class="!flex !justify-between !pt-4">
+          <mat-chip-set class="flex-col max-w-20">
+            <mat-chip class="year-container"
+              >{{ currentMovie.releaseDate.split('-').at(0) }}
+            </mat-chip>
+            <mat-chip class="">
+              <div class="vote-container flex justify-center !items-center">
+                <mat-icon class="mb-1 scale-75 text-yellow-400"
+                  >star_rate</mat-icon
+                  >
+                  <strong class="ml-1">{{
+                    currentMovie.voteAverage.toFixed(1)
+                  }}</strong>
+                </div>
+              </mat-chip>
+            </mat-chip-set>
+            @if (genresOnPage.size) {
+              <span class="genres-container">
+                <mat-chip-set class="justify-end">
+                  @for (genreId of currentMovie.genreIds; track genreId) {
+                    <mat-chip>
+                      {{ genresOnPage.get(genreId)?.name }}</mat-chip
+                      >
+                  }
+                </mat-chip-set>
+              </span>
+            }
+          </mat-card-subtitle>
+        </mat-card-header>
+        <div class="current-movie-img-container"></div>
+        <mat-card-content class="z-[1] h-40 overflow-y-scroll">
+          <p>{{ currentMovie.overview }}</p>
+        </mat-card-content>
+        <mat-divider></mat-divider>
+        @if (matDialogData) {
+          <div class="is-movie-watched-slide-toggle__container">
+            <div class="slide-toggle__background-container"></div>
+            <mat-slide-toggle
+              class="is-movie-watched-slide-toggle"
+              #slideToggleRef
+              [checked]="matDialogData.matchedMovie.isWatched"
         (click)="
           updateIsMovieWatched(
             matDialogData.movie,
@@ -69,20 +71,21 @@
             slideToggleRef
           )
         ">
-      </mat-slide-toggle>
+            </mat-slide-toggle>
+          </div>
+        } @else {
+          <mat-card-actions class="mx-2 mb-2">
+            @for (item of markActions; track item) {
+              <button
+                [color]="item.buttonColor"
+                [class]="'w-full mark-action-button-' + item.value"
+                [disabled]="isRequestPended"
+                mat-flat-button
+                (click)="voteMovie(item)">
+                {{ item.label }}
+              </button>
+            }
+          </mat-card-actions>
+        }
+      </mat-card>
     </div>
-    } @else {
-    <mat-card-actions class="mx-2 mb-2">
-      <button
-        *ngFor="let item of markActions"
-        [color]="item.buttonColor"
-        [class]="'w-full mark-action-button-' + item.value"
-        [disabled]="isRequestPended"
-        mat-flat-button
-        (click)="voteMovie(item)">
-        {{ item.label }}
-      </button>
-    </mat-card-actions>
-    }
-  </mat-card>
-</div>
