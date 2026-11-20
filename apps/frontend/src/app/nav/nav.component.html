@@ -87,11 +87,15 @@
           <button mat-icon-button (click)="toggleSidenav(snav)">
             <mat-icon>menu</mat-icon>
           </button>
+          <a class="brand" href="/" (click)="$event.preventDefault(); navigate('')" aria-label="Cinemate home">
+            <img class="brand-mark" src="assets/cinemate-mark.svg" alt="" width="32" height="32" />
+            <span class="brand-word">Cine<b>Mate</b></span>
+          </a>
         } @else {
-          <img
-            class="cinemate-logo max-h-12 mr-4 absolute left-0 rounded-r-full shadow-md"
-            alt="Cinemate logo"
-            src="../../assets/cinemate-logo.png" />
+          <a class="brand mr-4" href="/" (click)="$event.preventDefault(); navigate('')" aria-label="Cinemate home">
+            <img class="brand-mark" src="assets/cinemate-mark.svg" alt="" width="36" height="36" />
+            <span class="brand-word">Cine<b>Mate</b></span>
+          </a>
             <div class="flex-auto"></div>
             <ng-container
               [ngTemplateOutlet]="navButtonContainer"

@@ -12,9 +12,9 @@ $default-typography: mat.m2-define-typography-config(
 );
 @include mat.typography-hierarchy($default-typography);
 
-$default-primary: mat.m2-define-palette(mat.$m2-indigo-palette, 100);
-$default-accent: mat.m2-define-palette(mat.$m2-indigo-palette, A200, 400, A400);
-$default-warn: mat.m2-define-palette(mat.$m2-indigo-palette, 500, 100, A200);
+$default-primary: mat.m2-define-palette(mat.$m2-deep-purple-palette, 700, 400, 900);
+$default-accent: mat.m2-define-palette(mat.$m2-amber-palette, 600, 300, 800);
+$default-warn: mat.m2-define-palette(mat.$m2-pink-palette, 500, 200, 700);
 
 $default-theme: mat.m2-define-light-theme(
   (
@@ -28,9 +28,9 @@ $default-theme: mat.m2-define-light-theme(
   )
 );
 
-$dark-primary: mat.m2-define-palette(mat.$m2-grey-palette, 700);
-$dark-accent: mat.m2-define-palette(mat.$m2-grey-palette, A200, 400, A400);
-$dark-warn: mat.m2-define-palette(mat.$m2-grey-palette, 500, 100, A200);
+$dark-primary: mat.m2-define-palette(mat.$m2-deep-purple-palette, 400, 200, 600);
+$dark-accent: mat.m2-define-palette(mat.$m2-amber-palette, 400, 200, 600);
+$dark-warn: mat.m2-define-palette(mat.$m2-pink-palette, 300, 100, 500);
 
 $dark-theme: mat.m2-define-dark-theme(
   (
@@ -75,7 +75,7 @@ body {
 
 body {
   margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
   color: var(--mat-app-text-color);
   background-color: var(--mat-app-background-color);
 }
@@ -95,20 +95,40 @@ $variants-theme: (
   @include button-variants.color($default-theme, $variants-theme, default);
   // @include nav-style($default-theme);
   --mat-icon-button-state-layer-color: rgba(25, 54, 101, 0.1);
-  .cinemate-logo {
-    filter: drop-shadow(1px 1px 1px rgba(255, 255, 255, 0.2)) brightness(0);
-  }
 
-  --mat-app-background-color: rgba(240, 248, 255, 0.7);
+  --mat-app-background-color: #f5f2fb;
+  --mat-toolbar-container-background-color: #3f2a82;
+  --mat-toolbar-container-text-color: #fff;
+  --brand-wordmark: #fff;
+  background-image:
+    radial-gradient(60rem 30rem at 10% -10%, rgba(124, 77, 255, 0.14), transparent 60%),
+    radial-gradient(50rem 28rem at 100% 0%, rgba(255, 179, 0, 0.12), transparent 60%);
+  background-attachment: fixed;
 }
 
 .dark {
   @include mat.all-component-themes($dark-theme);
   @include button-variants.color($dark-theme, $variants-theme, darker);
   --mat-icon-button-state-layer-color: rgba(255, 255, 255, 0.1);
-  .cinemate-logo {
-    filter: drop-shadow(1px 1px 1px rgba(255, 255, 255, 0.2)) invert(0);
-  }
 
-  --mat-app-background-color: rgba(0, 0, 0, 0.7);
+  --mat-app-background-color: #0e0d14;
+  --mat-toolbar-container-background-color: #17142a;
+  --mat-toolbar-container-text-color: #f1ecff;
+  --brand-wordmark: #f1ecff;
+  background-image:
+    radial-gradient(60rem 30rem at 10% -10%, rgba(124, 77, 255, 0.28), transparent 60%),
+    radial-gradient(50rem 28rem at 100% 0%, rgba(255, 179, 0, 0.14), transparent 60%);
+  background-attachment: fixed;
+}
+
+// Toolbar colours per theme (more specific than the Material theme mixin).
+.default .mat-toolbar.mat-primary {
+  --mat-toolbar-container-background-color: #3f2a82;
+  --mat-toolbar-container-text-color: #fff;
+}
+
+.dark .mat-toolbar.mat-primary {
+  --mat-toolbar-container-background-color: #17142a;
+  --mat-toolbar-container-text-color: #f1ecff;
+  border-bottom: 1px solid rgba(124, 77, 255, 0.25);
 }
