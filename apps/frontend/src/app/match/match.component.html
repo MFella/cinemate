@@ -8,84 +8,69 @@
       <mat-icon>close</mat-icon>
     </button>
   }
-  <mat-card class="match-card overflow-hidden !rounded-xl">
+  <mat-card class="match-card">
     <img
-      class="current-movie-img h-full w-full absolute"
+      #posterImg
+      class="current-movie-img"
       [ngSrc]="getMovieUrl(currentMovie.posterPath)"
+      alt=""
       [fill]="true"
       priority
-      [ngStyle]="getMoviePosterStyles(currentMovie.posterPath)" />
+      [ngStyle]="getMoviePosterStyles(currentMovie.posterPath)"
+      (load)="onPosterSettled()"
+      (error)="onPosterSettled()" />
+    <div class="poster-scrim"></div>
 
-      <mat-card-header>
-        <mat-card-title class="!flex !justify-center"
-          ><h1 class="text-center !z-1 relative px-4 py-2">
-          {{ currentMovie.title }}
-        </h1></mat-card-title
-        >
-        <mat-card-subtitle class="!flex !justify-between !pt-4">
-          <mat-chip-set class="flex-col max-w-20">
-            <mat-chip class="year-container"
-              >{{ currentMovie.releaseDate.split('-').at(0) }}
-            </mat-chip>
-            <mat-chip class="">
-              <div class="vote-container flex justify-center !items-center">
-                <mat-icon class="mb-1 scale-75 text-yellow-400"
-                  >star_rate</mat-icon
-                  >
-                  <strong class="ml-1">{{
-                    currentMovie.voteAverage.toFixed(1)
-                  }}</strong>
-                </div>
-              </mat-chip>
-            </mat-chip-set>
-            @if (genresOnPage.size) {
-              <span class="genres-container">
-                <mat-chip-set class="justify-end">
-                  @for (genreId of currentMovie.genreIds; track genreId) {
-                    <mat-chip>
-                      {{ genresOnPage.get(genreId)?.name }}</mat-chip
-                      >
-                  }
-                </mat-chip-set>
-              </span>
-            }
-          </mat-card-subtitle>
-        </mat-card-header>
-        <div class="current-movie-img-container"></div>
-        <mat-card-content class="z-[1] h-40 overflow-y-scroll">
-          <p>{{ currentMovie.overview }}</p>
-        </mat-card-content>
-        <mat-divider></mat-divider>
-        @if (matDialogData) {
-          <div class="is-movie-watched-slide-toggle__container">
-            <div class="slide-toggle__background-container"></div>
-            <mat-slide-toggle
-              class="is-movie-watched-slide-toggle"
-              #slideToggleRef
-              [checked]="matDialogData.matchedMovie.isWatched"
-        (click)="
-          updateIsMovieWatched(
-            matDialogData.movie,
-            matDialogData.matchedMovie,
-            $event,
-            slideToggleRef
-          )
-        ">
-            </mat-slide-toggle>
-          </div>
-        } @else {
-          <mat-card-actions class="mx-2 mb-2">
-            @for (item of markActions; track item) {
-              <button
-                [color]="item.buttonColor"
-                [class]="'w-full mark-action-button-' + item.value"
-                [disabled]="isRequestPended"
-                mat-flat-button
-                (click)="voteMovie(item)">
-                {{ item.label }}
-              </button>
-            }
-          </mat-card-actions>
+    <div class="card-body">
+      <div class="meta-pills">
+        <span class="pill pill-rating">
+          <mat-icon>star_rate</mat-icon>
+          {{ currentMovie.voteAverage.toFixed(1) }}
+        </span>
+        <span class="pill">{{ currentMovie.releaseDate.split('-').at(0) }}</span>
+        @if (genresOnPage.size) {
+          @for (genreId of currentMovie.genreIds; track genreId) {
+            <span class="pill pill-genre">{{
+              genresOnPage.get(genreId)?.name
+            }}</span>
+          }
         }
-      </mat-card>
+      </div>
+
+      <h1 class="movie-title">{{ currentMovie.title }}</h1>
+
+      <p class="movie-overview">{{ currentMovie.overview }}</p>
+
+      @if (matDialogData) {
+        <div class="watched-row">
+          <span class="watched-label">Is watched</span>
+          <mat-slide-toggle
+            class="is-movie-watched-slide-toggle"
+            #slideToggleRef
+            [checked]="matDialogData.matchedMovie.isWatched"
+            (click)="
+              updateIsMovieWatched(
+                matDialogData.movie,
+                matDialogData.matchedMovie,
+                $event,
+                slideToggleRef
+              )
+            ">
+          </mat-slide-toggle>
+        </div>
+      } @else {
+        <div class="vote-actions">
+          @for (item of markActions; track item) {
+            <button
+              [class]="'vote-button vote-button-' + item.value"
+              [disabled]="isRequestPended || !isPosterLoaded"
+              type="button"
+              (click)="voteMovie(item)">
+              {{ item.label }}
+            </button>
+          }
+        </div>
+      }
     </div>
+  </mat-card>
+</div>

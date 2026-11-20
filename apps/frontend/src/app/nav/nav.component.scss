@@ -3,8 +3,33 @@
   position: fixed;
 }
 
-.cinemate-log {
-  transition: all 0.4s;
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  color: var(--brand-wordmark, #fff);
+  letter-spacing: 0.04em;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.brand-mark {
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(124, 77, 255, 0.45);
+}
+
+.brand-word {
+  font-size: 1.25rem;
+  font-weight: 400;
+
+  b {
+    font-weight: 700;
+    color: #ffb300;
+  }
 }
 
 .active {
