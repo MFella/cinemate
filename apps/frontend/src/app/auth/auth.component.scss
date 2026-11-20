@@ -21,7 +21,7 @@
 
   b {
     font-weight: 700;
-    color: #ffb300;
+    color: var(--brand-accent-text, #ffb300);
   }
 }
 
@@ -35,6 +35,9 @@
   width: 100%;
   border-radius: 1.5rem;
   padding: 0.5rem;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  box-shadow: var(--app-shadow);
 }
 
 .google-button {
@@ -43,7 +46,7 @@
   border-radius: 9999px;
   background: #fff;
   color: #3c4043;
-  border: 1px solid rgba(128, 128, 128, 0.35);
+  border: 1px solid rgba(60, 64, 67, 0.35);
   font-weight: 500;
 }
 

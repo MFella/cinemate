@@ -1,4 +1,12 @@
-import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  inject,
+  OnInit,
+  ChangeDetectionStrategy,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
@@ -44,7 +52,7 @@ import {
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './match.component.scss'
 })
-export class MatchComponent implements OnInit {
+export class MatchComponent implements OnInit, AfterViewInit {
   private static readonly MOVIES_REMAINS_FETCH_THRESHOLD = 4;
   private static readonly POSTER_URL_PREFIX =
     'https://image.tmdb.org/t/p/original';
@@ -54,7 +62,10 @@ export class MatchComponent implements OnInit {
   readonly matDialogRef = inject(MatDialogRef, { optional: true });
   readonly #restDataService = inject(RestDataService);
   readonly #alertInteractionService = inject(AlertInteractionService);
+  @ViewChild('posterImg') posterImg?: ElementRef<HTMLImageElement>;
   isRequestPended = false;
+  // Poster of the current movie is in the DOM; vote buttons stay locked until then.
+  isPosterLoaded = false;
 
   markActions: Array<MarkButtonData> = [
     { label: 'No 🤨', value: 'NO', buttonColor: 'primary' },
@@ -82,6 +93,14 @@ export class MatchComponent implements OnInit {
     }
   }
 
+  ngAfterViewInit(): void {
+    // The image may finish loading before the (load) listener is attached (hydration, cache).
+    const img = this.posterImg?.nativeElement;
+    if (img?.complete && img.naturalWidth > 0) {
+      Promise.resolve().then(() => this.onPosterSettled());
+    }
+  }
+
   voteMovie(vote: MarkButtonData): void {
     this.isRequestPended = true;
     this.restDataService
@@ -102,7 +121,7 @@ export class MatchComponent implements OnInit {
           this.lastRateResult = rateResult;
           const fetchMovieRemovalResult = this.fetchedMovies.shift();
           if (fetchMovieRemovalResult) {
-            this.currentMovie = fetchMovieRemovalResult;
+            this.setCurrentMovie(fetchMovieRemovalResult);
           }
 
           if (
@@ -152,6 +171,11 @@ export class MatchComponent implements OnInit {
       : MatchComponent.POSTER_URL_PLACEHOLDER;
   }
 
+  onPosterSettled(): void {
+    // Called on both load and error, so a broken image never locks the buttons.
+    this.isPosterLoaded = true;
+  }
+
   closeDialog(): void {
     this.matDialogRef?.close();
   }
@@ -177,6 +201,27 @@ export class MatchComponent implements OnInit {
           slideToggleRef.setDisabledState(false);
         }
       });
+  }
+
+  private setCurrentMovie(movie: MovieToRate): void {
+    const isSamePoster =
+      !!this.currentMovie &&
+      this.getMovieUrl(this.currentMovie.posterPath) ===
+        this.getMovieUrl(movie.posterPath);
+    this.currentMovie = movie;
+    // Same URL means the <img> will not fire `load` again, so keep the current state.
+    if (!isSamePoster) {
+      this.isPosterLoaded = false;
+    }
+    this.preloadNextPoster();
+  }
+
+  private preloadNextPoster(): void {
+    const nextMovie = this.fetchedMovies[0];
+    if (!nextMovie?.posterPath || typeof Image === 'undefined') {
+      return;
+    }
+    new Image().src = this.getMovieUrl(nextMovie.posterPath);
   }
 
   private resolvePageNumber(): number | null {
@@ -213,7 +258,7 @@ export class MatchComponent implements OnInit {
         if (movieInitData?.movies?.length) {
           const movieRemovalResult = movieInitData.movies.shift();
           if (movieRemovalResult) {
-            this.currentMovie = movieRemovalResult;
+            this.setCurrentMovie(movieRemovalResult);
           }
           this.fetchedMovies = movieInitData?.movies;
         } else {

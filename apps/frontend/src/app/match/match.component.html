@@ -10,12 +10,15 @@
   }
   <mat-card class="match-card">
     <img
+      #posterImg
       class="current-movie-img"
       [ngSrc]="getMovieUrl(currentMovie.posterPath)"
       alt=""
       [fill]="true"
       priority
-      [ngStyle]="getMoviePosterStyles(currentMovie.posterPath)" />
+      [ngStyle]="getMoviePosterStyles(currentMovie.posterPath)"
+      (load)="onPosterSettled()"
+      (error)="onPosterSettled()" />
     <div class="poster-scrim"></div>
 
     <div class="card-body">
@@ -60,7 +63,7 @@
           @for (item of markActions; track item) {
             <button
               [class]="'vote-button vote-button-' + item.value"
-              [disabled]="isRequestPended"
+              [disabled]="isRequestPended || !isPosterLoaded"
               type="button"
               (click)="voteMovie(item)">
               {{ item.label }}
