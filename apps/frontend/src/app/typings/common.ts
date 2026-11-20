@@ -40,6 +40,10 @@ export type SelectOption = {
   disabled: boolean;
 };
 
+export type UserPreferences = {
+  preferences: Array<GenEntity>;
+};
+
 export type UserMatchFilterOptions = {
   pageNumber: number;
   onlyWatched?: true;

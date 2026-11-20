@@ -156,7 +156,7 @@ export class MoviesService {
       );
       await this.saveMovieListDto(
         moviesListDto,
-        userId,
+        tmdbRequestOptions.genreId,
         tmdbRequestOptions.pageNumber
       );
       return moviesListDto;
@@ -208,14 +208,9 @@ export class MoviesService {
     userId: string,
     pageOfMovie?: PageOfMovie
   ): Promise<MoviesListDTO> {
-    const userFromDb = await this.prismaService.user.findFirst({
-      where: {
-        id: userId,
-      },
-      select: {
-        genreId: true,
-      },
-    });
+    // a page of a known genre is read from that genre; otherwise the feed decides
+    const feedGenreId =
+      pageOfMovie?.genreId ?? (await this.getFeedGenreId(userId));
 
     const completedPageOfMovies =
       await this.prismaService.completedPageOfMovie.findMany({
@@ -225,7 +220,7 @@ export class MoviesService {
         where: {
           userId,
           pageOfMovie: {
-            genreId: userFromDb.genreId,
+            genreId: feedGenreId,
           },
         },
       });
@@ -238,7 +233,7 @@ export class MoviesService {
     if (!pageOfMovie) {
       pageOfMovie = await this.prismaService.pageOfMovie.findFirst({
         where: {
-          genreId: userFromDb.genreId,
+          genreId: feedGenreId,
           pageNumber: currentPageNumber,
         },
       });
@@ -284,25 +279,16 @@ export class MoviesService {
     return MoviesUtil.convertMoviesToRateToMoviesListDto(
       cachedMovies,
       genresOnPage,
-      userFromDb.genreId,
+      feedGenreId,
       currentPageNumber
     );
   }
 
   private async saveMovieListDto(
     moviesListDto: MoviesListDTO,
-    userId: string,
+    genreId: number,
     currentPageNumber: number
   ): Promise<void> {
-    // prisma work ...
-    const userGenre = await this.prismaService.user.findFirst({
-      where: {
-        id: userId,
-      },
-      include: {
-        genre: true,
-      },
-    });
 
     const movieIds = moviesListDto.movies.map(
       movieInListDto => movieInListDto.id
@@ -339,11 +325,6 @@ export class MoviesService {
         genresFromDb.map(g => [g.id, g])
       ).values(),
     ];
-    const genreId =
-      userGenre?.genreId !== undefined && userGenre?.genreId !== null
-        ? userGenre.genreId
-        : MoviesService.DEFAULT_GENRE_ID;
-
     await this.prismaService.pageOfMovie.create({
       data: {
         pageNumber: currentPageNumber,
@@ -416,45 +397,22 @@ export class MoviesService {
       };
     }
 
-    const userGenre = await this.prismaService.user.findFirst({
-      where: {
-        id: userId,
-      },
-      include: {
-        genre: true,
-      },
-    });
+    const preferredGenreIds = await this.getPreferredGenreIds(userId);
 
-    // eslint-disable-next-line prefer-const
-    let genreId = userGenre?.genreId;
-
-    if (genreId === undefined || genreId === null) {
-      // fallback to default
-      const defaultGenre = await this.prismaService.genre.findFirst({
-        where: {
-          name: MoviesService.DEFAULT_GENRE,
-        },
-      });
-
-      if (!defaultGenre) {
-        return {
-          moviesCountLeftOnPage: null,
-          isRateSaved: false,
-          reason: `Cannot retrieve default ${MoviesService.DEFAULT_GENRE} genre from database`,
-        };
-      }
-
-      genreId = defaultGenre?.id;
-    }
-
+    // the page this movie was shown on (one of the user's genres)
     const pageOfMovie = await this.prismaService.pageOfMovie.findFirst({
       where: {
         movieIds: {
           has: movieId,
         },
-        genreId,
+        genreId: { in: preferredGenreIds },
       },
     });
+
+    if (!pageOfMovie) {
+      // rate is saved, but the movie is not on any known page of the user's genres
+      return { moviesCountLeftOnPage: null, isRateSaved: true };
+    }
 
     const userRates = await this.prismaService.rate.findMany({
       where: {
@@ -673,20 +631,45 @@ export class MoviesService {
     );
   }
 
+  private async getPreferredGenreIds(userId: string): Promise<Array<number>> {
+    const userGenres = await this.prismaService.userGenre.findMany({
+      where: { userId },
+    });
+
+    return userGenres.length
+      ? userGenres.map(userGenre => userGenre.genreId).sort((a, b) => a - b)
+      : [MoviesService.DEFAULT_GENRE_ID];
+  }
+
+  /**
+   * Genre the feed serves next: the preferred genre with the fewest pages this user
+   * has completed (ties: lowest id). Completions change only when a page is finished,
+   * so the user stays on one genre until the current page is done.
+   */
+  async getFeedGenreId(userId: string): Promise<number> {
+    const preferredGenreIds = await this.getPreferredGenreIds(userId);
+
+    let feedGenreId = preferredGenreIds[0];
+    let fewestCompleted = Infinity;
+    for (const genreId of preferredGenreIds) {
+      const completedCount =
+        await this.prismaService.completedPageOfMovie.count({
+          where: { userId, pageOfMovie: { genreId } },
+        });
+      if (completedCount < fewestCompleted) {
+        fewestCompleted = completedCount;
+        feedGenreId = genreId;
+      }
+    }
+
+    return feedGenreId;
+  }
+
   private async getTmdbMovieRequestOptions(
     userId: string,
     shouldLoadNextPage?: 0 | 1
   ): Promise<TmdbMovieGetListRequestOptions> {
-    const userGenreFromDb = await this.prismaService.user.findFirst({
-      where: {
-        id: userId,
-      },
-      include: {
-        genre: true,
-      },
-    });
-
-    const userGenreId = userGenreFromDb?.genre?.id;
+    const userGenreId = await this.getFeedGenreId(userId);
 
     const userCompletedPages =
       await this.prismaService.completedPageOfMovie.findMany({
@@ -702,7 +685,7 @@ export class MoviesService {
       });
 
     let currentPageNumber = MoviesService.DEFAULT_PAGE_NUMBER;
-    if (userGenreId !== undefined && userCompletedPages?.length > 0) {
+    if (userCompletedPages?.length > 0) {
       currentPageNumber =
         Math.max(
           ...userCompletedPages.map(

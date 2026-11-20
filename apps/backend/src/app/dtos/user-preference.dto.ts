@@ -1,5 +1,5 @@
 import { Genre } from "@prisma/client";
 
 export type UserPreferenceDto = {
-    preference: Genre
+    preferences: Array<Genre>
 };

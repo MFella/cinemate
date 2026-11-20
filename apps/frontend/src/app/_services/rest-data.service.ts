@@ -8,6 +8,7 @@ import {
   FindMatchResult,
   MovieToRate,
   UserMatchFilterOptions,
+  UserPreferences,
   AuthSource,
   UserInfo,
 } from '../typings/common';
@@ -52,8 +53,8 @@ export class RestDataService extends BasicRestDataService {
     return this.get<MovieToRate>(`movies/${movieId}`);
   }
 
-  fetchUserGenrePreference(): Observable<GenEntity> {
-    return this.get<GenEntity>('user/preference');
+  fetchUserGenrePreference(): Observable<UserPreferences> {
+    return this.get<UserPreferences>('user/preference');
   }
 
   @Memoize()
@@ -96,8 +97,8 @@ export class RestDataService extends BasicRestDataService {
     });
   }
 
-  saveUserPreference(preference: Genres): Observable<boolean> {
-    return this.post<boolean>('user/preference', { genreId: preference });
+  saveUserPreferences(genreIds: Array<number>): Observable<boolean> {
+    return this.post<boolean>('user/preference', { genreIds });
   }
 
   saveIsMovieWatched(movieId: number, isMovieWatched: boolean) {

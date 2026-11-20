@@ -56,15 +56,23 @@ model CompletedPageOfMovie {
 model Genre {
   id  Int @id @unique @default(autoincrement())
   name String
-  user User[]
+  users UserGenre[]
 }
 
 model User {
   id  Decimal @id @unique @db.Decimal(25, 0)
   email String
-  genre Genre @relation(fields: [genreId], references: [id])
-  genreId Int
   picture String
+  genres UserGenre[]
+}
+
+model UserGenre {
+  userId  Decimal @db.Decimal(25, 0)
+  genreId Int
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  genre   Genre   @relation(fields: [genreId], references: [id])
+
+  @@id([userId, genreId])
 }
 
 model WatchedMovie {

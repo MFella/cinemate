@@ -24,7 +24,9 @@
         ],
         "scripts": [],
         "server": "apps/frontend/src/main.server.ts",
-        "prerender": true,
+        "prerender": {
+          "discoverRoutes": false
+        },
         "ssr": {
           "entry": "apps/frontend/server.ts"
         }

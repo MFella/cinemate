@@ -7,10 +7,11 @@ import { RestDataService } from '../_services/rest-data.service';
 
 export const authGuard: CanActivateFn = async (_route, state) => {
   // On the server there is no localStorage, so the user can't be recognised.
-  // Don't redirect there (it would drop the requested URL); the browser decides.
+  // Don't redirect (it would drop the requested URL) and don't run the route's
+  // resolvers (they call the API); returning false just renders the app shell and
+  // the browser decides. The login page ('/') is guarded by the negation of this.
   if (isPlatformServer(inject(PLATFORM_ID))) {
-    // the login page ('/') is guarded by the negation of this guard
-    return state.url !== '/';
+    return false;
   }
 
   const router = inject(Router);

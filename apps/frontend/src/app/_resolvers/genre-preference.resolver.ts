@@ -1,8 +1,8 @@
 import { inject } from '@angular/core';
 import { ResolveFn } from '@angular/router';
 import { RestDataService } from '../_services/rest-data.service';
-import { GenEntity } from '../typings/common';
+import { UserPreferences } from '../typings/common';
 
-export const genrePreferenceResolver: ResolveFn<GenEntity> = () => {
+export const genrePreferenceResolver: ResolveFn<UserPreferences> = () => {
   return inject(RestDataService).fetchUserGenrePreference();
 };

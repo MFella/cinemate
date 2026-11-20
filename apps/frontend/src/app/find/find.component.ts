@@ -46,6 +46,7 @@ import {
   MatchedMovie,
   MovieToRate,
   SelectOption,
+  UserPreferences,
 } from '../typings/common';
 import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute } from '@angular/router';
@@ -172,9 +173,9 @@ export class FindComponent implements OnInit {
           (email: string) => email !== currentUserEmail
         );
 
-        const userGenreId = (
-          data['findData'][0] as Record<'preference', GenEntity>
-        ).preference.id;
+        // the first preferred genre is the default one in the search form
+        const userGenreId = (data['findData'][0] as UserPreferences)
+          .preferences[0]?.id;
         const userGenreOption = this.genreOptions.find(
           genre => genre.value === userGenreId
         );

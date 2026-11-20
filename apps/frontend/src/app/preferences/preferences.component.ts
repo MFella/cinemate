@@ -16,7 +16,12 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { GenEntity, SelectOption, genres } from '../typings/common';
+import {
+  GenEntity,
+  SelectOption,
+  UserPreferences,
+  genres,
+} from '../typings/common';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, take } from 'rxjs';
 import { RestDataService } from '../_services/rest-data.service';
@@ -51,7 +56,7 @@ export class PreferencesComponent implements OnInit {
   #alertService: AlertInteractionService = inject(AlertInteractionService);
 
   isFetchingData = false;
-  originGenreId!: number;
+  originGenreIds: Array<number> = [];
   genreOptions: Array<SelectOption> = genres.map(genre => {
     return {
       value: Math.random() * 10,
@@ -61,14 +66,14 @@ export class PreferencesComponent implements OnInit {
   });
 
   preferencesFormGroup: FormGroup = new FormGroup({
-    genre: new FormControl('', [Validators.required]),
+    genres: new FormControl<Array<number>>([], [Validators.required]),
   });
 
   ngOnInit(): void {
     this.isFetchingData = true;
     (
       this.#activatedRoute.data as Observable<{
-        preferencesData: [Record<'preference', GenEntity>, Array<GenEntity>];
+        preferencesData: [UserPreferences, Array<GenEntity>];
       }>
     )
       .pipe(take(1))
@@ -81,23 +86,35 @@ export class PreferencesComponent implements OnInit {
           };
         });
 
-        this.originGenreId = preferencesData[0].preference.id;
-        this.preferencesFormGroup.get('genre')?.setValue(this.originGenreId);
+        this.originGenreIds = preferencesData[0].preferences.map(
+          genre => genre.id
+        );
+        this.preferencesFormGroup.get('genres')?.setValue(this.originGenreIds);
         this.isFetchingData = false;
       });
   }
 
+  hasSelectionChanged(): boolean {
+    const selected: Array<number> =
+      this.preferencesFormGroup.get('genres')?.value ?? [];
+    return (
+      selected.length !== this.originGenreIds.length ||
+      selected.some(genreId => !this.originGenreIds.includes(genreId))
+    );
+  }
+
   savePreference(): void {
-    const selectedPreference = this.preferencesFormGroup.get('genre')?.value;
+    const selectedPreference: Array<number> =
+      this.preferencesFormGroup.get('genres')?.value ?? [];
     this.isFetchingData = true;
     this.#restDataService
-      .saveUserPreference(selectedPreference)
+      .saveUserPreferences(selectedPreference)
       .pipe(take(1))
       .subscribe({
         next: (isSaved: boolean) => {
           if (isSaved) {
-            this.originGenreId = selectedPreference;
-            this.#alertService.success('Preference has been saved');
+            this.originGenreIds = [...selectedPreference];
+            this.#alertService.success('Preferences have been saved');
           }
         },
         error: (error: HttpErrorResponse) => {

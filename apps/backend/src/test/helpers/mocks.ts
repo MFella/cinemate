@@ -5,7 +5,6 @@ import { Genre, User } from '@prisma/client';
 export const mockUserFromDb = {
   id: 123.0 as any,
   email: 'example@gmail.com',
-  genreId: 4,
   picture: '',
 } satisfies User;
 
