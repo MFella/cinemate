@@ -48,4 +48,8 @@ export class FindMatchResultDto {
 
   @IsBoolean()
   isLastPage: boolean;
+
+  // E-mails from the request that do not belong to any registered user.
+  @IsArray()
+  unknownEmails: Array<string>;
 }

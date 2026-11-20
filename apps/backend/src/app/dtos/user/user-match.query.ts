@@ -2,6 +2,7 @@ import {
   ArrayMinSize,
   IsArray,
   IsBoolean,
+  IsIn,
   IsOptional,
   IsString,
   MaxLength,
@@ -9,6 +10,7 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { MatchMode } from '../../typings/common';
 
 class IsStringifiedNumber implements ValidatorConstraintInterface {
   validate(value: string): Promise<boolean> | boolean {
@@ -52,4 +54,8 @@ export class UserMatchQuery {
   @IsString()
   @MaxLength(256)
   searchedMovieTitle?: string;
+
+  @IsOptional()
+  @IsIn(['all', 'any'])
+  matchMode?: MatchMode;
 }

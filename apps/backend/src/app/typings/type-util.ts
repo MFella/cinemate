@@ -19,7 +19,7 @@ export class TypeUtil {
     matchedRate: Record<string, unknown>
   ): matchedRate is MatchedRate {
     return (
-      'id' in matchedRate && 'user' in matchedRate && 'movie' in matchedRate
+      'id' in matchedRate && 'users' in matchedRate && 'movie' in matchedRate
     );
   }
 }

@@ -1,4 +1,3 @@
-import { User } from '@prisma/client';
 import { TransformedTmdbMovie } from '../dtos/movies-list.dto';
 
 export const genres = [
@@ -28,10 +27,16 @@ export const genres = [
 
 export type Genres = (typeof genres)[number];
 
+// 'all': every selected user liked the movie; 'any': at least one of them did.
+// In both modes the current user must have liked it too.
+export type MatchMode = 'all' | 'any';
+
 export type MatchedRate = {
-  id: string;
+  id: number;
   movie: TransformedTmdbMovie;
-  user: User;
+  // Selected users (not the current one) who liked the movie.
+  users: Array<{ id: string; email: string }>;
+  isWatched: boolean;
 };
 
 export type AuthSource = 'google' | 'facebook';
