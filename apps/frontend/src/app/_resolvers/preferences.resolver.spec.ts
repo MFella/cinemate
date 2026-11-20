@@ -4,8 +4,10 @@ import { ResolveFn } from '@angular/router';
 import { preferencesResolver } from './preferences.resolver';
 
 describe('preferencesResolver', () => {
-  const executeResolver: ResolveFn<boolean> = (...resolverParameters) => 
-      TestBed.runInInjectionContext(() => preferencesResolver(...resolverParameters));
+  const executeResolver: ResolveFn<boolean> = (...resolverParameters) =>
+    TestBed.runInInjectionContext(() =>
+      preferencesResolver(...resolverParameters)
+    );
 
   beforeEach(() => {
     TestBed.configureTestingModule({});

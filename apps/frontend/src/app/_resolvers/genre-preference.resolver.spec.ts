@@ -4,8 +4,10 @@ import { ResolveFn } from '@angular/router';
 import { genrePreferenceResolver } from './genre-preference.resolver';
 
 describe('genrePreferenceResolver', () => {
-  const executeResolver: ResolveFn<boolean> = (...resolverParameters) => 
-      TestBed.runInInjectionContext(() => genrePreferenceResolver(...resolverParameters));
+  const executeResolver: ResolveFn<boolean> = (...resolverParameters) =>
+    TestBed.runInInjectionContext(() =>
+      genrePreferenceResolver(...resolverParameters)
+    );
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
