@@ -49,14 +49,3 @@ export type UserJwtPayload = {
 
 const cookieNames = ['access_token'] as const;
 export type CookieNames = (typeof cookieNames)[number];
-
-export type JwtAuthConfig = {
-  secret: string;
-};
-
-export type OauthGoogleUserInfo<T extends AuthSource> = {
-  provider: T;
-  id: string;
-  email: string;
-  picture: string;
-};

@@ -1,75 +1,39 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { User } from '@prisma/client';
 import { PrismaService } from '../database/prisma.service';
 import { UserService } from '../user/user.service';
-import { User } from '@prisma/client';
-import { ConfigService } from '@nestjs/config';
-import {
-  AuthSource,
-  JwtAuthConfig,
-  OauthGoogleUserInfo,
-  UserJwtPayload,
-} from '../typings/common';
+import { CognitoIdentity } from './cognito/cognito-identity';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly configService: ConfigService,
-    private readonly jwtService: JwtService,
     private readonly prismaService: PrismaService,
     private readonly userService: UserService
   ) {}
 
-  generateJwt(payload: UserJwtPayload): string {
-    const jwtSecret =
-      this.configService.get<JwtAuthConfig>('jwtConfig')?.secret ?? '';
-    return this.jwtService.sign(payload, {
-      secret: jwtSecret,
-    });
-  }
-
-  async signInUser<T extends AuthSource>(
-    userToRegister: OauthGoogleUserInfo<T>
-  ): Promise<string> {
-    if (!userToRegister) {
-      throw new BadRequestException('Unauthenticated');
+  /** Finds the user of a verified sign-in, registering them on the first one. */
+  async signInUser(identity: CognitoIdentity): Promise<User> {
+    const existingUser = await this.getUserById(identity.id);
+    if (existingUser) {
+      return existingUser;
     }
 
-    let userFromDb = await this.getUserById(userToRegister.id);
-
-    if (!userFromDb) {
-      userFromDb = await this.userService.tryRegisterUser(
-        userToRegister.id,
-        userToRegister.email,
-        userToRegister.picture
+    const registeredUser = await this.userService.tryRegisterUser(
+      identity.id,
+      identity.email,
+      identity.picture
+    );
+    if (!registeredUser) {
+      throw new InternalServerErrorException(
+        `Error occured during creation of user with id: ${identity.id}`
       );
-      if (!userFromDb) {
-        throw new InternalServerErrorException(
-          `Error occured during creation of user with id: ${userToRegister.id}`
-        );
-      }
     }
-
-    return this.generateJwt({
-      sub: userFromDb.id.toString(),
-      email: userFromDb.email,
-      picture: userFromDb.picture,
-    });
+    return registeredUser;
   }
 
   async getUserById(userId: string): Promise<User> {
     return await this.prismaService.user.findFirst({
-      where: {
-        id: userId,
-      },
+      where: { id: userId },
     });
-  }
-
-  getUserInfoFromCookie(accessToken: string): UserJwtPayload {
-    return this.jwtService.decode(accessToken);
   }
 }

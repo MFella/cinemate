@@ -9,14 +9,17 @@ export default () => ({
     url: process.env.TMDB_API_URL,
     key: process.env.TMDB_API_TOKEN,
   },
-  oauthGoogleConfig: {
-    clientId: process.env.OAUTH_GOOGLE_CLIENT_ID,
-    clientSecret: process.env.OAUTH_GOOGLE_CLIENT_SECRET,
-    callbackURL: process.env.OAUTH_GOOGLE_CALLBACK_URL,
-    scope: ['profile', 'email'],
-  },
-  jwtConfig: {
-    secret: process.env.AUTH_JWT_SECRET,
+  cognito: {
+    region: process.env.COGNITO_REGION,
+    userPoolId: process.env.COGNITO_USER_POOL_ID,
+    clientId: process.env.COGNITO_CLIENT_ID,
+    clientSecret: process.env.COGNITO_CLIENT_SECRET,
+    // Hosted UI domain without https://, e.g. cinemate.auth.eu-central-1.amazoncognito.com
+    domain: process.env.COGNITO_DOMAIN,
+    // must be registered as a callback URL of the app client
+    redirectUri: process.env.COGNITO_REDIRECT_URI,
+    // must be registered as a sign-out URL of the app client
+    logoutUri: process.env.FRONTEND_URL,
   },
   isDevMode: process.env.NODE_ENV === 'dev',
 });
