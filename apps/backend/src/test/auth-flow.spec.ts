@@ -19,7 +19,8 @@ const IDENTITY: CognitoIdentity = {
 const createCognito = (overrides: Partial<CognitoService> = {}) =>
   ({
     getAuthorizeUrl: jest.fn(
-      (provider: string, state: string) => `https://hosted/ui?p=${provider}&s=${state}`
+      (provider: string, state: string) =>
+        `https://hosted/ui?p=${provider}&s=${state}`
     ),
     getLogoutUrl: jest.fn(() => 'https://hosted/logout'),
     exchangeCodeForIdToken: jest.fn().mockResolvedValue('id-token'),
@@ -40,7 +41,10 @@ const createResponse = () => {
 };
 
 describe('AuthGuard', () => {
-  const run = async (cognito: CognitoService, cookies?: Record<string, string>) => {
+  const run = async (
+    cognito: CognitoService,
+    cookies?: Record<string, string>
+  ) => {
     const request: Record<string, unknown> = { cookies };
     const guard = new AuthGuard(cognito);
     const result = await guard.canActivate({
@@ -60,9 +64,9 @@ describe('AuthGuard', () => {
       verifyIdToken: jest.fn().mockRejectedValue(new UnauthorizedException()),
     });
 
-    await expect(
-      run(cognito, { access_token: 'forged' })
-    ).rejects.toThrow(UnauthorizedException);
+    await expect(run(cognito, { access_token: 'forged' })).rejects.toThrow(
+      UnauthorizedException
+    );
   });
 
   it('lets a valid token in and exposes the user to controllers', async () => {
@@ -87,8 +91,7 @@ describe('AuthController', () => {
       signInUser: jest.fn().mockResolvedValue({ id: IDENTITY.id }),
     } as unknown as jest.Mocked<AuthService>;
     const configService = {
-      get: (key: string) =>
-        ({ isDevMode: true, frontendUrl: FRONTEND })[key],
+      get: (key: string) => ({ isDevMode: true, frontendUrl: FRONTEND })[key],
     } as unknown as ConfigService;
     return {
       cognito,
@@ -157,7 +160,12 @@ describe('AuthController', () => {
       const { controller, cognito } = build();
 
       await expect(
-        controller.callback('code', 'evil', request('evil', 'abc'), createResponse())
+        controller.callback(
+          'code',
+          'evil',
+          request('evil', 'abc'),
+          createResponse()
+        )
       ).rejects.toThrow(UnauthorizedException);
       expect(cognito.exchangeCodeForIdToken).not.toHaveBeenCalled();
     });
@@ -166,7 +174,12 @@ describe('AuthController', () => {
       const { controller } = build();
 
       await expect(
-        controller.callback('code', 'abc', request('abc', null), createResponse())
+        controller.callback(
+          'code',
+          'abc',
+          request('abc', null),
+          createResponse()
+        )
       ).rejects.toThrow(UnauthorizedException);
     });
 

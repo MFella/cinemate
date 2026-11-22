@@ -1,4 +1,9 @@
-import { Inject, Injectable, Optional, UnauthorizedException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Optional,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CognitoJwtVerifier } from 'aws-jwt-verify';
 import { AuthSource } from '../../typings/common';

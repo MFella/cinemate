@@ -14,14 +14,15 @@ Goal: show real AWS skills (after DVA-C02) on this project. Only list on the por
 
 ## Stage 1 – foundation
 
-- [ ] IaC: CDK in TypeScript (alternative: SAM), `infra/` directory
+- [x] IaC: CDK in TypeScript, `infra/` directory (see `docs/adr/0001-infrastructure-as-code-with-cdk.md`)
 - [ ] Frontend: decide SSR vs static build (static + S3 + CloudFront is simplest)
 
 ## Stage 2 – Cognito (main feature)
 
-- [ ] User Pool with Google and Facebook federation
-- [ ] Backend: replace Passport/JWT with Cognito token validation (`jwks-rsa`), remap users in Prisma
-- [ ] Frontend: Cognito login (Hosted UI or Amplify Auth), update guards and interceptor
+- [x] User Pool with Google and Facebook federation (stack written and tested; **not deployed yet**, see `infra/README.md`)
+- [ ] Deploy the stack, set the `COGNITO_*` variables and click through the login
+- [x] Backend: Passport/JWT replaced by Cognito (hosted UI + code flow, ID token verified with `aws-jwt-verify`); users keep their ids, no migration
+- [x] Frontend: no change needed (the backend handles the flow and the cookie stays)
 
 ## Stage 3 – hosting on AWS
 

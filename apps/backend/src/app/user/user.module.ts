@@ -7,11 +7,6 @@ import { FriendsService } from '../friends/friends.service';
 
 @Module({
   controllers: [UserController],
-  providers: [
-    UserService,
-    FriendsService,
-    PrismaService,
-    ConfigService,
-  ],
+  providers: [UserService, FriendsService, PrismaService, ConfigService],
 })
 export class UserModule {}

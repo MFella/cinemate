@@ -17,9 +17,7 @@ const googleClaims = {
   sub: 'cognito-uuid',
   email: 'anna@example.com',
   picture: 'https://example.com/anna.jpg',
-  identities: [
-    { userId: '110248495921238986420', providerName: 'Google' },
-  ],
+  identities: [{ userId: '110248495921238986420', providerName: 'Google' }],
 };
 
 describe('toCognitoIdentity', () => {

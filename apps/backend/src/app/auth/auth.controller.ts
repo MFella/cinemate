@@ -12,7 +12,11 @@ import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { CognitoService } from './cognito/cognito.service';
-import type { AuthSource, CookieNames, UserJwtPayload } from '../typings/common';
+import type {
+  AuthSource,
+  CookieNames,
+  UserJwtPayload,
+} from '../typings/common';
 
 const ACCESS_TOKEN_COOKIE: CookieNames = 'access_token';
 const STATE_COOKIE = 'oauth_state';
@@ -41,7 +45,10 @@ export class AuthController {
     this.login('facebook', response);
   }
 
-  login(provider: AuthSource, response: Pick<Response, 'cookie' | 'redirect'>): void {
+  login(
+    provider: AuthSource,
+    response: Pick<Response, 'cookie' | 'redirect'>
+  ): void {
     // `state` ties the callback to this browser (protects against forged callbacks)
     const state = randomBytes(24).toString('base64url');
     response.cookie(STATE_COOKIE, state, {
