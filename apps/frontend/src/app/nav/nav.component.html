@@ -3,6 +3,7 @@
     <button
       (click)="navigate('')"
       [ngClass]="currentActivatedUrl === '/' ? 'active' : ''"
+      [attr.aria-current]="currentActivatedUrl === '/' ? 'page' : null"
       class="mr-4 !rounded-3xl"
       mat-button>
       <mat-icon>home</mat-icon>
@@ -12,6 +13,7 @@
     <button
       (click)="navigate('match')"
       [ngClass]="currentActivatedUrl === '/match' ? 'active' : ''"
+      [attr.aria-current]="currentActivatedUrl === '/match' ? 'page' : null"
       class="mr-4 !rounded-3xl"
       mat-button>
       <mat-icon> compare_arrows </mat-icon>
@@ -20,6 +22,9 @@
     <button
       (click)="navigate('preferences')"
       [ngClass]="currentActivatedUrl === '/preferences' ? 'active' : ''"
+      [attr.aria-current]="
+        currentActivatedUrl === '/preferences' ? 'page' : null
+      "
       class="mr-4 !rounded-3xl"
       mat-button>
       <mat-icon>settings</mat-icon>
@@ -28,6 +33,7 @@
     <button
       (click)="navigate('friends')"
       [ngClass]="currentActivatedUrl === '/friends' ? 'active' : ''"
+      [attr.aria-current]="currentActivatedUrl === '/friends' ? 'page' : null"
       class="mr-4 !rounded-3xl"
       mat-button>
       <mat-icon>group</mat-icon>
@@ -36,6 +42,7 @@
     <button
       (click)="navigate('find')"
       [ngClass]="currentActivatedUrl === '/find' ? 'active' : ''"
+      [attr.aria-current]="currentActivatedUrl === '/find' ? 'page' : null"
       class="!rounded-3xl"
       mat-button>
       <mat-icon>search</mat-icon>
