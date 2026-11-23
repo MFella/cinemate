@@ -144,7 +144,7 @@ export class RestDataService extends BasicRestDataService {
     );
   }
 
-  revokeToken(): Observable<void> {
-    return this.delete<void>('auth/token');
+  revokeToken(): Observable<{ logoutUrl: string }> {
+    return this.delete<{ logoutUrl: string }>('auth/token');
   }
 }

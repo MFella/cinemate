@@ -67,7 +67,7 @@
       "options": {
         "targetName": "test"
       },
-      "include": ["apps/backend/**/*", "apps/frontend/**/*"]
+      "include": ["apps/backend/**/*", "apps/frontend/**/*", "infra/**/*"]
     },
     {
       "plugin": "@nx/jest/plugin",

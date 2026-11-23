@@ -1,0 +1,23 @@
+{
+  "name": "infra",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "infra",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "synth": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cdk synth",
+        "cwd": "infra"
+      }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cdk deploy",
+        "cwd": "infra"
+      }
+    }
+  }
+}

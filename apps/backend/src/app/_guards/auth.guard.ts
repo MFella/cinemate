@@ -4,17 +4,12 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
-import { JwtAuthConfig } from '../typings/common';
+import { CognitoService } from '../auth/cognito/cognito.service';
 
+/** Lets in requests with a valid Cognito ID token in the `access_token` cookie. */
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService
-  ) {}
+  constructor(private readonly cognitoService: CognitoService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -24,19 +19,13 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException();
     }
 
-    try {
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret: this.configService.get<JwtAuthConfig>('jwtConfig').secret,
-      });
-      request['user'] = payload;
-    } catch {
-      throw new UnauthorizedException();
-    }
+    const identity = await this.cognitoService.verifyIdToken(token);
+    // the shape controllers read (see the UserId decorator)
+    request['user'] = {
+      sub: identity.id,
+      email: identity.email,
+      picture: identity.picture,
+    };
     return true;
-  }
-
-  private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
   }
 }

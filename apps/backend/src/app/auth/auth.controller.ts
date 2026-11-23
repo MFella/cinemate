@@ -1,84 +1,114 @@
+import { randomBytes } from 'node:crypto';
 import {
   Controller,
   Delete,
   Get,
-  HttpStatus,
-  Request,
-  Response,
+  Query,
+  Req,
+  Res,
   UnauthorizedException,
-  UseGuards,
 } from '@nestjs/common';
-import { GoogleOauthGuard } from './guards/google-oauth.guard';
-import { AuthService } from './auth.service';
-import type { CookieNames, UserJwtPayload } from '../typings/common';
 import { ConfigService } from '@nestjs/config';
+import type { Request, Response } from 'express';
+import { AuthService } from './auth.service';
+import { CognitoService } from './cognito/cognito.service';
+import type {
+  AuthSource,
+  CookieNames,
+  UserJwtPayload,
+} from '../typings/common';
 
-type CookieOptions = 'maxAge' | 'sameSite' | 'secure' | 'httpOnly';
+const ACCESS_TOKEN_COOKIE: CookieNames = 'access_token';
+const STATE_COOKIE = 'oauth_state';
+const STATE_COOKIE_MAX_AGE_MS = 10 * 60 * 1000;
+const ACCESS_TOKEN_COOKIE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 @Controller('auth')
 export class AuthController {
-  private static readonly ACCESS_TOKEN_COOKIE_NAME: CookieNames =
-    'access_token';
-  private cookieSignOptions: Partial<
-    Record<CookieOptions, string | number | boolean | Date>
-  > = {};
-  private accessToken: string = '';
+  private readonly isDevMode: boolean;
 
   constructor(
     private readonly authService: AuthService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly cognitoService: CognitoService
   ) {
-    const isDevMode = configService.get('isDevMode');
-    this.cookieSignOptions = {
-      maxAge: 3600 * 1000 * 24,
-      sameSite: isDevMode ? true : 'None',
-      secure: isDevMode ? false : true,
-      httpOnly: true,
-    };
+    this.isDevMode = !!configService.get('isDevMode');
   }
 
   @Get('google')
-  @UseGuards(GoogleOauthGuard)
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  async loginUser(): Promise<void> {}
+  loginWithGoogle(@Res() response: Response): void {
+    this.login('google', response);
+  }
 
-  @Get('google/cb')
-  @UseGuards(GoogleOauthGuard)
-  async afterGoogleAuthCallback(
-    @Request() request,
-    @Response() response
+  @Get('facebook')
+  loginWithFacebook(@Res() response: Response): void {
+    this.login('facebook', response);
+  }
+
+  login(
+    provider: AuthSource,
+    response: Pick<Response, 'cookie' | 'redirect'>
+  ): void {
+    // `state` ties the callback to this browser (protects against forged callbacks)
+    const state = randomBytes(24).toString('base64url');
+    response.cookie(STATE_COOKIE, state, {
+      httpOnly: true,
+      secure: !this.isDevMode,
+      // the callback is a top-level navigation from the Cognito domain
+      sameSite: 'lax',
+      maxAge: STATE_COOKIE_MAX_AGE_MS,
+    });
+    response.redirect(this.cognitoService.getAuthorizeUrl(provider, state));
+  }
+
+  @Get('callback')
+  async callback(
+    @Query('code') code: string | undefined,
+    @Query('state') state: string | undefined,
+    @Req() request: Request,
+    @Res() response: Response
   ): Promise<void> {
-    this.accessToken = await this.authService.signInUser<'google'>(
-      request.user
-    );
+    const expectedState = request.cookies?.[STATE_COOKIE];
+    if (!code || !state || !expectedState || state !== expectedState) {
+      throw new UnauthorizedException('Sign-in could not be verified');
+    }
 
-    response.cookie(
-      AuthController.ACCESS_TOKEN_COOKIE_NAME,
-      this.accessToken,
-      this.cookieSignOptions
-    );
+    const idToken = await this.cognitoService.exchangeCodeForIdToken(code);
+    const identity = await this.cognitoService.verifyIdToken(idToken);
+    await this.authService.signInUser(identity);
 
-    response
-      .status(HttpStatus.OK)
-      .redirect(`${this.configService.get<string>('frontendUrl')}/match`);
+    response.clearCookie(STATE_COOKIE);
+    response.cookie(ACCESS_TOKEN_COOKIE, idToken, {
+      maxAge: ACCESS_TOKEN_COOKIE_MAX_AGE_MS,
+      sameSite: this.isDevMode ? true : 'none',
+      secure: !this.isDevMode,
+      httpOnly: true,
+    });
+    response.redirect(`${this.configService.get<string>('frontendUrl')}/match`);
   }
 
   @Get('user-info')
-  async getUserInfo(@Request() request): Promise<UserJwtPayload> {
-    if (!request.cookies?.[AuthController.ACCESS_TOKEN_COOKIE_NAME]) {
+  async getUserInfo(@Req() request: Request): Promise<UserJwtPayload> {
+    const token = request.cookies?.[ACCESS_TOKEN_COOKIE];
+    if (!token) {
       throw new UnauthorizedException('Session has expired');
     }
 
-    return this.authService.getUserInfoFromCookie(
-      request.cookies?.[AuthController.ACCESS_TOKEN_COOKIE_NAME]
-    );
+    const identity = await this.cognitoService.verifyIdToken(token);
+    return {
+      sub: identity.id,
+      email: identity.email,
+      picture: identity.picture,
+    };
   }
 
   @Delete('token')
-  async revokeToken(@Response() response): Promise<void> {
-    response.clearCookie(AuthController.ACCESS_TOKEN_COOKIE_NAME);
-    response
-      .status(HttpStatus.OK)
-      .redirect(`${this.configService.get<string>('frontendUrl')}`);
+  async revokeToken(
+    @Res({ passthrough: true }) response: Response
+  ): Promise<{ logoutUrl: string }> {
+    response.clearCookie(ACCESS_TOKEN_COOKIE);
+    // The frontend calls this through XHR, which cannot follow a cross-origin redirect.
+    // It navigates to this URL itself, which ends the Cognito session too.
+    return { logoutUrl: this.cognitoService.getLogoutUrl() };
   }
 }
