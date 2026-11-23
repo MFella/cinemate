@@ -76,7 +76,7 @@ export class RestDataService extends BasicRestDataService {
   ): Observable<FindMatchResult> {
     let httpParams = new HttpParams();
     httpParams = httpParams.append('genreId', genreId);
-    httpParams = httpParams.appendAll({ mailOfUsers: ['', ...userEmails] });
+    httpParams = httpParams.appendAll({ mailOfUsers: userEmails });
 
     for (const key in userMatchFilterOptions) {
       if (

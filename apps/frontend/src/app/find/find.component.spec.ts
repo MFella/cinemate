@@ -189,10 +189,10 @@ describe('FindComponent', () => {
       });
 
       const [request] = matchRequests();
-      // fetchUserMatch always sends a leading empty value; ignore it here
-      expect(
-        request.request.params.getAll('mailOfUsers')?.filter(Boolean)
-      ).toEqual(['anna@example.com', 'bob@example.com']);
+      expect(request.request.params.getAll('mailOfUsers')).toEqual([
+        'anna@example.com',
+        'bob@example.com',
+      ]);
       expect(request.request.params.get('genreId')).toBe('4');
       expect(request.request.params.get('matchMode')).toBe('any');
       expect(request.request.params.get('onlyUnwatched')).toBe('true');
