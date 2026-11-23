@@ -19,7 +19,7 @@ Goal: show real AWS skills (after DVA-C02) on this project. Only list on the por
 
 ## Stage 2 – Cognito (main feature)
 
-- [x] User Pool with Google and Facebook federation (stack written and tested; **not deployed yet**, see `infra/README.md`)
+- [x] User Pool with Google and Facebook federation (stack `CinemateAuth` deployed to eu-central-1, see `infra/README.md`)
 - [x] Deploy the stack, set the `COGNITO_*` variables and click through the login
 - [x] Backend: Passport/JWT replaced by Cognito (hosted UI + code flow, ID token verified with `aws-jwt-verify`); users keep their ids, no migration
 - [x] Frontend: no change needed (the backend handles the flow and the cookie stays)
