@@ -158,7 +158,7 @@ export class UserService {
   ): Promise<FindMatchResultDto> {
     const myId = userId.toString();
 
-    // The frontend sends an empty first element; ignore blanks and repeated e-mails.
+    // Ignore blank and repeated e-mails.
     const requestedEmails = Array.from(
       new Map(
         (mailOfUsers ?? [])

@@ -146,7 +146,7 @@ export class NavComponent implements OnDestroy, OnInit {
         filter(action => action.type === EventType.NavigationEnd)
       )
       .subscribe((event: any) => {
-        this.currentActivatedUrl = event.url;
+        this.currentActivatedUrl = event.url.split(/[?#]/)[0];
         this.#changeDetectorRef.detectChanges();
       });
   }
