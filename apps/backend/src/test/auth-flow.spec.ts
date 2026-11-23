@@ -8,6 +8,9 @@ import { CognitoService } from '../app/auth/cognito/cognito.service';
 import { CognitoIdentity } from '../app/auth/cognito/cognito-identity';
 import { UserService } from '../app/user/user.service';
 import { PrismaService } from '../app/database/prisma.service';
+import { SessionService } from '../app/auth/session.service';
+import { DemoService } from '../app/demo/demo.service';
+import { DemoTokenService } from '../app/demo/demo-token.service';
 
 const IDENTITY: CognitoIdentity = {
   id: '110248495921238986420',
@@ -28,6 +31,18 @@ const createCognito = (overrides: Partial<CognitoService> = {}) =>
     ...overrides,
   }) as unknown as jest.Mocked<CognitoService>;
 
+const demoServiceStub = (isEnabled = false) =>
+  ({
+    isEnabled,
+    ensureFresh: jest.fn(),
+  }) as unknown as jest.Mocked<DemoService>;
+
+const createTokens = () =>
+  new DemoTokenService({ get: () => ({ tokenSecret: 'test' }) } as never);
+
+const createSession = (cognito: CognitoService) =>
+  new SessionService(cognito, createTokens(), demoServiceStub());
+
 const createResponse = () => {
   const response = {
     cookie: jest.fn(),
@@ -46,7 +61,7 @@ describe('AuthGuard', () => {
     cookies?: Record<string, string>
   ) => {
     const request: Record<string, unknown> = { cookies };
-    const guard = new AuthGuard(cognito);
+    const guard = new AuthGuard(createSession(cognito));
     const result = await guard.canActivate({
       switchToHttp: () => ({ getRequest: () => request }),
     } as never);
@@ -96,7 +111,14 @@ describe('AuthController', () => {
     return {
       cognito,
       authService,
-      controller: new AuthController(authService, configService, cognito),
+      controller: new AuthController(
+        authService,
+        configService,
+        cognito,
+        createSession(cognito),
+        demoServiceStub(),
+        createTokens()
+      ),
     };
   };
 
@@ -238,7 +260,7 @@ describe('AuthController', () => {
       const { controller } = build();
       const response = createResponse();
 
-      const result = await controller.revokeToken(response);
+      const result = await controller.revokeToken({ cookies: {} }, response);
 
       expect(response.clearCookie).toHaveBeenCalledWith('access_token');
       expect(response.redirect).not.toHaveBeenCalled();

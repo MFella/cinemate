@@ -43,6 +43,16 @@
         </svg>
         Continue with Facebook
       </button>
+      @if (isDemoAvailable()) {
+        <div class="demo-divider"><span>or</span></div>
+        <button class="demo-button" mat-stroked-button (click)="startDemo()">
+          <mat-icon>play_circle</mat-icon>
+          Try the demo
+        </button>
+        <p class="demo-hint">
+          No account needed. A shared demo with example friends and ratings.
+        </p>
+      }
     </mat-card-content>
   </mat-card>
 </div>

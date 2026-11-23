@@ -3,6 +3,9 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  NotFoundException,
+  Post,
   Query,
   Req,
   Res,
@@ -12,6 +15,12 @@ import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { CognitoService } from './cognito/cognito.service';
+import { SessionService } from './session.service';
+import { DemoService } from '../demo/demo.service';
+import {
+  DEMO_TOKEN_TTL_MS,
+  DemoTokenService,
+} from '../demo/demo-token.service';
 import type {
   AuthSource,
   CookieNames,
@@ -30,7 +39,10 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
-    private readonly cognitoService: CognitoService
+    private readonly cognitoService: CognitoService,
+    private readonly sessionService: SessionService,
+    private readonly demoService: DemoService,
+    private readonly demoTokenService: DemoTokenService
   ) {
     this.isDevMode = !!configService.get('isDevMode');
   }
@@ -94,7 +106,7 @@ export class AuthController {
       throw new UnauthorizedException('Session has expired');
     }
 
-    const identity = await this.cognitoService.verifyIdToken(token);
+    const identity = await this.sessionService.resolve(token);
     return {
       sub: identity.id,
       email: identity.email,
@@ -102,11 +114,43 @@ export class AuthController {
     };
   }
 
+  /** What the login page can offer (the demo button shows only when this is on). */
+  @Get('options')
+  getOptions(): { demo: boolean } {
+    return { demo: this.demoService.isEnabled };
+  }
+
+  /** Signs in to the shared demo account, after making sure its data is fresh. */
+  @Post('demo')
+  @HttpCode(204)
+  async startDemo(
+    @Res({ passthrough: true }) response: Pick<Response, 'cookie'>
+  ): Promise<void> {
+    if (!this.demoService.isEnabled) {
+      throw new NotFoundException();
+    }
+
+    await this.demoService.ensureFresh();
+    response.cookie(ACCESS_TOKEN_COOKIE, this.demoTokenService.sign(), {
+      maxAge: DEMO_TOKEN_TTL_MS,
+      sameSite: this.isDevMode ? true : 'none',
+      secure: !this.isDevMode,
+      httpOnly: true,
+    });
+  }
+
   @Delete('token')
   async revokeToken(
+    @Req() request: Pick<Request, 'cookies'>,
     @Res({ passthrough: true }) response: Response
   ): Promise<{ logoutUrl: string }> {
     response.clearCookie(ACCESS_TOKEN_COOKIE);
+    if (
+      this.sessionService.isDemoSession(request.cookies?.[ACCESS_TOKEN_COOKIE])
+    ) {
+      // the demo has no Cognito session to end
+      return { logoutUrl: this.configService.get<string>('frontendUrl') };
+    }
     // The frontend calls this through XHR, which cannot follow a cross-origin redirect.
     // It navigates to this URL itself, which ends the Cognito session too.
     return { logoutUrl: this.cognitoService.getLogoutUrl() };

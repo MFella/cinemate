@@ -21,5 +21,11 @@ export default () => ({
     // must be registered as a sign-out URL of the app client
     logoutUri: process.env.FRONTEND_URL,
   },
+  // sign-in to a shared demo account (see docs/demo.md); off unless DEMO_MODE=true
+  demo: {
+    enabled: process.env.DEMO_MODE === 'true',
+    resetIntervalMs: Number(process.env.DEMO_RESET_MINUTES ?? 60) * 60 * 1000,
+    tokenSecret: process.env.DEMO_TOKEN_SECRET,
+  },
   isDevMode: process.env.NODE_ENV === 'dev',
 });
