@@ -6,7 +6,6 @@ import {
   model,
   OnInit,
   signal,
-  ViewChild,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -30,6 +29,7 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import {
   BehaviorSubject,
+  debounceTime,
   filter,
   of,
   Subject,
@@ -48,7 +48,8 @@ import {
   SelectOption,
   UserPreferences,
 } from '../typings/common';
-import { MatSelect, MatSelectModule } from '@angular/material/select';
+import { MatSelectModule } from '@angular/material/select';
+import { MatMenuModule } from '@angular/material/menu';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../_services/auth.service';
@@ -79,6 +80,7 @@ import { MoviePreviewComponent } from '../movie-preview/movie-preview.component'
     MatTableModule,
     MatSlideToggleModule,
     MatTooltipModule,
+    MatMenuModule,
     MoviePreviewComponent,
   ],
   providers: [
@@ -94,9 +96,6 @@ import { MoviePreviewComponent } from '../movie-preview/movie-preview.component'
   styleUrl: './find.component.scss',
 })
 export class FindComponent implements OnInit {
-  @ViewChild('filterSelect')
-  filterSelect!: MatSelect;
-
   private static readonly FETCH_MATCH_RESULT_SCROLL_THRESHOLD_PX = 200;
   private static readonly FETCH_MATCH_RESULT_SCROLL_DEBOUNCE_OFFSET = 200;
   private readonly activatedRoute = inject(ActivatedRoute);
@@ -156,6 +155,10 @@ export class FindComponent implements OnInit {
   ngOnInit(): void {
     this.setSearchUserFormValidators();
     this.observeMatchTableScrolled();
+    // title typing and filter changes re-query the results (no search button needed)
+    this.filterMatchResultForm.valueChanges
+      .pipe(debounceTime(300), takeUntilDestroyed(this.#destroyRef))
+      .subscribe(() => this.filterMatchResultList());
     this.activatedRoute.data
       .pipe(takeUntilDestroyed(this.#destroyRef))
       .subscribe(data => {
@@ -269,10 +272,21 @@ export class FindComponent implements OnInit {
 
     // clear state of fetched rate results
     this.findMatchResult = null;
+    this.filterMatchResultForm.reset(
+      { moreFilters: [], movieTitle: '' },
+      { emitEvent: false }
+    );
   }
 
-  openFilterSettingsSelect(): void {
-    this.filterSelect.open();
+  /** The "watched" filter that is on, if any (the two options exclude each other). */
+  get activeMoreFilter(): string | null {
+    return this.filterMatchResultForm.value.moreFilters?.at(0) ?? null;
+  }
+
+  toggleMoreFilter(value: SelectOption['value']): void {
+    this.filterMatchResultForm.controls.moreFilters.setValue(
+      this.activeMoreFilter === value ? [] : [value]
+    );
   }
 
   filterMatchResultList(): void {

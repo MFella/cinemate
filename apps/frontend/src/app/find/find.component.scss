@@ -37,13 +37,80 @@
   }
 
   .filter-results__container {
-    @apply fixed m-0 p-2 bottom-0 left-0 w-full z-[2] justify-around;
-    background-color: rgba(0, 0, 0, 0.3);
-    .mat-mdc-form-field:first-child {
-      width: 50vw;
-    }
-    button {
-      @apply w-8 h-8 overflow-hidden;
+    @apply fixed m-0 bottom-0 left-0 w-full z-[2];
+    max-width: none;
+    border-radius: 1.25rem 1.25rem 0 0;
+  }
+}
+
+// results bar: ghost buttons and a quiet search field in the app's purple and amber
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 44rem;
+  margin: 0 auto 1rem;
+  padding: 0.4rem 0.5rem;
+}
+
+.bar-button {
+  flex: none;
+  color: var(--brand-accent-text);
+  border: 1px solid var(--app-border);
+  border-radius: 9999px;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    background-color: rgba(124, 77, 255, 0.12);
+    border-color: rgba(124, 77, 255, 0.4);
+  }
+
+  &.has-filters {
+    background-color: rgba(255, 179, 0, 0.16);
+    border-color: var(--brand-accent-text);
+  }
+}
+
+.bar-search {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  height: 2.5rem;
+  padding: 0 1rem;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  background: rgba(124, 77, 255, 0.08);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:focus-within {
+    border-color: rgba(124, 77, 255, 0.55);
+    box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.16);
+  }
+
+  mat-icon {
+    flex: none;
+    opacity: 0.6;
+  }
+
+  input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.95rem;
+
+    &::placeholder {
+      color: inherit;
+      opacity: 0.55;
     }
   }
 }
@@ -99,12 +166,6 @@
   td.mdc-data-table__cell {
     padding-top: 1rem;
     padding-bottom: 1rem;
-  }
-
-  .open-filter-settings-select {
-    .mdc-button__label {
-      z-index: -1 !important;
-    }
   }
 
   tr {

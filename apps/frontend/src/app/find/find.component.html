@@ -81,59 +81,53 @@
   </form>
 } @else {
   <div
-    class="filter-results__container filter-bar flex justify-center items-center mb-4">
-    <div class="flex justify-between items-center">
-      <button
-        mat-fab
-        aria-label="Return to search form"
-        color="accent"
-        class="mr-4 go-back-button"
-        matTooltip="Go back"
-        (click)="returnToSearchMode()">
-        <mat-icon>arrow_back</mat-icon>
-      </button>
-      <div class="w-full flex items-center" [formGroup]="filterMatchResultForm">
-        <mat-form-field class="md:!min-w-96 sm:!min-w-44">
-          <mat-label>Search by movie title</mat-label>
-          <input
-            matInput
-            placeholder="No country for old man"
-            value=""
-            formControlName="movieTitle" />
-        </mat-form-field>
-        <button
-          (click)="openFilterSettingsSelect()"
-          mat-fab
-          aria-label="Select to filter list of rates"
-          color="warn"
-          class="ml-4 mr-2 overflow-hidden open-filter-settings-select"
-          matTooltip="More filters">
-          <mat-icon class="absolute">settings</mat-icon>
-          <mat-form-field class="w-full mt-4 invisible -z-1">
-            <mat-select
-              #filterSelect
-              formControlName="filter"
-              multiple
-              formControlName="moreFilters">
-              @for (filterOption of filterOptions; track $index) {
-                <mat-option [value]="filterOption.value">
-                  {{ filterOption.label }}
-                </mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </button>
-      </div>
-    </div>
+    class="filter-results__container filter-bar"
+    [formGroup]="filterMatchResultForm">
     <button
-      mat-fab
-      aria-label="Search for rated movie"
-      color="primary"
-      class="ml-2"
-      matTooltip="Filter table"
-      (click)="filterMatchResultList()">
-      <mat-icon>search</mat-icon>
+      mat-icon-button
+      type="button"
+      class="bar-button go-back-button"
+      aria-label="Return to search form"
+      matTooltip="Go back"
+      (click)="returnToSearchMode()">
+      <mat-icon>arrow_back</mat-icon>
     </button>
+    <label class="bar-search">
+      <mat-icon aria-hidden="true">search</mat-icon>
+      <input
+        type="search"
+        autocomplete="off"
+        placeholder="Search by movie title"
+        aria-label="Search by movie title"
+        formControlName="movieTitle" />
+    </label>
+    <button
+      mat-icon-button
+      type="button"
+      class="bar-button open-filter-settings-select"
+      [class.has-filters]="activeMoreFilter !== null"
+      aria-label="More filters"
+      matTooltip="More filters"
+      [matMenuTriggerFor]="filterMenu">
+      <mat-icon>tune</mat-icon>
+    </button>
+    <mat-menu #filterMenu="matMenu" class="filter-menu">
+      @for (filterOption of filterOptions; track filterOption.value) {
+        <button
+          mat-menu-item
+          type="button"
+          (click)="
+            $event.stopPropagation(); toggleMoreFilter(filterOption.value)
+          ">
+          <mat-icon>{{
+            activeMoreFilter === filterOption.value
+              ? 'check_circle'
+              : 'radio_button_unchecked'
+          }}</mat-icon>
+          <span>{{ filterOption.label }}</span>
+        </button>
+      }
+    </mat-menu>
   </div>
   @if (findMatchResult?.unknownEmails?.length) {
     <p class="unknown-emails text-center p-2">
