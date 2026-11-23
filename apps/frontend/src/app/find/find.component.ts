@@ -50,7 +50,7 @@ import {
 } from '../typings/common';
 import { MatSelectModule } from '@angular/material/select';
 import { MatMenuModule } from '@angular/material/menu';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../_services/auth.service';
 import { MatTableModule } from '@angular/material/table';
@@ -104,6 +104,9 @@ export class FindComponent implements OnInit {
   readonly #restDataService = inject(RestDataService);
   readonly #matDialog = inject<MatDialog>(MatDialog);
   readonly #alertInteractionService = inject(AlertInteractionService);
+  readonly #router = inject(Router);
+  // the search (e-mails, genre, mode) that the results on screen belong to
+  #loadedSearchKey: string | null = null;
 
   readonly fetchedGenres = signal<Array<GenEntity>>([]);
   readonly selectedEmails = signal<Array<string>>([]);
@@ -186,6 +189,11 @@ export class FindComponent implements OnInit {
           this.searchUserForm.get('genre')?.setValue(userGenreId);
       });
 
+    // the URL is the source of truth of a search: reload and "back" restore it
+    this.activatedRoute.queryParamMap
+      .pipe(takeUntilDestroyed(this.#destroyRef))
+      .subscribe(params => this.applySearchFromUrl(params));
+
     of(this.allUsers).subscribe(() => {
       this.selectedEmails.update(fetchedUsers => [...fetchedUsers]);
     });
@@ -225,29 +233,15 @@ export class FindComponent implements OnInit {
   }
 
   getUserMatch(): void {
-    this.#alertInteractionService.isLoadingSpinnerActive$.next(true);
-    this.#restDataService
-      .fetchUserMatch(
-        this.searchUserForm.value.genre,
-        this.searchUserForm.value.mailOfUsers,
-        {
-          pageNumber: 0,
-          matchMode: this.searchUserForm.value.matchMode ?? 'all',
-        }
-      )
-      .pipe(take(1), takeUntilDestroyed(this.#destroyRef))
-      .subscribe(
-        (findMatchResult: FindMatchResult) => {
-          this.findMatchResult = findMatchResult;
-          this.matchedMovies$.next(findMatchResult.matchedRates);
-          this.isInSearchMode = false;
-        },
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        () => {},
-        () => {
-          this.#alertInteractionService.isLoadingSpinnerActive$.next(false);
-        }
-      );
+    // the query params change triggers the search (see applySearchFromUrl)
+    this.#router.navigate([], {
+      relativeTo: this.activatedRoute,
+      queryParams: {
+        ...this.buildSearchQueryParams(),
+        title: null,
+        filter: null,
+      },
+    });
   }
 
   async openMovieInfoDialog(matchedMovie: MatchedMovie): Promise<void> {
@@ -267,15 +261,10 @@ export class FindComponent implements OnInit {
   }
 
   returnToSearchMode(): void {
-    this.isInSearchMode = true;
-    this.pageNumber = 0;
-
-    // clear state of fetched rate results
-    this.findMatchResult = null;
-    this.filterMatchResultForm.reset(
-      { moreFilters: [], movieTitle: '' },
-      { emitEvent: false }
-    );
+    this.#router.navigate([], {
+      relativeTo: this.activatedRoute,
+      queryParams: {},
+    });
   }
 
   /** The "watched" filter that is on, if any (the two options exclude each other). */
@@ -290,15 +279,83 @@ export class FindComponent implements OnInit {
   }
 
   filterMatchResultList(): void {
+    this.#router.navigate([], {
+      relativeTo: this.activatedRoute,
+      queryParams: this.buildSearchQueryParams(),
+      replaceUrl: true,
+    });
+    this.loadResults(false);
+  }
+
+  private buildSearchQueryParams(): Record<string, unknown> {
     const { moreFilters, movieTitle } = this.filterMatchResultForm.value;
-    const moreFiltersObject =
-      moreFilters?.reduce(
-        (
-          acc: Record<'onlyWatched' | 'onlyUnwatched', boolean>,
-          value: string
-        ) => Object.defineProperty(acc, value, { value: true }),
-        {}
-      ) ?? {};
+    return {
+      emails: (this.searchUserForm.value.mailOfUsers ?? []).filter(Boolean),
+      genre: this.searchUserForm.value.genre,
+      mode: this.searchUserForm.value.matchMode ?? 'all',
+      title: movieTitle?.trim() || null,
+      filter: moreFilters?.at(0) ?? null,
+    };
+  }
+
+  private applySearchFromUrl(params: ParamMap): void {
+    const emails = params
+      .getAll('emails')
+      .map(email => email.trim())
+      .filter(Boolean);
+    const genre = Number(params.get('genre'));
+    const isGenreKnown = this.genreOptions.some(
+      option => option.value === genre
+    );
+
+    if (!emails.length || !isGenreKnown) {
+      // no (valid) search in the URL: show the form, which keeps what was typed
+      this.#loadedSearchKey = null;
+      this.isInSearchMode = true;
+      this.pageNumber = 0;
+      this.findMatchResult = null;
+      this.filterMatchResultForm.reset(
+        { moreFilters: [], movieTitle: '' },
+        { emitEvent: false }
+      );
+      return;
+    }
+
+    const matchMode = params.get('mode') === 'any' ? 'any' : 'all';
+    const searchKey = JSON.stringify([emails, genre, matchMode]);
+    if (searchKey === this.#loadedSearchKey) {
+      // only the title or the filter changed: the results are already up to date
+      return;
+    }
+    this.#loadedSearchKey = searchKey;
+
+    const filterParam = params.get('filter');
+    const isFilterKnown = this.filterOptions.some(
+      option => option.value === filterParam
+    );
+    this.selectedEmails.set(emails);
+    this.searchUserForm.patchValue({
+      mailOfUsers: emails,
+      genre,
+      matchMode,
+    });
+    this.filterMatchResultForm.reset(
+      {
+        moreFilters: isFilterKnown ? [filterParam] : [],
+        movieTitle: params.get('title') ?? '',
+      },
+      { emitEvent: false }
+    );
+    this.isInSearchMode = false;
+    this.pageNumber = 0;
+    this.loadResults(true);
+  }
+
+  private loadResults(showSpinner: boolean): void {
+    const { moreFilters, movieTitle } = this.filterMatchResultForm.value;
+    const activeFilter = moreFilters?.at(0);
+    showSpinner &&
+      this.#alertInteractionService.isLoadingSpinnerActive$.next(true);
 
     this.#restDataService
       .fetchUserMatch(
@@ -307,15 +364,22 @@ export class FindComponent implements OnInit {
         {
           pageNumber: 0,
           matchMode: this.searchUserForm.value.matchMode ?? 'all',
-          onlyWatched: moreFiltersObject['onlyWatched'],
-          onlyUnwatched: moreFiltersObject['onlyUnwatched'],
+          onlyWatched: activeFilter === 'onlyWatched' ? true : undefined,
+          onlyUnwatched: activeFilter === 'onlyUnwatched' ? true : undefined,
           searchedMovieTitle: movieTitle ?? '',
         }
       )
       .pipe(take(1), takeUntilDestroyed(this.#destroyRef))
-      .subscribe((findMatchResult: FindMatchResult) => {
-        this.findMatchResult = findMatchResult;
-        this.matchedMovies$.next(findMatchResult.matchedRates);
+      .subscribe({
+        next: (findMatchResult: FindMatchResult) => {
+          this.findMatchResult = findMatchResult;
+          this.matchedMovies$.next(findMatchResult.matchedRates);
+        },
+        // the interceptor reports the error; just stop the spinner
+        error: () =>
+          this.#alertInteractionService.isLoadingSpinnerActive$.next(false),
+        complete: () =>
+          this.#alertInteractionService.isLoadingSpinnerActive$.next(false),
       });
   }
 
