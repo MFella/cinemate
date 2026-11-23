@@ -40,7 +40,14 @@ export class AuthService {
       this.#alertService.success(
         'You have been logged out successfully' + (reason ?? '')
       );
-      await firstValueFrom(this.#restService.revokeToken());
+      const { logoutUrl } = await firstValueFrom(
+        this.#restService.revokeToken()
+      );
+      // ends the Cognito session; it sends the user back to the login page
+      if (logoutUrl && this.#isPlatformBrowser) {
+        window.location.href = logoutUrl;
+        return;
+      }
     }
     await this.#ngZone.run(() => this.#router.navigate(['/']));
   }

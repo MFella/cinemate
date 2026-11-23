@@ -103,9 +103,12 @@ export class AuthController {
   }
 
   @Delete('token')
-  async revokeToken(@Res() response: Response): Promise<void> {
+  async revokeToken(
+    @Res({ passthrough: true }) response: Response
+  ): Promise<{ logoutUrl: string }> {
     response.clearCookie(ACCESS_TOKEN_COOKIE);
-    // also ends the Cognito session, so the next login asks for the account again
-    response.redirect(this.cognitoService.getLogoutUrl());
+    // The frontend calls this through XHR, which cannot follow a cross-origin redirect.
+    // It navigates to this URL itself, which ends the Cognito session too.
+    return { logoutUrl: this.cognitoService.getLogoutUrl() };
   }
 }

@@ -234,14 +234,15 @@ describe('AuthController', () => {
   });
 
   describe('logout', () => {
-    it('removes the cookie and ends the Cognito session', async () => {
+    it('removes the cookie and returns the Cognito logout URL (no redirect, the call is XHR)', async () => {
       const { controller } = build();
       const response = createResponse();
 
-      await controller.revokeToken(response);
+      const result = await controller.revokeToken(response);
 
       expect(response.clearCookie).toHaveBeenCalledWith('access_token');
-      expect(response.redirect).toHaveBeenCalledWith('https://hosted/logout');
+      expect(response.redirect).not.toHaveBeenCalled();
+      expect(result).toEqual({ logoutUrl: 'https://hosted/logout' });
     });
   });
 });
