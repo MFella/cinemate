@@ -35,7 +35,10 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         {
-          from: join(prismaClient, 'libquery_engine-rhel-openssl-3.0.x.so.node'),
+          from: join(
+            prismaClient,
+            'libquery_engine-rhel-openssl-3.0.x.so.node'
+          ),
         },
         { from: join(prismaClient, 'schema.prisma') },
       ],
