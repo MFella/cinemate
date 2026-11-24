@@ -97,6 +97,14 @@ export class RestDataService extends BasicRestDataService {
     });
   }
 
+  fetchAuthOptions(): Observable<{ demo: boolean }> {
+    return this.get<{ demo: boolean }>('auth/options');
+  }
+
+  startDemo(): Observable<void> {
+    return this.post<void>('auth/demo', {});
+  }
+
   fetchFriends(): Observable<FriendsOverview> {
     return this.get<FriendsOverview>('friends');
   }

@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { FriendshipStatus } from '@prisma/client';
 import { PrismaService } from '../database/prisma.service';
+import { isDemoUserId } from '../demo/demo-users';
 
 export type FriendUser = { id: string; email: string; picture: string };
 
@@ -39,6 +40,11 @@ export class FriendsService {
     }
 
     const targetId = String(target.id);
+    // the shared demo account must not reach real users
+    if (isDemoUserId(myId) && !isDemoUserId(targetId)) {
+      return;
+    }
+
     const existing = await this.prismaService.friendship.findFirst({
       where: {
         OR: [
