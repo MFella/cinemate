@@ -144,7 +144,7 @@
           class="movie-tile hover:cursor-pointer"></app-movie-preview>
       }
     </div>
-  } @else {
+  } @else if (!isLoadingResults) {
     <h2 class="no-results-found-header w-full text-center p-4 rounded-xl">
       No results found 😶
     </h2>

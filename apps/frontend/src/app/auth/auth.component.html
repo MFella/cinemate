@@ -43,15 +43,25 @@
         </svg>
         Continue with Facebook
       </button>
-      @if (isDemoAvailable()) {
-        <div class="demo-divider"><span>or</span></div>
-        <button class="demo-button" mat-stroked-button (click)="startDemo()">
-          <mat-icon>play_circle</mat-icon>
-          Try the demo
-        </button>
-        <p class="demo-hint">
-          No account needed. A shared demo with example friends and ratings.
-        </p>
+      @if (demoState() !== 'off') {
+        <!-- while the answer is pending the block keeps its space but is not shown -->
+        <div
+          class="demo-section"
+          [class.is-pending]="demoState() === 'loading'"
+          [attr.aria-hidden]="demoState() === 'loading' ? 'true' : null">
+          <div class="demo-divider"><span>or</span></div>
+          <button
+            class="demo-button"
+            mat-stroked-button
+            [tabindex]="demoState() === 'loading' ? -1 : 0"
+            (click)="startDemo()">
+            <mat-icon>play_circle</mat-icon>
+            Try the demo
+          </button>
+          <p class="demo-hint">
+            No account needed. A shared demo with example friends and ratings.
+          </p>
+        </div>
       }
     </mat-card-content>
   </mat-card>

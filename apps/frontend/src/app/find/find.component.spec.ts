@@ -199,6 +199,20 @@ describe('FindComponent', () => {
       expect(request.request.params.get('searchedMovieTitle')).toBe('street');
     });
 
+    it('does not say "No results" while the request is pending', async () => {
+      await create({ emails: 'anna@example.com', genre: '4' });
+      const text = () => (fixture.nativeElement as HTMLElement).textContent;
+
+      expect(component.isLoadingResults).toBe(true);
+      expect(text()).not.toContain('No results found');
+
+      matchRequests()[0].flush({ matchedRates: [], unknownEmails: [] });
+      fixture.detectChanges();
+
+      expect(component.isLoadingResults).toBe(false);
+      expect(text()).toContain('No results found');
+    });
+
     it('shows the form when the genre in the URL is unknown', async () => {
       await create({ emails: 'anna@example.com', genre: '999' });
 
