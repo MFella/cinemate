@@ -15,7 +15,7 @@ Goal: show real AWS skills (after DVA-C02) on this project. Only list on the por
 ## Stage 1 – foundation
 
 - [x] IaC: CDK in TypeScript, `infra/` directory (see `docs/adr/0001-infrastructure-as-code-with-cdk.md`)
-- [ ] Frontend: decide SSR vs static build (static + S3 + CloudFront is simplest)
+- [x] Frontend: static build (`nx build frontend -c static`), served from S3 + CloudFront
 
 ## Stage 2 – Cognito (main feature)
 
@@ -26,13 +26,15 @@ Goal: show real AWS skills (after DVA-C02) on this project. Only list on the por
 
 ## Stage 3 – hosting on AWS
 
-- [ ] Frontend: S3 + CloudFront (ACM / Route 53 if custom domain)
-- [ ] Backend: Lambda + API Gateway or a container (App Runner / ECS); Neon via pooler; secrets in Secrets Manager / SSM
+- [x] Frontend: private S3 bucket + CloudFront (OAC); no custom domain, the `*.cloudfront.net` address is enough
+- [x] Backend: the Nest app as one Lambda behind an HTTP API, reached through CloudFront at `/api/*` (same origin, so cookies work); Neon via the pooler; secrets in Secrets Manager (`cinemate/backend`)
+- [x] Public demo enabled in production, with a throttled `POST /api/auth/demo` route
 
 ## Stage 4 – CI/CD and observability
 
-- [ ] GitHub Actions: build, test, deploy infra and apps (OIDC to AWS, no stored keys)
-- [ ] CloudWatch: logs, error alarm, one dashboard
+- [x] GitHub Actions: CI on pull requests and `main`; Deploy after a green CI on `main` (OIDC to AWS, no stored keys)
+- [x] CloudWatch: Lambda and API alarms, one dashboard, e-mail through SNS; AWS Budgets alert (5 USD / month)
+- [ ] DB migrations are not part of the pipeline; `CinemateAuth`, `CinemateGithubDeploy` and `CinemateMonitoring` are deployed by hand
 
 ## Stage 5 – optional
 
@@ -40,7 +42,7 @@ Goal: show real AWS skills (after DVA-C02) on this project. Only list on the por
 
 ## Stage 6 – portfolio
 
-- [ ] README with architecture diagram
+- [x] README with architecture diagram
 - [ ] Portfolio text only for what is deployed
 
 ## Decisions

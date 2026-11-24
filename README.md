@@ -21,11 +21,11 @@ npm i
 
 in the main directory.
 <br>
-Project is also deployed - you can try that here.
+The project is deployed on AWS - try it here: https://dp4vq19ji7yw3.cloudfront.net (the login page has a demo account button).
 
 ## 🔐 Authentication
 
-Currently project only supports google authentication (thanks to oauth 2.0). Hence, login via 'google' is required in order to use whole application.
+Sign-in goes through Amazon Cognito (Google and Facebook federation, hosted UI, authorization code flow). A demo account is available without any login.
 
 ## 🧪 Test exection
 
@@ -54,6 +54,24 @@ npm run units:back
 The whole project is a fullstack application - it includes a frontend, and a backend connected to the database. Below (in the Tech Stack section), we will list the libraries and dependencies used. The diagram below shows the relationships within the app.
 <br>
 <img style="width: 100%" src="https://raw.githubusercontent.com/MFella/cinemate/refs/heads/main/assets/overall-architecture.png" />
+
+# ☁️ AWS architecture
+
+```mermaid
+flowchart LR
+  U[Browser] --> CF[CloudFront]
+  CF -->|static files| S3[(S3, private)]
+  CF -->|/api/*| APIGW[HTTP API]
+  APIGW --> L[Lambda: Nest app]
+  L --> SM[Secrets Manager]
+  L --> DB[(Neon Postgres)]
+  L -.-> COG[Cognito]
+  L --> CW[CloudWatch]
+  CW -->|alarms| SNS[SNS] --> MAIL[e-mail]
+  GH[GitHub Actions] -->|OIDC role| CDK[CDK deploy]
+```
+
+Everything is defined in [`infra/`](infra/README.md) (CDK, TypeScript). Pushes to `main` are deployed by GitHub Actions through an OIDC role, with no stored AWS keys. Decisions: [`docs/adr/`](docs/adr).
 
 # 💻 Tech Stack
 
