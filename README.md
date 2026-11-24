@@ -67,7 +67,7 @@ flowchart LR
   GH[GitHub Actions] -->|OIDC role| CDK[CDK deploy]
 ```
 
-Everything is defined in [`infra/`](infra/README.md) (CDK, TypeScript). Pushes to `main` are deployed by GitHub Actions through an OIDC role, with no stored AWS keys. Decisions: [`docs/adr/`](docs/adr).
+Everything is defined in [`infra/`](infra/README.md) (CDK, TypeScript). Pushes to `main` are deployed by GitHub Actions through an OIDC role, with no stored AWS keys. Decisions: [`docs/adr/`](docs/adr). Problems met on the way: [`docs/challenges.md`](docs/challenges.md).
 
 # 💻 Tech Stack
 
