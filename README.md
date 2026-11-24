@@ -71,26 +71,33 @@ Everything is defined in [`infra/`](infra/README.md) (CDK, TypeScript). Pushes t
 
 # 💻 Tech Stack
 
-Project built thanks to <b>nx version @18.3.4</b>
+Built with <b>Nx 24</b> (TypeScript 6, Node 24). Exact versions are in `package.json`.
 
-Used **frontend** main technologies:
+**Frontend**
 
 |    Dependency    | Version |
 | :--------------: | :-----: |
-|     Angular      | ^17.3.0 |
-| Angular Material | ^17.3.7 |
+|     Angular      | ~22.2.0 |
+| Angular Material | ~22.2.0 |
 |       RxJS       | ~7.8.0  |
 |   TailwindCSS    | ^3.0.2  |
 |    Playwright    | ^1.36.0 |
 
-Used **backend** main technologies:
+**Backend**
 
-|       Dependency        | Version |
-| :---------------------: | :-----: |
-|         NestJS          | ^10.0.2 |
-|         Prisma          | ^5.18.1 |
-| passport-google-oauth20 | ^2.0.0  |
-|        Supertest        | ^7.0.0  |
-|          Jest           | ^29.4.1 |
+|          Dependency           | Version  |
+| :---------------------------: | :------: |
+|            NestJS             | ^11.2.11 |
+|            Prisma             | ^6.19.3  |
+|        aws-jwt-verify         |  5.2.1   |
+| @codegenie/serverless-express |  5.0.0   |
+|             Jest              |  30.5.2  |
 
-and rest can be found within the repo.
+**Infrastructure and delivery**
+
+|      Dependency       | Version |
+| :-------------------: | :-----: |
+|        AWS CDK        | 2.278.0 |
+| GitHub Actions (OIDC) |    -    |
+
+The rest can be found within the repo.
