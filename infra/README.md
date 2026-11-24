@@ -1,5 +1,15 @@
 # Cinemate infrastructure (AWS CDK)
 
+| Stack                  | What it creates                                  | Deployed by                   |
+| ---------------------- | ------------------------------------------------ | ----------------------------- |
+| `CinemateBackend`      | Lambda (Nest), HTTP API, throttled demo route    | GitHub Actions                |
+| `CinemateFrontend`     | S3 bucket, CloudFront (`/api/*` goes to the API) | GitHub Actions                |
+| `CinemateAuth`         | Cognito user pool, hosted UI, app client         | by hand                       |
+| `CinemateGithubDeploy` | GitHub OIDC provider and the deploy role         | by hand                       |
+| `CinemateMonitoring`   | SNS topic, alarms, dashboard, monthly budget     | by hand (`-c alertEmail=...`) |
+
+Why serverless: [`docs/adr/0003-serverless-hosting-on-aws.md`](../docs/adr/0003-serverless-hosting-on-aws.md). The backend secret is created with `node infra/scripts/put-backend-secret.js`.
+
 Sign-in through Amazon Cognito. Why: [`docs/adr/0002-cognito-for-authentication.md`](../docs/adr/0002-cognito-for-authentication.md).
 
 The stack `CinemateAuth` (region `eu-central-1`) creates a federation-only user pool (Google, Facebook), the hosted UI domain and one app client for the backend.

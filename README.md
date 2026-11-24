@@ -1,5 +1,3 @@
-<img style="width: 100%;" src="https://raw.githubusercontent.com/MFella/cinemate/refs/heads/main/apps/frontend/src/assets/cinemate-logo.png" />
-
 # 🎥 Overview
 
 The main goal of this project was to create an app for finding perfectly matched movies to watch together (e.g. with your fiancée/boyfriend, etc.). <br><br>
@@ -21,11 +19,11 @@ npm i
 
 in the main directory.
 <br>
-Project is also deployed - you can try that here.
+The project is deployed on AWS - try it here: https://dp4vq19ji7yw3.cloudfront.net (the login page has a demo account button).
 
 ## 🔐 Authentication
 
-Currently project only supports google authentication (thanks to oauth 2.0). Hence, login via 'google' is required in order to use whole application.
+Sign-in goes through Amazon Cognito (Google and Facebook federation, hosted UI, authorization code flow). A demo account is available without any login.
 
 ## 🧪 Test exection
 
@@ -51,32 +49,55 @@ npm run units:back
 
 # 🏠 Overall architecture
 
-The whole project is a fullstack application - it includes a frontend, and a backend connected to the database. Below (in the Tech Stack section), we will list the libraries and dependencies used. The diagram below shows the relationships within the app.
-<br>
-<img style="width: 100%" src="https://raw.githubusercontent.com/MFella/cinemate/refs/heads/main/assets/overall-architecture.png" />
+A fullstack Nx monorepo: an Angular frontend and a Nest backend on a Postgres database (Prisma), using the TMDB API for movie data. The libraries are listed in the Tech Stack section; the diagram below shows how it runs on AWS.
+
+# ☁️ AWS architecture
+
+```mermaid
+flowchart LR
+  U[Browser] --> CF[CloudFront]
+  CF -->|static files| S3[(S3, private)]
+  CF -->|/api/*| APIGW[HTTP API]
+  APIGW --> L[Lambda: Nest app]
+  L --> SM[Secrets Manager]
+  L --> DB[(Neon Postgres)]
+  L -.-> COG[Cognito]
+  L --> CW[CloudWatch]
+  CW -->|alarms| SNS[SNS] --> MAIL[e-mail]
+  GH[GitHub Actions] -->|OIDC role| CDK[CDK deploy]
+```
+
+Everything is defined in [`infra/`](infra/README.md) (CDK, TypeScript). Pushes to `main` are deployed by GitHub Actions through an OIDC role, with no stored AWS keys. Decisions: [`docs/adr/`](docs/adr). Problems met on the way: [`docs/challenges.md`](docs/challenges.md).
 
 # 💻 Tech Stack
 
-Project built thanks to <b>nx version @18.3.4</b>
+Built with <b>Nx 24</b> (TypeScript 6, Node 24). Exact versions are in `package.json`.
 
-Used **frontend** main technologies:
+**Frontend**
 
 |    Dependency    | Version |
 | :--------------: | :-----: |
-|     Angular      | ^17.3.0 |
-| Angular Material | ^17.3.7 |
+|     Angular      | ~22.2.0 |
+| Angular Material | ~22.2.0 |
 |       RxJS       | ~7.8.0  |
 |   TailwindCSS    | ^3.0.2  |
 |    Playwright    | ^1.36.0 |
 
-Used **backend** main technologies:
+**Backend**
 
-|       Dependency        | Version |
-| :---------------------: | :-----: |
-|         NestJS          | ^10.0.2 |
-|         Prisma          | ^5.18.1 |
-| passport-google-oauth20 | ^2.0.0  |
-|        Supertest        | ^7.0.0  |
-|          Jest           | ^29.4.1 |
+|          Dependency           | Version  |
+| :---------------------------: | :------: |
+|            NestJS             | ^11.2.11 |
+|            Prisma             | ^6.19.3  |
+|        aws-jwt-verify         |  5.2.1   |
+| @codegenie/serverless-express |  5.0.0   |
+|             Jest              |  30.5.2  |
 
-and rest can be found within the repo.
+**Infrastructure and delivery**
+
+|      Dependency       | Version |
+| :-------------------: | :-----: |
+|        AWS CDK        | 2.278.0 |
+| GitHub Actions (OIDC) |    -    |
+
+The rest can be found within the repo.
