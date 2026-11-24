@@ -4,6 +4,7 @@ import * as path from 'path';
 import { BackendStack } from '../lib/backend-stack';
 import { CognitoAuthStack } from '../lib/cognito-auth-stack';
 import { FrontendStack } from '../lib/frontend-stack';
+import { GithubDeployStack } from '../lib/github-deploy-stack';
 
 const app = new App();
 
@@ -57,4 +58,10 @@ new CognitoAuthStack(app, 'CinemateAuth', {
     `${frontendUrl}/api/auth/callback`,
   ],
   logoutUrls: ['http://localhost:4200', frontendUrl],
+});
+
+new GithubDeployStack(app, 'CinemateGithubDeploy', {
+  env,
+  repository: context('githubRepository', 'MFella/cinemate'),
+  branch: context('deployBranch', 'main'),
 });

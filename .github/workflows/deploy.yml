@@ -1,0 +1,52 @@
+name: Deploy
+
+# Runs after CI went green on main. No AWS keys are stored in GitHub: the job trades its
+# OIDC token for the role created by the CinemateGithubDeploy stack (infra/lib).
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+# never two deploys at once, and never cancel one halfway through
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # the commit CI has just checked, not whatever main is by now
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx prisma generate --schema apps/backend/prisma/schema.prisma
+
+      - name: Build the static frontend and the Lambda bundle
+        run: |
+          npx nx build frontend --configuration=static
+          npx nx run backend:build-lambda
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::137192580624:role/cinemate-github-deploy
+          aws-region: eu-central-1
+
+      - name: Deploy the backend and the frontend
+        working-directory: infra
+        run: npx cdk deploy CinemateBackend CinemateFrontend --require-approval never
