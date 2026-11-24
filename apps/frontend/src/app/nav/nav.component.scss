@@ -3,6 +3,24 @@
   position: fixed;
 }
 
+.nav-side {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  min-width: 0;
+
+  &--end {
+    justify-content: flex-end;
+  }
+}
+
+.nav-links {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 1rem;
+}
+
 .brand {
   display: inline-flex;
   align-items: center;
@@ -55,6 +73,10 @@
 
 ::ng-deep {
   .mat-sidenav {
+    // solid: the page must not show through the menu
+    background: var(--app-surface) !important;
+    border-radius: 0 1.25rem 1.25rem 0;
+
     .mat-drawer-inner-container {
       @apply p-4 flex flex-col gap-3;
 

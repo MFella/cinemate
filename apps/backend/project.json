@@ -5,6 +5,18 @@
   "projectType": "application",
   "tags": [],
   "targets": {
+    "build-lambda": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/apps/backend-lambda"],
+      "options": {
+        "command": "webpack-cli build --config apps/backend/webpack.lambda.config.js --mode production",
+        "cwd": "{workspaceRoot}",
+        "env": {
+          "NX_TASK_TARGET_PROJECT": "backend",
+          "NX_TASK_TARGET_TARGET": "build-lambda"
+        }
+      }
+    },
     "serve": {
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",

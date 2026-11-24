@@ -18,6 +18,8 @@ export type UserJwtPayload = {
   providedIn: 'root',
 })
 export class AuthService {
+  private static readonly NOTICE_KEY = 'logout_notice';
+
   #router = inject(Router);
   #alertService = inject(AlertInteractionService);
   #lsService = inject(LocalStorageService);
@@ -37,19 +39,41 @@ export class AuthService {
   async logout(reason?: string): Promise<void> {
     if (this.#lsService.getItem('user_info')) {
       this.#lsService.deleteItem('user_info');
-      this.#alertService.success(
-        'You have been logged out successfully' + (reason ?? '')
-      );
+      const message = 'You have been logged out successfully' + (reason ?? '');
       const { logoutUrl } = await firstValueFrom(
         this.#restService.revokeToken()
       );
       // ends the Cognito session; it sends the user back to the login page
       if (logoutUrl && this.#isPlatformBrowser) {
+        // the page reloads right away, so the login page shows the message
+        this.#rememberNotice(message);
         window.location.href = logoutUrl;
         return;
       }
+      this.#alertService.success(message);
     }
     await this.#ngZone.run(() => this.#router.navigate(['/']));
+  }
+
+  /** Shows the message left by a logout that reloaded the page (once). */
+  showPendingNotice(): void {
+    try {
+      const message = sessionStorage.getItem(AuthService.NOTICE_KEY);
+      if (message) {
+        sessionStorage.removeItem(AuthService.NOTICE_KEY);
+        this.#alertService.success(message);
+      }
+    } catch {
+      // storage blocked: no message
+    }
+  }
+
+  #rememberNotice(message: string): void {
+    try {
+      sessionStorage.setItem(AuthService.NOTICE_KEY, message);
+    } catch {
+      // storage blocked: the logout still works, just without the message
+    }
   }
 
   hasUserValidToken(): boolean {

@@ -3,7 +3,7 @@
 }
 
 .friend-row {
-  @apply flex items-center gap-2 py-2;
+  @apply flex flex-wrap items-center gap-x-2 gap-y-1 py-2;
 
   &:not(:last-child) {
     border-bottom: 1px solid rgba(127, 127, 127, 0.2);
@@ -17,4 +17,24 @@
 .pending-label,
 .empty-state {
   @apply text-sm opacity-70;
+}
+
+// a long address takes the free space and breaks instead of pushing the buttons out
+.friend-email {
+  flex: 1 1 10rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media only screen and (max-width: 480px) {
+  // requests: the address on its own line, Accept and Decline under it on the right
+  .friends-incoming {
+    .friend-email {
+      flex-basis: 100%;
+    }
+
+    .friend-email + .flex-auto + button {
+      margin-left: auto;
+    }
+  }
 }
