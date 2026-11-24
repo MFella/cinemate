@@ -19,11 +19,11 @@ jobs:
   main:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: 'npm'
@@ -32,7 +32,7 @@ jobs:
       # the Prisma client is generated code; build and tests need it
       - run: npx prisma generate --schema apps/backend/prisma/schema.prisma
 
-      - uses: nrwl/nx-set-shas@v4
+      - uses: nrwl/nx-set-shas@v5
 
       - run: git branch --track main origin/main
         if: ${{ github.event_name == 'pull_request' }}
