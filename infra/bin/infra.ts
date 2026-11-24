@@ -5,6 +5,7 @@ import { BackendStack } from '../lib/backend-stack';
 import { CognitoAuthStack } from '../lib/cognito-auth-stack';
 import { FrontendStack } from '../lib/frontend-stack';
 import { GithubDeployStack } from '../lib/github-deploy-stack';
+import { MonitoringStack } from '../lib/monitoring-stack';
 
 const app = new App();
 
@@ -64,4 +65,15 @@ new GithubDeployStack(app, 'CinemateGithubDeploy', {
   env,
   repository: context('githubRepository', 'MFella/cinemate'),
   branch: context('deployBranch', 'main'),
+});
+
+// Alerts go to a mailbox given at deploy time (`-c alertEmail=...`), never stored in git.
+// The stack is always part of the app, so that the exports of the backend stack that it
+// reads stay stable when the pipeline deploys only the backend and the frontend.
+new MonitoringStack(app, 'CinemateMonitoring', {
+  env,
+  alertEmail: context('alertEmail', 'alerts@example.invalid'),
+  fn: backend.fn,
+  api: backend.api,
+  monthlyBudgetUsd: Number(context('monthlyBudgetUsd', '5')),
 });
