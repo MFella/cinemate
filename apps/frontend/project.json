@@ -50,6 +50,28 @@
             "BACKEND_API_URL": "'https://cinemate-api.click:3000'"
           }
         },
+        "static": {
+          "server": false,
+          "ssr": false,
+          "prerender": false,
+          "outputPath": "dist/apps/frontend-static",
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "1.2mb",
+              "maximumError": "1.5mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "3kb",
+              "maximumError": "4kb"
+            }
+          ],
+          "outputHashing": "all",
+          "define": {
+            "BACKEND_API_URL": "''"
+          }
+        },
         "development": {
           "optimization": false,
           "extractLicenses": false,
