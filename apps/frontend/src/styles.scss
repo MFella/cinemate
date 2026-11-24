@@ -54,8 +54,22 @@ $dark-theme: mat.m2-define-dark-theme(
   )
 );
 
-.movie-detail-dialog .mat-mdc-dialog-container {
-  @apply overflow-hidden rounded-xl;
+// the card draws its own dark, rounded surface; the dialog surface behind it must not
+// show as white corners
+.movie-detail-dialog {
+  .mat-mdc-dialog-container {
+    @apply overflow-hidden;
+    border-radius: 2rem;
+  }
+
+  .mat-mdc-dialog-surface {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .mat-mdc-card {
+    border-radius: 2rem !important;
+  }
 }
 
 /* You can add global styles to this file, and also import other style files */
@@ -229,4 +243,9 @@ $variants-theme: (
     transform: translateY(-4px) scale(1.02);
     box-shadow: 0 16px 36px rgba(124, 77, 255, 0.35);
   }
+}
+
+// toasts sit under the 4rem nav bar instead of covering it
+.toaster.toaster-top-right {
+  top: 4rem !important;
 }

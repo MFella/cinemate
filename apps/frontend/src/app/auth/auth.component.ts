@@ -39,6 +39,7 @@ export class AuthComponent {
   constructor(private readonly authService: AuthService) {
     // only in the browser: the page is prerendered without a backend
     afterNextRender(() => {
+      this.authService.showPendingNotice();
       this.#restDataService.fetchAuthOptions().subscribe({
         next: options => this.isDemoAvailable.set(options.demo),
         // no backend options: just no demo button
