@@ -29,6 +29,8 @@ export interface BackendStackProps extends StackProps {
 export class BackendStack extends Stack {
   /** Host name of the API (without scheme), the origin of CloudFront's `/api/*` */
   readonly apiDomain: string;
+  readonly fn: Function;
+  readonly api: HttpApi;
 
   constructor(scope: Construct, id: string, props: BackendStackProps) {
     super(scope, id, props);
@@ -85,6 +87,8 @@ export class BackendStack extends Stack {
       },
     };
 
+    this.fn = fn;
+    this.api = api;
     this.apiDomain = `${api.apiId}.execute-api.${this.region}.amazonaws.com`;
 
     new CfnOutput(this, 'ApiUrl', { value: api.apiEndpoint });
