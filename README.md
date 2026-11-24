@@ -49,9 +49,7 @@ npm run units:back
 
 # 🏠 Overall architecture
 
-The whole project is a fullstack application - it includes a frontend, and a backend connected to the database. Below (in the Tech Stack section), we will list the libraries and dependencies used. The diagram below shows the relationships within the app.
-<br>
-<img style="width: 100%" src="https://raw.githubusercontent.com/MFella/cinemate/refs/heads/main/assets/overall-architecture.png" />
+A fullstack Nx monorepo: an Angular frontend and a Nest backend on a Postgres database (Prisma), using the TMDB API for movie data. The libraries are listed in the Tech Stack section; the diagram below shows how it runs on AWS.
 
 # ☁️ AWS architecture
 
