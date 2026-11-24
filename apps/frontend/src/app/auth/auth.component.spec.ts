@@ -17,6 +17,7 @@ describe('AuthComponent', () => {
   const text = () => (fixture.nativeElement as HTMLElement).textContent ?? '';
 
   beforeEach(async () => {
+    localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [AuthComponent],
       providers: [provideHttpClient(), provideHttpClientTesting()],
@@ -54,6 +55,37 @@ describe('AuthComponent', () => {
     answerOptions(true);
 
     expect(text()).toContain('Try the demo');
+  });
+
+  it('keeps the space of the demo block until the backend answers', () => {
+    const section = () =>
+      (fixture.nativeElement as HTMLElement).querySelector('.demo-section');
+
+    expect(section()?.classList).toContain('is-pending');
+
+    answerOptions(true);
+
+    expect(section()?.classList).not.toContain('is-pending');
+  });
+
+  it('shows the demo block at once on a reload when the last answer was yes', () => {
+    localStorage.setItem('demo_available', 'true');
+    const reloaded = TestBed.createComponent(AuthComponent);
+    reloaded.detectChanges();
+    TestBed.inject(HttpTestingController).match(() => true);
+
+    // afterNextRender has run in detectChanges: the cached answer is used
+    reloaded.detectChanges();
+    const section = (reloaded.nativeElement as HTMLElement).querySelector(
+      '.demo-section'
+    );
+    expect(section?.classList).not.toContain('is-pending');
+  });
+
+  it('remembers the answer for the next reload', () => {
+    answerOptions(true);
+
+    expect(localStorage.getItem('demo_available')).toBe('true');
   });
 
   it('shows no demo button when the options cannot be loaded', () => {

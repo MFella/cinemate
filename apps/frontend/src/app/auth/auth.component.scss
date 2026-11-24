@@ -76,6 +76,15 @@
   margin: -2px 0.75rem 0 0;
 }
 
+.demo-section {
+  transition: opacity 0.25s ease;
+
+  &.is-pending {
+    visibility: hidden;
+    opacity: 0;
+  }
+}
+
 .demo-divider {
   display: flex;
   align-items: center;

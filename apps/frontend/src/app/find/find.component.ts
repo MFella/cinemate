@@ -146,6 +146,8 @@ export class FindComponent implements OnInit {
   pageNumber = 0;
   findMatchResult: FindMatchResult | null = null;
   isInSearchMode = true;
+  /** A search request is in flight: no "No results" yet. */
+  isLoadingResults = false;
   allUsers: Array<string> = [];
   genreOptions: Array<SelectOption> = [];
   displayMatchTableColumns: string[] = [
@@ -354,6 +356,7 @@ export class FindComponent implements OnInit {
   private loadResults(showSpinner: boolean): void {
     const { moreFilters, movieTitle } = this.filterMatchResultForm.value;
     const activeFilter = moreFilters?.at(0);
+    this.isLoadingResults = true;
     showSpinner &&
       this.#alertInteractionService.isLoadingSpinnerActive$.next(true);
 
@@ -376,10 +379,14 @@ export class FindComponent implements OnInit {
           this.matchedMovies$.next(findMatchResult.matchedRates);
         },
         // the interceptor reports the error; just stop the spinner
-        error: () =>
-          this.#alertInteractionService.isLoadingSpinnerActive$.next(false),
-        complete: () =>
-          this.#alertInteractionService.isLoadingSpinnerActive$.next(false),
+        error: () => {
+          this.isLoadingResults = false;
+          this.#alertInteractionService.isLoadingSpinnerActive$.next(false);
+        },
+        complete: () => {
+          this.isLoadingResults = false;
+          this.#alertInteractionService.isLoadingSpinnerActive$.next(false);
+        },
       });
   }
 
