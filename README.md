@@ -1,5 +1,3 @@
-<img style="width: 100%;" src="https://raw.githubusercontent.com/MFella/cinemate/refs/heads/main/apps/frontend/src/assets/cinemate-logo.png" />
-
 # 🎥 Overview
 
 The main goal of this project was to create an app for finding perfectly matched movies to watch together (e.g. with your fiancée/boyfriend, etc.). <br><br>
