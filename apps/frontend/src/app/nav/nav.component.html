@@ -1,10 +1,10 @@
-<ng-template #navButtonContainer let-vertical="vertical">
+<ng-template #navLinks>
   @if (!isUserHasValidToken) {
     <button
       (click)="navigate('')"
       [ngClass]="currentActivatedUrl === '/' ? 'active' : ''"
       [attr.aria-current]="currentActivatedUrl === '/' ? 'page' : null"
-      class="mr-4 !rounded-3xl"
+      class="!rounded-3xl"
       mat-button>
       <mat-icon>home</mat-icon>
       <span>Home</span>
@@ -14,7 +14,7 @@
       (click)="navigate('match')"
       [ngClass]="currentActivatedUrl === '/match' ? 'active' : ''"
       [attr.aria-current]="currentActivatedUrl === '/match' ? 'page' : null"
-      class="mr-4 !rounded-3xl"
+      class="!rounded-3xl"
       mat-button>
       <mat-icon> compare_arrows </mat-icon>
       <span>Match</span>
@@ -25,7 +25,7 @@
       [attr.aria-current]="
         currentActivatedUrl === '/preferences' ? 'page' : null
       "
-      class="mr-4 !rounded-3xl"
+      class="!rounded-3xl"
       mat-button>
       <mat-icon>settings</mat-icon>
       <span>Preferences</span>
@@ -34,7 +34,7 @@
       (click)="navigate('friends')"
       [ngClass]="currentActivatedUrl === '/friends' ? 'active' : ''"
       [attr.aria-current]="currentActivatedUrl === '/friends' ? 'page' : null"
-      class="mr-4 !rounded-3xl"
+      class="!rounded-3xl"
       mat-button>
       <mat-icon>group</mat-icon>
       <span>Friends</span>
@@ -49,7 +49,9 @@
       <span>Find</span>
     </button>
   }
-  <div class="flex-auto"></div>
+</ng-template>
+
+<ng-template #navActions let-vertical="vertical">
   <div
     class="user-app-preferences-container"
     [ngClass]="{
@@ -94,6 +96,14 @@
   }
 </ng-template>
 
+<ng-template #navButtonContainer let-vertical="vertical">
+  <ng-container [ngTemplateOutlet]="navLinks"></ng-container>
+  <div class="flex-auto"></div>
+  <ng-container
+    [ngTemplateOutlet]="navActions"
+    [ngTemplateOutletContext]="{ vertical: vertical }"></ng-container>
+</ng-template>
+
 <mat-toolbar color="primary">
   <mat-toolbar-row>
     @if (mobileQuery.matches) {
@@ -114,25 +124,32 @@
         <span class="brand-word">Cine<b>Mate</b></span>
       </a>
     } @else {
-      <a
-        class="brand mr-4"
-        href="/"
-        (click)="$event.preventDefault(); navigate('')"
-        aria-label="Cinemate home">
-        <img
-          class="brand-mark"
-          src="assets/cinemate-mark.svg"
-          alt=""
-          width="36"
-          height="36" />
-        <span class="brand-word">Cine<b>Mate</b></span>
-      </a>
-      <div class="flex-auto"></div>
-      <ng-container
-        [ngTemplateOutlet]="navButtonContainer"
-        [ngTemplateOutletContext]="{
-          vertical: false,
-        }"></ng-container>
+      <!-- three columns: the links stay in the middle of the page, whatever the sides weigh -->
+      <div class="nav-side">
+        <a
+          class="brand"
+          href="/"
+          (click)="$event.preventDefault(); navigate('')"
+          aria-label="Cinemate home">
+          <img
+            class="brand-mark"
+            src="assets/cinemate-mark.svg"
+            alt=""
+            width="36"
+            height="36" />
+          <span class="brand-word">Cine<b>Mate</b></span>
+        </a>
+      </div>
+      <div class="nav-links">
+        <ng-container [ngTemplateOutlet]="navLinks"></ng-container>
+      </div>
+      <div class="nav-side nav-side--end">
+        <ng-container
+          [ngTemplateOutlet]="navActions"
+          [ngTemplateOutletContext]="{
+            vertical: false,
+          }"></ng-container>
+      </div>
     }
   </mat-toolbar-row>
 </mat-toolbar>

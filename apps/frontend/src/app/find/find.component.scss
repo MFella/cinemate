@@ -34,6 +34,8 @@
 
   .found-movies__container {
     @apply grid-cols-1;
+    // the filter bar is fixed to the bottom of the screen: keep the last row clear of it
+    padding-bottom: 6.5rem;
   }
 
   .filter-results__container {
