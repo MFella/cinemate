@@ -1,23 +1,28 @@
 name: CI
 
+# One pipeline: `check` runs on pull requests and on main; `deploy` runs only on main (and
+# by hand), after `check` went green. No AWS keys are stored in GitHub: the deploy job
+# trades its OIDC token for the role created by the CinemateGithubDeploy stack (infra/lib).
 on:
   push:
     branches:
       - main
   pull_request:
+  workflow_dispatch:
 
 permissions:
-  actions: read
   contents: read
 
-# a newer push to the same branch makes the older run pointless
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  main:
+  check:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    # a newer push to the same branch makes the older run pointless
+    concurrency:
+      group: ci-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v7
         with:
@@ -42,3 +47,40 @@ jobs:
       # frontend + backend only: the *-e2e projects need a running server and a
       # database (and their lint is not clean yet), see docs/aws-plan.md
       - run: npx nx affected -t lint test build --exclude=frontend-e2e,backend-e2e
+
+  deploy:
+    needs: check
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    # never two deploys at once, and never cancel one halfway through
+    concurrency:
+      group: deploy
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx prisma generate --schema apps/backend/prisma/schema.prisma
+
+      - name: Build the static frontend and the Lambda bundle
+        run: |
+          npx nx build frontend --configuration=static
+          npx nx run backend:build-lambda
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::137192580624:role/cinemate-github-deploy
+          aws-region: eu-central-1
+
+      - name: Deploy the backend and the frontend
+        working-directory: infra
+        run: npx cdk deploy CinemateBackend CinemateFrontend --require-approval never
